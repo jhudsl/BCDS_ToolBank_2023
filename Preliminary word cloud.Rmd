@@ -1,0 +1,54 @@
+---
+title: "Baltimore DS preliminary"
+output: html_document
+date: "2023-10-10"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(wordcloud)
+library(tm)
+```
+```{r}
+# source: https://towardsdatascience.com/create-a-word-cloud-with-r-bde3e7422e8a
+```
+
+
+```{r}
+survey = read.csv("/Users/karin/Documents/Baltimore\ DS/High-Frequency\ Partner\ Survey\ 2023.xlsx\ -\ Sheet1.csv")
+```
+
+```{r}
+survey
+```
+```{r}
+text = paste(c(survey[, 5], survey[, 6]), collapse = " ")
+text = gsub("[\r\n]", "", text)
+
+docs <- Corpus(VectorSource(c(survey[, 5], survey[, 6]))) 
+```
+
+```{r}
+docs <- docs %>%
+  tm_map(removeNumbers) %>%
+  tm_map(removePunctuation) %>%
+  tm_map(stripWhitespace)
+docs <- tm_map(docs, content_transformer(tolower))
+docs <- tm_map(docs, removeWords, stopwords("english"))
+```
+
+```{r}
+dtm <- TermDocumentMatrix(docs) 
+matrix <- as.matrix(dtm) 
+words <- sort(rowSums(matrix),decreasing=TRUE) 
+df <- data.frame(word = names(words),freq=words)
+```
+
+```{r}
+set.seed(1234) # for reproducibility 
+wordcloud(words = df$word, freq = df$freq, min.freq = 3, max.words=200, random.order=FALSE, rot.per=0.35, colors=brewer.pal(8, "Dark2"))
+```
+
