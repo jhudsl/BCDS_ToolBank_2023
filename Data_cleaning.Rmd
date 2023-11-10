@@ -1,0 +1,42 @@
+---
+title: "Advanced Data IO"
+author: "Data Wrangling in R"
+output:
+  ioslides_presentation:
+    css: styles.css
+    widescreen: yes
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, echo = FALSE, include=FALSE, purl=FALSE}
+library(knitr)
+opts_chunk$set(comment = "")
+```
+
+```{r, include=FALSE}
+library(tidyverse)
+library(googlesheets4)
+```
+
+```{r eval=FALSE}
+# Prompts a browser pop-up
+gs4_auth()
+```
+```{r}
+# Once set up, you can automate this process by passing your email
+gs4_auth(email = "karinchen737@gmail.com")
+```
+
+## Reading data with the googlesheets4 package {.smaller}
+
+```{r}
+sheet_url <- 
+  "https://docs.google.com/spreadsheets/d/1W5kgOFSJux4lqpwqwJ_h9tJnd5oTY3-wBs57cpkyM3U/edit#gid=1386397630"
+sheet_dat_1 <- read_sheet(sheet_url)
+head(sheet_dat_1)
+```
+
+
+
+
