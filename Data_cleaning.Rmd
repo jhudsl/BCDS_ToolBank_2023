@@ -1,12 +1,5 @@
 ---
-title: "Advanced Data IO"
-author: "Data Wrangling in R"
-output:
-  ioslides_presentation:
-    css: styles.css
-    widescreen: yes
-editor_options: 
-  chunk_output_type: console
+title: "Data Cleaning for ToolBank Project"
 ---
 
 ```{r, echo = FALSE, include=FALSE, purl=FALSE}
