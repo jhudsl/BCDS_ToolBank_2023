@@ -16,8 +16,10 @@ opts_chunk$set(comment = "")
 ```
 
 ```{r, include=FALSE}
+library(tidyr)
 library(tidyverse)
 library(googlesheets4)
+library(ggplot2)
 ```
 
 ```{r eval=FALSE}
@@ -64,22 +66,22 @@ data$di_orgyearsworked = ifelse(data$di_orgyearsworked == "0-2 years", 1,
                                 ifelse(data$di_orgyearsworked == "3-5 years", 2, 3))
 head(data)
 ```
-
+The following section is commented out as we used text format choices in the following study
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
-# Question: general attitudes
-# variables: "att_purtool", "att_strtool", "att_redtime", "att_evquality", "att_posimpact"
-# 1 - Strongly agree; 2 - Agree; 3 - Neutral; 4 - Disagree; 5 - Strongly disagree; 6 - N/A
-att_mc = c("att_purtool", "att_strtool", "att_redtime", "att_evquality", "att_posimpact")
-
-invisible(lapply(att_mc, FUN = function(x) {
-  data[[x]] <<- ifelse(data[[x]] == "Strongly agree", 1,
-                     ifelse(data[[x]] == "Agree", 2,
-                            ifelse(data[[x]] == "Neutral", 3,
-                                   ifelse(data[[x]] == "Disagree", 4,
-                                          ifelse(data[[x]] == "Strongly disagree", 5, 6)))))
-}))
-
-head(data)
+# # Question: general attitudes
+# # variables: "att_purtool", "att_strtool", "att_redtime", "att_evquality", "att_posimpact"
+# # 1 - Strongly agree; 2 - Agree; 3 - Neutral; 4 - Disagree; 5 - Strongly disagree; 6 - N/A
+# att_mc = c("att_purtool", "att_strtool", "att_redtime", "att_evquality", "att_posimpact")
+# 
+# invisible(lapply(att_mc, FUN = function(x) {
+#   data[[x]] <<- ifelse(data[[x]] == "Strongly agree", 1,
+#                      ifelse(data[[x]] == "Agree", 2,
+#                             ifelse(data[[x]] == "Neutral", 3,
+#                                    ifelse(data[[x]] == "Disagree", 4,
+#                                           ifelse(data[[x]] == "Strongly disagree", 5, 6)))))
+# }))
+# 
+# head(data)
 ```
 
 ## split check all that apply responses into indicators
@@ -330,6 +332,27 @@ summary_table_di_orgyearsworked <- data.frame(
 print(summary_table_di_orgyearsworked)
 
 ```
+
+### Question: How long have you worked with this organization? (Plan 2)
+```{r}
+# May be it is better to list the data as a table as the data is binned instead of continuous
+table(data$di_orgyearsworked) 
+di_orgyearsworked_table = data.frame(cbind(time = c("0-2 years", "3-5 years", "More than 5 years"),
+                                RespondentCount = table(data$di_orgyearsworked),
+                                Percentage = round(table(data$di_orgyearsworked)/nrow(data),3)))
+
+di_orgyearsworked_table
+```
+```{r}
+# mean number of year worked with the organization. Transfer choices into number by the following standard: 0-2 years -> 1yr; 3-5 years -> 4 yr; more than 5 years -> 6 year
+data = mutate(data, di_orgyearsworked_calc = ifelse(di_orgyearsworked == 1, 1, 
+                                                    ifelse(di_orgyearsworked == 2, 4, 6)))
+mean(data$di_orgyearsworked_calc)
+median(data$di_orgyearsworked_calc)
+hist(data$di_orgyearsworked_calc, breaks = c(0, 3, 6, 9), right = F, xlim = c(0, 10), ylim = c(0, 25), main = "Time Respondents Have Worked with Their Organizations", xlab = "time (years)")
+```
+
+
 ## Section 2: Demographic Information 
 
 ### Response Analysis
@@ -400,7 +423,8 @@ data%>%
              stat="identity")+
   labs(x="Years Worked at CBO", 
        y="Percentage of respondants",
-       title="Agreement that TB reduced costs related to purchasing/renting tools/equipment")
+       title="Agreement that TB reduced costs related to purchasing/renting tools/equipment") +
+  scale_x_discrete(labels = c("0-2 years", "3-5 years", "More than 5 years"))
 
 #The TB has positively impacted our CBO by reducing costs related to storing tools and equipment
 data%>%
@@ -427,7 +451,8 @@ data%>%
              stat="identity")+
   labs(x="Years Worked at CBO", 
        y="Percentage of respondants",
-       title="Agreement that TB reduced costs related to storing tools/equipment")
+       title="Agreement that TB reduced costs related to storing tools/equipment") +
+  scale_x_discrete(labels = c("0-2 years", "3-5 years", "More than 5 years"))
 
 
 #The TB has positively impacted our CBO by reducing staff time to complete community projects
@@ -455,7 +480,8 @@ data%>%
              stat="identity")+
   labs(x="Years Worked at CBO", 
        y="Percentage of respondants",
-       title="Agreement that TB reduced staff time for projects")
+       title="Agreement that TB reduced staff time for projects") +
+  scale_x_discrete(labels = c("0-2 years", "3-5 years", "More than 5 years"))
 
 #Tools made available through the TB allow our CBO to complete higher quality events/projects without additional funding
 data%>%
@@ -482,7 +508,8 @@ data%>%
              stat="identity")+
   labs(x="Years Worked at CBO", 
        y="Percentage of respondants",
-       title="Agreement that TB allows for higher qual events/projs")
+       title="Agreement that TB allows for higher qual events/projs") +
+  scale_x_discrete(labels = c("0-2 years", "3-5 years", "More than 5 years"))
 
 #The TB has positively impacted our CBO
 data%>%
@@ -509,7 +536,8 @@ data%>%
              stat="identity")+
   labs(x="Years Worked at CBO", 
        y="Percentage of respondants",
-       title="Agreement that TB pos. impacted CBO")
+       title="Agreement that TB pos. impacted CBO") +
+  scale_x_discrete(labels = c("0-2 years", "3-5 years", "More than 5 years"))
 ```
 
 
@@ -550,9 +578,10 @@ data%>%
              x=question)) + 
     geom_bar(position="stack", 
              stat="identity")+
-  labs(x="Years Worked at CBO", 
+  labs(x="General Attitude", 
        y="Percentage of respondants",
-       title="Sentiment on TB among CBOs w/ top exec. a minority")
+       title="Sentiment on TB among CBOs w/ top exec. a minority") +
+  scale_x_discrete(labels = c("higher quality event", "positive impact", "purchase tool", "reduce time", "store tool"))
 
 # sentiments of CBOS w "More than 50% of program recipients are minorities"
 data%>%
@@ -579,9 +608,10 @@ data%>%
              x=question)) + 
     geom_bar(position="stack", 
              stat="identity")+
-  labs(x="Years Worked at CBO", 
+  labs(x="General Attitude", 
        y="Percentage of respondants",
-       title="Sentiment on TB among CBOs w/ 50%+ program recipients are minorities")
+       title="Sentiment on TB among CBOs w/ 50%+ program recipients are minorities") +
+  scale_x_discrete(labels = c("higher quality event", "positive impact", "purchase tool", "reduce time", "store tool"))
 
 #sentiment of CBOs w "More than 50% of our board is made up of minorities"
 data%>%
@@ -608,9 +638,10 @@ data%>%
              x=question)) + 
     geom_bar(position="stack", 
              stat="identity")+
-  labs(x="Years Worked at CBO", 
+  labs(x="General Attitude", 
        y="Percentage of respondants",
-       title="Sentiment on TB among CBOs w/ 50%+ board members are minorities")
+       title="Sentiment on TB among CBOs w/ 50%+ board members are minorities") +
+  scale_x_discrete(labels = c("higher quality event", "positive impact", "purchase tool", "reduce time", "store tool"))
 
 # sentiments of CBOs who responded "None of the above"
 data%>%
@@ -637,9 +668,10 @@ data%>%
              x=question)) + 
     geom_bar(position="stack", 
              stat="identity")+
-  labs(x="Years Worked at CBO", 
+  labs(x="General Attitude", 
        y="Percentage of respondants",
-       title="Sentiment on TB among CBOs reporting none for minority status Q")
+       title="Sentiment on TB among CBOs reporting none for minority status Q") +
+  scale_x_discrete(labels = c("higher quality event", "positive impact", "purchase tool", "reduce time", "store tool"))
 ```
 
 ## Section 3: General Attitudes
@@ -716,9 +748,10 @@ data%>%
              x=question)) + 
     geom_bar(position="stack", 
              stat="identity")+
-  labs(x="Years Worked at CBO", 
+  labs(x="General Attitude", 
        y="Percentage of respondants",
-       title="Agreement that TB helps with different aspects")
+       title="Agreement that TB helps with different aspects") +
+  scale_x_discrete(labels = c("higher quality event", "positive impact", "purchase tool", "reduce time", "store tool"))
 ```
 
 
@@ -752,7 +785,7 @@ summary_table_eco_purchase<- data.frame(
 print(summary_table_eco_purchase)
 
 # Display histogram
-hist(eco_purchase)
+hist(eco_purchase, main = "Histogram of Spending on Purchasing/Renting Tools/Equip if without TB", xlab = "spending (dollars)")
 ```
 
 
@@ -781,7 +814,7 @@ summary_table_eco_storage<- data.frame(
 print(summary_table_eco_storage)
 
 # Display histogram
-hist(eco_storage)
+hist(eco_storage, main = "Histogram of Spending on Storaging Tools/Equip if without TB", xlab = "spending (dollars)")
 ```
 
 
@@ -810,7 +843,7 @@ summary_table_eco_maintain<- data.frame(
 print(summary_table_eco_maintain)
 
 # Display histogram
-hist(eco_maintain)
+hist(eco_maintain, main = "Histogram of Maintaining on Purchasing/Renting Tools/Equip if without TB", xlab = "spending (dollars)")
 ```
 
 Question: Reflecting on your events in the past year: If the TB did not exist, how much funding would your organization allocate to buying, storing, tracking and maintaining your own inventory of tools and equipment?
@@ -838,9 +871,35 @@ summary_table_eco_totalcost<- data.frame(
 print(summary_table_eco_totalcost)
 
 # Display histogram
-hist(eco_totalcost)
+hist(eco_totalcost, main = "Histogram of Total Spending in Past Year if without TB", xlab = "spending (dollars)")
 ```
+Question: number of total events hosted during last year
+```{r}
+# Create a vector 
+eco_events<- data$eco_events
 
+# Define a function to calculate the mode
+Mode <- function(x) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
+# Calculate mean, median, and mode
+mean_value <- mean(eco_events)
+median_value <- median(eco_events)
+mode_value <- Mode(eco_events)
+
+# Create a summary table
+summary_table_eco_events<- data.frame(
+  Measure = c("Mean", "Median", "Mode"),
+  Value = c(mean_value, median_value, mode_value)
+)
+
+# Display the summary table
+print(summary_table_eco_events)
+
+# Display histogram
+hist(eco_events, main = "Histogram of Total Event Hosted in Past Year", xlab = "count of events")
+```
 
 Question: If there were no TB, how many of your events in the past year would you not have been hosted for any reason?
 
@@ -868,7 +927,34 @@ summary_table_eco_nothost<- data.frame(
 print(summary_table_eco_nothost)
 
 # Display histogram
-hist(eco_nothost)
+hist(eco_nothost, main = "Histogram of Events not able to Host in Past Year if without TB", xlab = "count of events")
+```
+
+Extra analysis: percent of event not host during last year
+```{r}
+data$eco_nothost_pct_calc = data$eco_nothost/data$eco_events
+eco_nothost_pct_calc = data$eco_nothost_pct_calc
+# Define a function to calculate the mode
+Mode <- function(x) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
+# Calculate mean, median, and mode
+mean_value <- mean(eco_nothost_pct_calc)
+median_value <- median(eco_nothost_pct_calc)
+mode_value <- Mode(eco_nothost_pct_calc)
+
+# Create a summary table
+summary_table_eco_nothost_pct_calc<- data.frame(
+  Measure = c("Mean", "Median", "Mode"),
+  Value = c(mean_value, median_value, mode_value)
+)
+
+# Display the summary table
+print(summary_table_eco_nothost_pct_calc)
+
+# Display histogram
+hist(eco_nothost_pct_calc*100, main = "Histogram: Percentage of Events not able to Host in Past Year if without TB", xlab = "Percentage(%)")
 ```
 
 
@@ -902,7 +988,7 @@ summary_table_eco_constit<- data.frame(
 print(summary_table_eco_constit)
 
 # Display histogram
-hist(eco_constit)
+hist(eco_constit, main = "Histogram of Number of Constituents Affected if without TB", xlab = "count")
 ```
 
 Calculated: 
@@ -966,15 +1052,34 @@ data%>%
 
 Question: With the money that you have saved on purchasing, storing, and maintaining tools and equipment, what have you been able to accomplish?
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
-
+sum_table = data.frame(cbind(choices = c("Hired additional staff positions",
+                                         "Hosted additional projects or events",
+                                         "other"),
+                             percentage = round(c(nrow(data[data$ci_exaccomp_stf == 1,])/nrow(data),
+                                            nrow(data[data$ci_exaccomp_prj == 1,])/nrow(data),
+                                            nrow(data[!is.na(data$ci_exaccomp_otr),])/nrow(data)),3)))
+sum_table
 ```
 
 
 Question: Without the TB, what would you no longer be able to fund?
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
-
+sum_table = data.frame(cbind(choices = c("Staff",
+                                         "Projects",
+                                         "other"),
+                             percentage = round(c(nrow(data[data$ci_cutfund_stf == 1,])/nrow(data),
+                                            nrow(data[data$ci_cutfund_prj == 1,])/nrow(data),
+                                            nrow(data[!is.na(data$ci_cutfund_otr),])/nrow(data)),3)))
+sum_table
 ```
 
+Among partners indicated certain effect, what is the average quantified effects
+```{r}
+mean(data$ci_staff, na.rm = T)
+mean(data$ci_project, na.rm = T)
+```
+
+Quantify effect of "other", if selected
 
 # Analysis surroundingg questions 
 
@@ -1087,6 +1192,8 @@ X = number (of staff or projects)
 Facet: Without the TB, what would you no longer be able to fund?
 (code note: will also have to manipulate data a bit to get this)
 
+
+
 Question: In what ways has the community benefited through the toolbank? What are the most prominent types of events (or organization types) the toolbank supports?
 
 
@@ -1094,8 +1201,47 @@ Question: In what ways has the community benefited through the toolbank? What ar
 X1 = ways of impact; X2 = event types
 Y = % respondent
 Can incorporate other if there is consistency across respondents
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+sum_table = data.frame(choices = c("Quantity",
+                                         "Quality",
+                                         "Diversity",
+                                         "Consistency",
+                                         "other"),
+                       percentage = round(c(nrow(data[data$ci_evimpact_qtt == 1,])/nrow(data),
+                                            nrow(data[data$ci_evimpact_qlt == 1,])/nrow(data),
+                                            nrow(data[data$ci_evimpact_dvt == 1,])/nrow(data),
+                                            nrow(data[data$ci_evimpact_cst == 1,])/nrow(data),
+                                            nrow(data[!is.na(data$ci_evimpact_otr),])/nrow(data)),3))
+sum_table
+
+ggplot(sum_table)+
+  geom_bar(aes(x = choices, y = percentage), stat='identity') +
+  labs(x = "ways events impacted without TB", y = "percentage responded", title = "Percentage for Ways Events Got Impacted 
+       without TB among Respondents") +
+  ylim(c(0,1))
+```
 
 
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+sum_table = data.frame(choices = c("Fundraising",
+                                         "Service Projects",
+                                         "Educational Workshops",
+                                         "Community Building",
+                                         "other"),
+                       percentage = round(c(nrow(data[data$eve_type_fr == 1,])/nrow(data),
+                                            nrow(data[data$eve_type_sp == 1,])/nrow(data),
+                                            nrow(data[data$eve_type_ew == 1,])/nrow(data),
+                                            nrow(data[data$eve_type_cb == 1,])/nrow(data),
+                                            nrow(data[!is.na(data$eve_type_otr),])/nrow(data)),3))
+sum_table
+
+ggplot(sum_table)+
+  geom_bar(aes(x = choices, y = percentage), stat='identity') +
+  labs(x = "event types TB helps to complete", y = "percentage responded", title = "Percentage for Each Event Types 
+       TB helps to Complete among Respondents") +
+  ylim(c(0,1))
+
+```
 
 
 
