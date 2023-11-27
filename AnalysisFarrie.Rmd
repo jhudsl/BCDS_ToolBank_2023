@@ -40,6 +40,15 @@ sheet_dat_1 <- read_sheet(sheet_url)
 head(sheet_dat_1)
 ```
 
+### read in gross receipts data
+```{r}
+sheet_gr_url = "https://docs.google.com/spreadsheets/d/1W5kgOFSJux4lqpwqwJ_h9tJnd5oTY3-wBs57cpkyM3U/edit#gid=1036871075"
+data_gr <- read_sheet(sheet_gr_url, sheet = "Sheet1")
+colnames(data_gr) = c("timestamp", "cbo_name", "cbo_gr")
+head(data_gr)
+```
+
+
 ## Delete extra variables
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 # delete Noah's test response
@@ -295,6 +304,25 @@ invisible(lapply(1:nrow(data), FUN = function(x) {
 
 head(data)
 ```
+## Merge Gross Recipts to datasheet and add stratification
+```{r}
+data$cbo_gr = NA
+
+for (org in unique(data$di_org)) {
+  if(is.numeric(data_gr[data_gr$cbo_name == org,]$cbo_gr[1][[1]])) {
+    data[data$di_org == org, ]$cbo_gr = data_gr[data_gr$cbo_name == org,]$cbo_gr[1][[1]]
+  }
+}
+
+# stratification: small <= 500,000; median 500,000 - 1,000,000; large > 1,000,000
+data$cbo_size = ifelse(is.na(data$cbo_gr), NA, 
+                       ifelse(data$cbo_gr <= 500000, 1,
+                              ifelse(data$cbo_gr <= 1000000, 2, 3)))
+
+head(data)
+```
+
+
 
 ## Start of Farrie Analysis
 
@@ -302,8 +330,8 @@ head(data)
 
 Boxplot and Historgram of Years Worked
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
-boxplot(data$di_orgyearsworked)
-hist(data$ di_orgyearsworked)
+# boxplot(data$di_orgyearsworked)
+# hist(data$di_orgyearsworked)
 ```
 
 
@@ -348,6 +376,7 @@ di_orgyearsworked_table
 data = mutate(data, di_orgyearsworked_calc = ifelse(di_orgyearsworked == 1, 1, 
                                                     ifelse(di_orgyearsworked == 2, 4, 6)))
 mean(data$di_orgyearsworked_calc)
+sd(data$di_orgyearsworked_calc)
 median(data$di_orgyearsworked_calc)
 hist(data$di_orgyearsworked_calc, breaks = c(0, 3, 6, 9), right = F, xlim = c(0, 10), ylim = c(0, 25), main = "Time Respondents Have Worked with Their Organizations", xlab = "time (years)")
 ```
@@ -392,7 +421,10 @@ print(summary_tabledi_mled_na)
 ```
 
 Based on the metrics above, 86% of the survey respondents reported to at least of the minority service or leadership criteria. 
+
+
 ### Plots
+
 
 
 #### general sentiment and years with the CBO
@@ -774,11 +806,14 @@ Mode <- function(x) {
 mean_value <- mean(eco_purchase)
 median_value <- median(eco_purchase)
 mode_value <- Mode(eco_purchase)
+sd_value <- sd(eco_purchase)
+q25_value <- quantile(eco_purchase, 0.25)
+q75_value <- quantile(eco_purchase, 0.75)
 
 # Create a summary table
 summary_table_eco_purchase<- data.frame(
-  Measure = c("Mean", "Median", "Mode"),
-  Value = c(mean_value, median_value, mode_value)
+  Measure = c("Mean", "Median", "Mode", "sd", "1st quantile", "3rd quantile"),
+  Value = c(mean_value, median_value, mode_value, sd_value, q25_value, q75_value)
 )
 
 # Display the summary table
@@ -803,11 +838,14 @@ Mode <- function(x) {
 mean_value <- mean(eco_storage)
 median_value <- median(eco_storage)
 mode_value <- Mode(eco_storage)
+sd_value <- sd(eco_storage)
+q25_value <- quantile(eco_storage, 0.25)
+q75_value <- quantile(eco_storage, 0.75)
 
 # Create a summary table
 summary_table_eco_storage<- data.frame(
-  Measure = c("Mean", "Median", "Mode"),
-  Value = c(mean_value, median_value, mode_value)
+  Measure = c("Mean", "Median", "Mode", "sd", "1st quantile", "3rd quantile"),
+  Value = c(mean_value, median_value, mode_value, sd_value, q25_value, q75_value)
 )
 
 # Display the summary table
@@ -832,11 +870,14 @@ Mode <- function(x) {
 mean_value <- mean(eco_maintain)
 median_value <- median(eco_maintain)
 mode_value <- Mode(eco_maintain)
+sd_value <- sd(eco_maintain)
+q25_value <- quantile(eco_maintain, 0.25)
+q75_value <- quantile(eco_maintain, 0.75)
 
 # Create a summary table
 summary_table_eco_maintain<- data.frame(
-  Measure = c("Mean", "Median", "Mode"),
-  Value = c(mean_value, median_value, mode_value)
+  Measure = c("Mean", "Median", "Mode", "sd", "1st quantile", "3rd quantile"),
+  Value = c(mean_value, median_value, mode_value, sd_value, q25_value, q75_value)
 )
 
 # Display the summary table
@@ -860,11 +901,14 @@ Mode <- function(x) {
 mean_value <- mean(eco_totalcost)
 median_value <- median(eco_totalcost)
 mode_value <- Mode(eco_totalcost)
+sd_value <- sd(eco_totalcost)
+q25_value <- quantile(eco_totalcost, 0.25)
+q75_value <- quantile(eco_totalcost, 0.75)
 
 # Create a summary table
 summary_table_eco_totalcost<- data.frame(
-  Measure = c("Mean", "Median", "Mode"),
-  Value = c(mean_value, median_value, mode_value)
+  Measure = c("Mean", "Median", "Mode", "sd", "1st quantile", "3rd quantile"),
+  Value = c(mean_value, median_value, mode_value, sd_value, q25_value, q75_value)
 )
 
 # Display the summary table
@@ -887,11 +931,14 @@ Mode <- function(x) {
 mean_value <- mean(eco_events)
 median_value <- median(eco_events)
 mode_value <- Mode(eco_events)
+sd_value <- sd(eco_events)
+q25_value <- quantile(eco_events, 0.25)
+q75_value <- quantile(eco_events, 0.75)
 
 # Create a summary table
 summary_table_eco_events<- data.frame(
-  Measure = c("Mean", "Median", "Mode"),
-  Value = c(mean_value, median_value, mode_value)
+  Measure = c("Mean", "Median", "Mode", "sd", "1st quantile", "3rd quantile"),
+  Value = c(mean_value, median_value, mode_value, sd_value, q25_value, q75_value)
 )
 
 # Display the summary table
@@ -916,13 +963,15 @@ Mode <- function(x) {
 mean_value <- mean(eco_nothost)
 median_value <- median(eco_nothost)
 mode_value <- Mode(eco_nothost)
+sd_value <- sd(eco_nothost)
+q25_value <- quantile(eco_nothost, 0.25)
+q75_value <- quantile(eco_nothost, 0.75)
 
 # Create a summary table
 summary_table_eco_nothost<- data.frame(
-  Measure = c("Mean", "Median", "Mode"),
-  Value = c(mean_value, median_value, mode_value)
+  Measure = c("Mean", "Median", "Mode", "sd", "1st quantile", "3rd quantile"),
+  Value = c(mean_value, median_value, mode_value, sd_value, q25_value, q75_value)
 )
-
 # Display the summary table
 print(summary_table_eco_nothost)
 
@@ -976,12 +1025,14 @@ range_value <- max(eco_constit)- min(eco_constit)
 mean_value <- mean(eco_constit)
 median_value <- median(eco_constit)
 mode_value <- Mode(eco_constit)
-
+sd_value <- sd(eco_constit)
+q25_value <- quantile(eco_constit, 0.25)
+q75_value <- quantile(eco_constit, 0.75)
 
 # Create a summary table
 summary_table_eco_constit<- data.frame(
-  Measure = c("Max","Min","Range","Mean", "Median", "Mode"),
-  Value = c(max_value, min_value, range_value, mean_value, median_value, mode_value)
+  Measure = c("Mean", "Median", "Mode", "sd", "1st quantile", "3rd quantile"),
+  Value = c(mean_value, median_value, mode_value, sd_value, q25_value, q75_value)
 )
 
 # Display the summary table
@@ -1055,6 +1106,9 @@ Question: With the money that you have saved on purchasing, storing, and maintai
 sum_table = data.frame(cbind(choices = c("Hired additional staff positions",
                                          "Hosted additional projects or events",
                                          "other"),
+                             frequency = round(c(nrow(data[data$ci_exaccomp_stf == 1,]),
+                                            nrow(data[data$ci_exaccomp_prj == 1,]),
+                                            nrow(data[!is.na(data$ci_exaccomp_otr),])),3),
                              percentage = round(c(nrow(data[data$ci_exaccomp_stf == 1,])/nrow(data),
                                             nrow(data[data$ci_exaccomp_prj == 1,])/nrow(data),
                                             nrow(data[!is.na(data$ci_exaccomp_otr),])/nrow(data)),3)))
@@ -1067,6 +1121,9 @@ Question: Without the TB, what would you no longer be able to fund?
 sum_table = data.frame(cbind(choices = c("Staff",
                                          "Projects",
                                          "other"),
+                             frequency = round(c(nrow(data[data$ci_cutfund_stf == 1,]),
+                                            nrow(data[data$ci_cutfund_prj == 1,]),
+                                            nrow(data[!is.na(data$ci_cutfund_otr),])),3),
                              percentage = round(c(nrow(data[data$ci_cutfund_stf == 1,])/nrow(data),
                                             nrow(data[data$ci_cutfund_prj == 1,])/nrow(data),
                                             nrow(data[!is.na(data$ci_cutfund_otr),])/nrow(data)),3)))
@@ -1076,7 +1133,9 @@ sum_table
 Among partners indicated certain effect, what is the average quantified effects
 ```{r}
 mean(data$ci_staff, na.rm = T)
+sd(data$ci_staff, na.rm = T)
 mean(data$ci_project, na.rm = T)
+sd(data$ci_project, na.rm = T)
 ```
 
 Quantify effect of "other", if selected
@@ -1207,6 +1266,11 @@ sum_table = data.frame(choices = c("Quantity",
                                          "Diversity",
                                          "Consistency",
                                          "other"),
+                       frequency = round(c(nrow(data[data$ci_evimpact_qtt == 1,]),
+                                            nrow(data[data$ci_evimpact_qlt == 1,]),
+                                            nrow(data[data$ci_evimpact_dvt == 1,]),
+                                            nrow(data[data$ci_evimpact_cst == 1,]),
+                                            nrow(data[!is.na(data$ci_evimpact_otr),])),3),
                        percentage = round(c(nrow(data[data$ci_evimpact_qtt == 1,])/nrow(data),
                                             nrow(data[data$ci_evimpact_qlt == 1,])/nrow(data),
                                             nrow(data[data$ci_evimpact_dvt == 1,])/nrow(data),
@@ -1228,6 +1292,11 @@ sum_table = data.frame(choices = c("Fundraising",
                                          "Educational Workshops",
                                          "Community Building",
                                          "other"),
+                       frequency = round(c(nrow(data[data$eve_type_fr == 1,]),
+                                            nrow(data[data$eve_type_sp == 1,]),
+                                            nrow(data[data$eve_type_ew == 1,]),
+                                            nrow(data[data$eve_type_cb == 1,]),
+                                            nrow(data[!is.na(data$eve_type_otr),])),3),
                        percentage = round(c(nrow(data[data$eve_type_fr == 1,])/nrow(data),
                                             nrow(data[data$eve_type_sp == 1,])/nrow(data),
                                             nrow(data[data$eve_type_ew == 1,])/nrow(data),
@@ -1242,7 +1311,14 @@ ggplot(sum_table)+
   ylim(c(0,1))
 
 ```
-
+### marginal analysis on fundraising questions
+```{r}
+nrow(data[!is.na(data$eve_fundraise_p),])
+mean(data$eve_fundraise_p, na.rm = T)
+median(data$eve_fundraise_p, na.rm = T)
+sd(data$eve_fundraise_p, na.rm = T)
+quantile(data$eve_fundraise_p, na.rm = T)
+```
 
 
 
