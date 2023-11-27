@@ -40,6 +40,15 @@ sheet_dat_1 <- read_sheet(sheet_url)
 head(sheet_dat_1)
 ```
 
+### read in gross receipts data
+```{r}
+sheet_gr_url = "https://docs.google.com/spreadsheets/d/1W5kgOFSJux4lqpwqwJ_h9tJnd5oTY3-wBs57cpkyM3U/edit#gid=1036871075"
+data_gr <- read_sheet(sheet_gr_url, sheet = "Sheet1")
+colnames(data_gr) = c("timestamp", "cbo_name", "cbo_gr")
+head(data_gr)
+```
+
+
 ## Delete extra variables
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 # delete Noah's test response
@@ -295,6 +304,25 @@ invisible(lapply(1:nrow(data), FUN = function(x) {
 
 head(data)
 ```
+## Merge Gross Recipts to datasheet and add stratification
+```{r}
+data$cbo_gr = NA
+
+for (org in unique(data$di_org)) {
+  if(is.numeric(data_gr[data_gr$cbo_name == org,]$cbo_gr[1][[1]])) {
+    data[data$di_org == org, ]$cbo_gr = data_gr[data_gr$cbo_name == org,]$cbo_gr[1][[1]]
+  }
+}
+
+# stratification: small <= 500,000; median 500,000 - 1,000,000; large > 1,000,000
+data$cbo_size = ifelse(is.na(data$cbo_gr), NA, 
+                       ifelse(data$cbo_gr <= 500000, 1,
+                              ifelse(data$cbo_gr <= 1000000, 2, 3)))
+
+head(data)
+```
+
+
 
 ## Start of Farrie Analysis
 
