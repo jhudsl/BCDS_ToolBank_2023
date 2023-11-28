@@ -1,11 +1,44 @@
 ---
-title: "AnalysisFarrie"
-author: "Haley Farrie"
-date: '2023-11-13'
-output:
-  html_document:
-    df_print: paged
+title: "Baltimore Community Data Science Collaboration, ToolBank Community and Economic Impact Survey Analysis"
+author: "Analysis by: Charlotte Clapham, Tianxu Chen, Haley Farrie"
+date: "2023-11-23"
+output: html_document
 ---
+
+# Report Outline
+- Section 1: Key Findings
+- Section 1A: Supporting Visualizations and Quotes 
+- Section 2: Data Analysis Overview
+- Section 2A: Data Wrangling
+- Section 2B: Data Cleaning
+- Section 3: Data Analysis by Survey Question 
+- Section 3A: Demographic Information
+- Section 3B: General sentiment
+- Section 3C: Economic Benefit
+- Section 3D: Community Impact
+- Section 3E: Analysis on surrounding questions
+- Section 3F: marginal analysis on fundraising questions
+
+
+# Section 1: Key Findings
+- 100% of respondents strongly agreed or agreed that the ToolBank positively impacts their CBO 
+- 100% of respondents strongly agreed or agreed that the ToolBank reduced costs related to purchasing and renting tools and equipment
+- 86% of the survey respondents reported to at least of the minority service or leadership criteria. 
+- Events got impacted by the TB mainly through their quality (77.8%), consistency (66.7%), and quantity (55.6%)
+- The most prominent types of events the toolbank supports are community building (84.4%) and service projects (75.6%)
+
+For the past year,
+- half of the respondents reported that at least 1/3 (35%) of their events would have been impossible without the help of the TB
+- half of the respondents reported that at least 150 of their constituents (volunteers, members, and event attendees) would have been negatively impacted without the help of the TB.
+
+
+## Section 1A: Supporting Visualizations and Quotes 
+
+TBD
+
+# Section 2: Data Analysis Process
+
+## Section 2A: Data Wrangling 
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -22,6 +55,7 @@ library(tidyr)
 library(tidyverse)
 library(googlesheets4)
 library(ggplot2)
+library(htmlTable)
 ```
 
 ```{r eval=FALSE}
@@ -30,11 +64,11 @@ gs4_auth()
 ```
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 # Once set up, you can automate this process by passing your email
-#gs4_auth(email = "karinchen737@gmail.com")
-gs4_auth(email = "chclapham@gmail.com")
+gs4_auth(email = "karinchen737@gmail.com")
+#gs4_auth(email = "chclapham@gmail.com")
 ```
 
-## Reading data with the googlesheets4 package {.smaller}
+### Reading data with the googlesheets4 package {.smaller}
 
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 sheet_url <- 
@@ -43,16 +77,17 @@ sheet_dat_1 <- read_sheet(sheet_url)
 head(sheet_dat_1)
 ```
 
-### read in gross receipts data
+### Reading gross receipts data
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 sheet_gr_url = "https://docs.google.com/spreadsheets/d/1W5kgOFSJux4lqpwqwJ_h9tJnd5oTY3-wBs57cpkyM3U/edit#gid=1036871075"
 data_gr <- read_sheet(sheet_gr_url, sheet = "Sheet1")
-colnames(data_gr) = c("timestamp", "cbo_name", "cbo_gr")
+colnames(data_gr) = c("timestamp", "cbo_name", "cbo_gr", "cbo_size", "comment")
 head(data_gr)
 ```
 
 
-## Delete extra variables
+## Section 2B: Data Cleaning
+### Delete extra variables
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 # delete Noah's test response
 # also delete the "Please specify:" question after receiving the first response, so we want to delete the corresponding column
@@ -61,7 +96,7 @@ data = sheet_dat_1[sheet_dat_1$`Name of your current organization` != "Baltimore
 head(data)
 ```
 
-## change column names to variables
+### change column names to variables
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 varlist = c("timestamp","di_org", "di_orgyearsworked", "di_mled", "att_purtool", "att_strtool", "att_redtime", "att_evquality", "att_posimpact", "att_mostimpact", "eco_purchase", "eco_storage", "eco_maintain", "eco_totalcost", "eco_events", "eco_nothost", "eco_constit", "ci_exaccomp", "ci_cutfund", "ci_otr", "ci_staff", "ci_project", "ci_evimpact", "eve_type", "eve_fundraise", "eve_fundraise_p")
 
@@ -69,7 +104,7 @@ colnames(data) = varlist
 str(data)
 ```
 
-## change multiple choice answer into numbers
+### change multiple choice answer into numbers
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 # Question: how long have you worked with this organization
 # variable: di_orgyearsworked; choice: 1 - 0-2 years; 2 - 3-5 years; 3 - More than 5 years
@@ -96,7 +131,7 @@ The following section is commented out as we used text format choices in the fol
 # head(data)
 ```
 
-## split check all that apply responses into indicators
+### split check all that apply responses into indicators
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 # Question 1: minority leadership
 data = mutate(data, di_mled_top = NA, di_mled_board = NA, di_mled_rep = NA, di_mled_na = NA)
@@ -307,7 +342,7 @@ invisible(lapply(1:nrow(data), FUN = function(x) {
 
 head(data)
 ```
-## Merge Gross Recipts to datasheet and add stratification
+### Merge Gross Recipts to datasheet and add stratification
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 data$cbo_gr = NA
 
@@ -317,61 +352,35 @@ for (org in unique(data$di_org)) {
   }
 }
 
-# stratification: small <= 500,000; median 500,000 - 1,000,000; large > 1,000,000
-data$cbo_size = ifelse(is.na(data$cbo_gr), NA, 
-                       ifelse(data$cbo_gr <= 500000, 1,
-                              ifelse(data$cbo_gr <= 1000000, 2, 3)))
+# stratification: small < 500,000; median 500,000 - 1,000,000; large >= 1,000,000
+# data$cbo_size = ifelse(is.na(data$cbo_gr), NA, 
+#                        ifelse(data$cbo_gr < 500000, 1,
+#                               ifelse(data$cbo_gr < 1000000, 2, 3)))
+# 
+# data$cbo_size_str = ifelse(is.na(data$cbo_gr), NA, 
+#                        ifelse(data$cbo_gr < 500000, "500,000 or less",
+#                               ifelse(data$cbo_gr < 1000000, "b/w 500,000 and 1,000,000", 
+#                                      "over 1,000,000")))
 
-data$cbo_size_str = ifelse(is.na(data$cbo_gr), NA, 
-                       ifelse(data$cbo_gr <= 500000, "500,000 or less",
-                              ifelse(data$cbo_gr <= 1000000, "b/w 500,000 and 1,000,000", 
-                                     "over 1,000,000")))
+# stratification based on Noah's guess: small < 500,000; median 500,000 - 1,000,000; large >= 1,000,000
+
+data$cbo_size = ifelse(data_gr$cbo_size == "Small", 1,
+                       ifelse(data_gr$cbo_size == "Medium", 2, 3))
+
+data$cbo_size_str = ifelse(data_gr$cbo_size == "Small", "500,000 or less",
+                       ifelse(data_gr$cbo_size == "Medium", "b/w 500,000 and 1,000,000", "over 1,000,000"))
 
 head(data)
 ```
 
 
+## Section 3: Data Analysis by Survey Question
 
-## Start of Farrie Analysis
+## Section 3A: Demographic Information 
 
-# Question: How long have you worked with this organization?
-
-Boxplot and Historgram of Years Worked
+### Question: How long have you worked with this organization? 
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
-# boxplot(data$di_orgyearsworked)
-# hist(data$di_orgyearsworked)
-```
-
-
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
-# Create a vector 
-di_orgyearsworked_data <- data$di_orgyearsworked
-
-# Define a function to calculate the mode
-Mode <- function(x) {
-  ux <- unique(x)
-  ux[which.max(tabulate(match(x, ux)))]
-}
-
-# Calculate mean, median, and mode
-mean_value <- mean(di_orgyearsworked_data)
-median_value <- median(di_orgyearsworked_data)
-mode_value <- Mode(di_orgyearsworked_data)
-
-# Create a summary table
-summary_table_di_orgyearsworked <- data.frame(
-  Measure = c("Mean", "Median", "Mode"),
-  Value = c(mean_value, median_value, mode_value)
-)
-
-# Display the summary table
-print(summary_table_di_orgyearsworked)
-
-```
-
-### Question: How long have you worked with this organization? (Plan 2)
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
-# May be it is better to list the data as a table as the data is binned instead of continuous
+# list the data as a table as the data is binned instead of continuous
 table(data$di_orgyearsworked) 
 di_orgyearsworked_table = data.frame(cbind(time = c("0-2 years", "3-5 years", "More than 5 years"),
                                 RespondentCount = table(data$di_orgyearsworked),
@@ -390,11 +399,7 @@ hist(data$di_orgyearsworked_calc, breaks = c(0, 3, 6, 9), right = F, xlim = c(0,
 ```
 
 
-## Section 2: Demographic Information 
-
-### Response Analysis
-
- Question:The following question pertains to minority leadership and service. For the purpose of this question, minority is defined as women, people of color, and immigrants. Ehich of the following best describes your organization? (please provide your best estimate).?
+### Question 3: The following question pertains to minority leadership and service. For the purpose of this question, minority is defined as women, people of color, and immigrants. Ehich of the following best describes your organization? (please provide your best estimate).?
 
 Percent of respondents stating, "our top executive position is held by a minority"
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
@@ -453,12 +458,8 @@ print(summary_tabledi_mled_na)
 
 Based on the metrics above, 86% of the survey respondents reported to at least of the minority service or leadership criteria. 
 
-
-
-
-### Plots
-
-#### general sentiment and years with the CBO
+## Section 3B: General sentiment
+### Questions 4-8:Plots of General sentiment and Years with the CBO
 
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 #The ToolBank (TB) has positively impacted our CBO by reducing costs related to purchasing or renting tools and equipment
@@ -604,7 +605,7 @@ data%>%
 ```
 
 
-#### general sentiment and size of CBO
+### Questions 4-8: Plots of General sentiment and size of CBO
 
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 table_size<- table(data$cbo_size)
@@ -811,7 +812,7 @@ data%>%
 ```
 
 
-#### general sentiment and minority status
+### Questions 4-8: Plots of General Sentiment and Minority Status
 
 
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
@@ -841,7 +842,6 @@ output_continuous <- matrix(c(
 
          ncol = 2, byrow = TRUE)
 
-library(htmlTable)
 output_continuous%>% 
   addHtmlTableStyle(col.columns = c("none", "#F7F7F7"))%>% 
   htmlTable(header =  c("# Yes (% Yes) ", "# No (% No)"),
@@ -989,7 +989,6 @@ data%>%
   scale_x_discrete(labels = c("higher quality event", "positive impact", "purchase tool", "reduce time", "store tool"))
 ```
 
-## Section 3: General Attitudes
 
 ### Response analysis
 
@@ -1395,7 +1394,6 @@ output_continuous <- matrix(c(
 
          ncol = 6, byrow = TRUE)
 
-library(htmlTable)
 output_continuous%>% 
   addHtmlTableStyle(col.columns = c("none", "#F7F7F7"),
                     col.rgroup = c("none", "#F5FBFF")
@@ -1440,7 +1438,7 @@ print(summary_table_att_strtool)
 ```
 
 
-Percent of respondents that reported "Agreeing" or "strongly Agreeing" that, "theTB has positively impacted our CBO by reducing staff time to complete maintenance/projects
+Percent of respondents that reported "Agreeing" or "strongly Agreeing" that, "the TB has positively impacted our CBO by reducing staff time to complete maintenance/projects
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 table_att_redtime<- table(data$att_redtime)
 percentages <- prop.table(table_att_redtime)
@@ -1464,10 +1462,6 @@ percentages <- prop.table(table_att_posimpact)
 summary_table_att_posimpact <-data.frame(count=table_att_posimpact, Percentage=percentages)
 print(summary_table_att_posimpact)
 ```
-
-
-
-
 
 ### Plots
 
@@ -1505,7 +1499,7 @@ data%>%
 
 
 
-## Section 4: Economic Benefit 
+## Section 3C: Economic Benefit 
 
 ### Response analysis
 
@@ -2006,7 +2000,7 @@ data%>%
 
 
 
-## Section 5: Community Impact
+## Section 3D: Community Impact
 
 Question: With the money that you have saved on purchasing, storing, and maintaining tools and equipment, what have you been able to accomplish?
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
@@ -2117,7 +2111,7 @@ output_continuous%>%
 
 Quantify effect of "other", if selected
 
-# Analysis surrounding questions 
+## Section 3E: Analysis surrounding questions 
 
 Question: do organizations with higher savings through toolbank report more of a positive impact? 
 
@@ -2289,7 +2283,7 @@ ggplot(sum_table)+
 
 ```
 
-### marginal analysis on fundraising questions
+## Section 3F: marginal analysis on fundraising questions
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 nrow(data[!is.na(data$eve_fundraise_p),])
 mean(data$eve_fundraise_p, na.rm = T)
