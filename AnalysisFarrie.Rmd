@@ -29,7 +29,7 @@ output:
 - Events got impacted by the TB mainly through their quality (77.8%), consistency (66.7%), and quantity (55.6%)
 - The most prominent types of events the toolbank supports are community building (84.4%) and service projects (75.6%)
 
-For the past year,
+- For the past year,
 - half of the respondents reported that at least 1/3 (35%) of their events would have been impossible without the help of the TB
 - half of the respondents reported that at least 150 of their constituents (volunteers, members, and event attendees) would have been negatively impacted without the help of the TB.
 
