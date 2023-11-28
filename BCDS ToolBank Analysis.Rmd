@@ -1,0 +1,1223 @@
+---
+title: "Baltimore Community Data Science Collaboration, ToolBank Community and Economic Impact Survey Analysis"
+author: "Analysis by: Charlotte Clapham, Tianxu Chen, Haley Farrie"
+date: "2023-11-23"
+output: pdf_document
+---
+# Report Outline
+- Section 1: Key Findings
+- Section 1A: Supporting Visualizations and Quotes 
+- Section 2: Data Analysis Overview
+- Section 2A: Data Wrangling
+- Section 2B: Data Cleaning
+- Section 2C: Data Analysis by Survey Question 
+- Section 3: Data Analysis by Research Question 
+
+# Section 1: Key Findings
+- 100% of respondents strongly agreed or agreed that the ToolBank positively impacts their CBO 
+- 100% of respondents strongly agreed or agreed that the ToolBank reduced costs related to purchasing and renting tools and equipment
+- 86% of the survey respondents reported to at least of the minority service or leadership criteria. 
+
+## Section 1A: Supporting Visualizations and Quotes 
+
+TBD
+
+# Section 2: Data Analysis Process
+
+## Section 2A: Data Wrangling 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r, echo = FALSE, include=FALSE, purl=FALSE}
+library(knitr)
+opts_chunk$set(comment = "")
+```
+
+```{r, include=FALSE}
+library(tidyr)
+library(tidyverse)
+library(googlesheets4)
+library(ggplot2)
+```
+
+```{r eval=FALSE}
+# Prompts a browser pop-up
+gs4_auth()
+```
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+# Once set up, you can automate this process by passing your email
+gs4_auth(email = "haley.farrie@gmail.com")
+```
+
+### Reading data with the googlesheets4 package {.smaller}
+
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+sheet_url <- 
+  "https://docs.google.com/spreadsheets/d/1W5kgOFSJux4lqpwqwJ_h9tJnd5oTY3-wBs57cpkyM3U/edit#gid=1386397630"
+sheet_dat_1 <- read_sheet(sheet_url)
+head(sheet_dat_1)
+```
+
+## Section 2B: Data Cleaning
+
+### Delete extra variables
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+# delete Noah's test response
+# also delete the "Please specify:" question after receiving the first response, so we want to delete the corresponding column
+data = sheet_dat_1[sheet_dat_1$`Name of your current organization` != "Baltimore ToolBank", 
+                   !names(sheet_dat_1) %in% c("Please specify:")]
+head(data)
+```
+
+### change column names to variables
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+varlist = c("timestamp","di_org", "di_orgyearsworked", "di_mled", "att_purtool", "att_strtool", "att_redtime", "att_evquality", "att_posimpact", "att_mostimpact", "eco_purchase", "eco_storage", "eco_maintain", "eco_totalcost", "eco_events", "eco_nothost", "eco_constit", "ci_exaccomp", "ci_cutfund", "ci_otr", "ci_staff", "ci_project", "ci_evimpact", "eve_type", "eve_fundraise", "eve_fundraise_p")
+
+colnames(data) = varlist
+str(data)
+```
+
+### change multiple choice answer into numbers
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+# Question: how long have you worked with this organization
+# variable: di_orgyearsworked; choice: 1 - 0-2 years; 2 - 3-5 years; 3 - More than 5 years
+
+data$di_orgyearsworked = ifelse(data$di_orgyearsworked == "0-2 years", 1,
+                                ifelse(data$di_orgyearsworked == "3-5 years", 2, 3))
+head(data)
+```
+The following section is commented out as we used text format choices in the following study
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+# # Question: general attitudes
+# # variables: "att_purtool", "att_strtool", "att_redtime", "att_evquality", "att_posimpact"
+# # 1 - Strongly agree; 2 - Agree; 3 - Neutral; 4 - Disagree; 5 - Strongly disagree; 6 - N/A
+# att_mc = c("att_purtool", "att_strtool", "att_redtime", "att_evquality", "att_posimpact")
+# 
+# invisible(lapply(att_mc, FUN = function(x) {
+#   data[[x]] <<- ifelse(data[[x]] == "Strongly agree", 1,
+#                      ifelse(data[[x]] == "Agree", 2,
+#                             ifelse(data[[x]] == "Neutral", 3,
+#                                    ifelse(data[[x]] == "Disagree", 4,
+#                                           ifelse(data[[x]] == "Strongly disagree", 5, 6)))))
+# }))
+# 
+# head(data)
+```
+
+### split check all that apply responses into indicators
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+# Question 1: minority leadership
+data = mutate(data, di_mled_top = NA, di_mled_board = NA, di_mled_rep = NA, di_mled_na = NA)
+
+invisible(lapply(1:nrow(data), FUN = function(x) {
+  choicelist = strsplit(data$di_mled[x], ", ")[[1]]
+  if ("Our top executive position is held by a minority." %in% choicelist) {
+    data$di_mled_top[x] <<- 1
+  } else { 
+    data$di_mled_top[x] <<- 0
+  }
+  
+  if ("More than 50% of our board is made up of minorities." %in% choicelist) {
+    data$di_mled_board[x] <<- 1
+  } else { 
+    data$di_mled_board[x] <<- 0
+  }
+  
+  if ("More than 50% of program recipients are minorities." %in% choicelist) {
+    data$di_mled_rep[x] <<- 1
+  } else { 
+    data$di_mled_rep[x] <<- 0
+  }
+  
+  if ("None of the above" %in% choicelist) {
+    data$di_mled_na[x] <<- 1
+  } else { 
+    data$di_mled_na[x] <<- 0
+  }
+}))
+
+head(data)
+```
+
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+# Question 2: With the money you have saved on purchasing, storing, and maintaining tools and equipment through the TB, what have you been able to accomplish?
+data = mutate(data, ci_exaccomp_stf = NA, ci_exaccomp_prj = NA, ci_exaccomp_na = NA, ci_exaccomp_otr = NA)
+
+invisible(lapply(1:nrow(data), FUN = function(x) {
+  choicelist = strsplit(data$ci_exaccomp[x], ", ")[[1]]
+  if ("Hired additional staff positions" %in% choicelist) {
+    data$ci_exaccomp_stf[x] <<- 1
+  } else { 
+    data$ci_exaccomp_stf[x] <<- 0
+  }
+  
+  choicelist = choicelist[choicelist != "Hired additional staff positions"]
+  
+  if ("Hosted additional projects or events" %in% choicelist) {
+    data$ci_exaccomp_prj[x] <<- 1
+  } else { 
+    data$ci_exaccomp_prj[x] <<- 0
+  }
+  
+  choicelist = choicelist[choicelist != "Hosted additional projects or events"]
+  
+  
+  if ("N/A" %in% choicelist) {
+    data$ci_exaccomp_na[x] <<- 1
+  } else { 
+    data$ci_exaccomp_na[x] <<- 0
+  }
+  
+  choicelist = choicelist[choicelist != "N/A"]
+  
+  if (length(choicelist > 0)) {
+    print(x)
+    data$ci_exaccomp_otr[x] <<- paste(choicelist, collapse = ", ")
+  }
+}))
+
+head(data)
+```
+
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+# Question 3: Without the TB, what would you no longer be able to fund?
+data = mutate(data, ci_cutfund_stf = NA, ci_cutfund_prj = NA, ci_cutfund_na = NA, ci_cutfund_otr = NA)
+
+invisible(lapply(1:nrow(data), FUN = function(x) {
+  choicelist = strsplit(data$ci_cutfund[x], ", ")[[1]]
+  if ("Staff" %in% choicelist) {
+    data$ci_cutfund_stf[x] <<- 1
+  } else { 
+    data$ci_cutfund_stf[x] <<- 0
+  }
+  
+  choicelist = choicelist[choicelist != "Staff"]
+  
+  if ("Projects" %in% choicelist) {
+    data$ci_cutfund_prj[x] <<- 1
+  } else { 
+    data$ci_cutfund_prj[x] <<- 0
+  }
+  
+  choicelist = choicelist[choicelist != "Projects"]
+  
+  
+  if ("N/A" %in% choicelist) {
+    data$ci_cutfund_na[x] <<- 1
+  } else { 
+    data$ci_cutfund_na[x] <<- 0
+  }
+  
+  choicelist = choicelist[choicelist != "N/A"]
+  
+  if (length(choicelist > 0)) {
+    print(x)
+    data$ci_cutfund_otr[x] <<- paste(choicelist, collapse = ", ")
+  }
+}))
+
+head(data)
+```
+
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+# Question 4: Without the TB, which of the following are ways that your community events would be impacted? (check all that apply)
+data = mutate(data, ci_evimpact_qtt = NA, ci_evimpact_qlt = NA, ci_evimpact_dvt = NA, 
+              ci_evimpact_cst = NA, ci_evimpact_otr = NA)
+
+invisible(lapply(1:nrow(data), FUN = function(x) {
+  choicelist = strsplit(data$ci_evimpact[x], ", ")[[1]]
+  if ("Quantity" %in% choicelist) {
+    data$ci_evimpact_qtt[x] <<- 1
+  } else { 
+    data$ci_evimpact_qtt[x] <<- 0
+  }
+  
+  choicelist = choicelist[choicelist != "Quantity"]
+  
+  if ("Quality" %in% choicelist) {
+    data$ci_evimpact_qlt[x] <<- 1
+  } else { 
+    data$ci_evimpact_qlt[x] <<- 0
+  }
+  
+  choicelist = choicelist[choicelist != "Quality"]
+  
+  
+  if ("Diversity" %in% choicelist) {
+    data$ci_evimpact_dvt[x] <<- 1
+  } else { 
+    data$ci_evimpact_dvt[x] <<- 0
+  }
+  
+  choicelist = choicelist[choicelist != "Diversity"]
+  
+  if ("Consistency" %in% choicelist) {
+    data$ci_evimpact_cst[x] <<- 1
+  } else { 
+    data$ci_evimpact_cst[x] <<- 0
+  }
+  
+  choicelist = choicelist[choicelist != "Consistency"]
+  
+  if (length(choicelist > 0)) {
+    print(x)
+    data$ci_evimpact_otr[x] <<- paste(choicelist, collapse = ", ")
+  }
+}))
+
+head(data)
+```
+
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+# Question 5: Which of the following types of events have TB tools and equipment helped your CBO complete?
+data = mutate(data, eve_type_fr = NA, eve_type_sp = NA, eve_type_ew = NA, eve_type_cb = NA, eve_type_otr = NA)
+
+invisible(lapply(1:nrow(data), FUN = function(x) {
+  choicelist = strsplit(data$eve_type[x], ", ")[[1]]
+  if ("Fundraising" %in% choicelist) {
+    data$eve_type_fr[x] <<- 1
+  } else { 
+    data$eve_type_fr[x] <<- 0
+  }
+  
+  choicelist = choicelist[choicelist != "Fundraising"]
+  
+  if ("Service Projects" %in% choicelist) {
+    data$eve_type_sp[x] <<- 1
+  } else { 
+    data$eve_type_sp[x] <<- 0
+  }
+  
+  choicelist = choicelist[choicelist != "Service Projects"]
+  
+  
+  if ("Educational Workshops" %in% choicelist) {
+    data$eve_type_ew[x] <<- 1
+  } else { 
+    data$eve_type_ew[x] <<- 0
+  }
+  
+  choicelist = choicelist[choicelist != "Educational Workshops"]
+  
+  if ("Community Building" %in% choicelist) {
+    data$eve_type_cb[x] <<- 1
+  } else { 
+    data$eve_type_cb[x] <<- 0
+  }
+  
+  choicelist = choicelist[choicelist != "Community Building"]
+  
+  if (length(choicelist > 0)) {
+    print(x)
+    data$eve_type_otr[x] <<- paste(choicelist, collapse = ", ")
+  }
+}))
+
+head(data)
+```
+## Section 2C: DatavAnalysis by Survey Question
+
+### Demographic Information 
+
+### Question 2: How long have you worked with this organization? 
+```{r}
+# list the data as a table as the data is binned instead of continuous
+table(data$di_orgyearsworked) 
+di_orgyearsworked_table = data.frame(cbind(time = c("0-2 years", "3-5 years", "More than 5 years"),
+                                RespondentCount = table(data$di_orgyearsworked),
+                                Percentage = round(table(data$di_orgyearsworked)/nrow(data),3)))
+
+di_orgyearsworked_table
+```
+```{r}
+# mean number of year worked with the organization. Transfer choices into number by the following standard: 0-2 years -> 1yr; 3-5 years -> 4 yr; more than 5 years -> 6 year
+data = mutate(data, di_orgyearsworked_calc = ifelse(di_orgyearsworked == 1, 1, 
+                                                    ifelse(di_orgyearsworked == 2, 4, 6)))
+mean(data$di_orgyearsworked_calc)
+median(data$di_orgyearsworked_calc)
+hist(data$di_orgyearsworked_calc, breaks = c(0, 3, 6, 9), right = F, xlim = c(0, 10), ylim = c(0, 25), main = "Time Respondents Have Worked with Their Organizations", xlab = "time (years)")
+```
+
+### Question 3: The following question pertains to minority leadership and service. For the purpose of this question, minority is defined as women, people of color, and immigrants. Ehich of the following best describes your organization? (please provide your best estimate).?
+
+Percent of respondents stating, "our top executive position is held by a minority"
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+table_di_mled_top <- table(data$di_mled_top)
+percentages <- prop.table(table_di_mled_top)
+summary_tabledi_mled_top <-data.frame(count=table_di_mled_top, Percentage=percentages)
+print(summary_tabledi_mled_top)
+```
+
+Percent of respondents stating, "More than 50% of our board is made up of minorities "
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+table_di_mled_board<- table(data$di_mled_board)
+percentages <- prop.table(table_di_mled_board)
+summary_tabledi_mled_board <-data.frame(count=table_di_mled_board, Percentage=percentages)
+print(summary_tabledi_mled_board)
+```
+
+Percent of respondents stating, "More than 50% of program recipients are minorities"
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+table_di_mled_rep<- table(data$di_mled_rep)
+percentages <- prop.table(table_di_mled_rep)
+summary_tabledi_mled_rep <-data.frame(count=table_di_mled_rep, Percentage=percentages)
+print(summary_tabledi_mled_rep)
+```
+
+Percent of respondents stating, "None of the above"
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+table_di_mled_na<- table(data$di_mled_na)
+percentages <- prop.table(table_di_mled_na)
+summary_tabledi_mled_na <-data.frame(count=table_di_mled_na, Percentage=percentages)
+print(summary_tabledi_mled_na)
+```
+
+
+### Questions 4-8:Plots of General sentiment and Years with the CBO
+
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+#The ToolBank (TB) has positively impacted our CBO by reducing costs related to purchasing or renting tools and equipment
+data%>%
+  group_by(di_orgyearsworked)%>%
+  summarize(agree = sum(att_purtool=="Agree",na.rm=T)/n(),
+            strongly_agree = sum(att_purtool=="Strongly agree",na.rm=T)/n(),
+            neutral = sum(att_purtool=="Neutral",na.rm=T)/n(),
+            disagree = sum(att_purtool=="Disagree",na.rm=T)/n(),
+            strongly_disagree = sum(att_purtool=="Strongly disagree",na.rm=T)/n(),
+            N_A = sum(att_purtool=="N/A",na.rm=T)/n())%>%
+  pivot_longer(agree:N_A, 
+               names_to= "Response", 
+               values_to = "Percentage")%>%
+  mutate(Response = factor(Response, levels = c("strongly_agree",
+                                                "agree",
+                                                "neutral", 
+                                                "disagree",
+                                                "strongly_disagree", 
+                                                 "N_A")))%>%
+  ggplot(aes(fill=Response,
+             y=Percentage, 
+             x=as.factor(di_orgyearsworked))) + 
+    geom_bar(position="stack", 
+             stat="identity")+
+  labs(x="Years Worked at CBO", 
+       y="Percentage of respondants",
+       title="Agreement that TB reduced costs related to purchasing/renting tools/equipment") +
+  scale_x_discrete(labels = c("0-2 years", "3-5 years", "More than 5 years"))
+
+#The TB has positively impacted our CBO by reducing costs related to storing tools and equipment
+data%>%
+  group_by(di_orgyearsworked)%>%
+  summarize(agree = sum(att_strtool=="Agree",na.rm=T)/n(),
+            strongly_agree = sum(att_strtool=="Strongly agree",na.rm=T)/n(),
+            neutral = sum(att_strtool=="Neutral",na.rm=T)/n(),
+            disagree = sum(att_strtool=="Disagree",na.rm=T)/n(),
+            strongly_disagree = sum(att_strtool=="Strongly disagree",na.rm=T)/n(),
+            N_A = sum(att_strtool=="N/A",na.rm=T)/n())%>%
+  pivot_longer(agree:N_A, 
+               names_to= "Response", 
+               values_to = "Percentage")%>%
+  mutate(Response = factor(Response, levels = c("strongly_agree",
+                                                "agree",
+                                                "neutral", 
+                                                "disagree",
+                                                "strongly_disagree", 
+                                                 "N_A")))%>%
+  ggplot(aes(fill=Response,
+             y=Percentage, 
+             x=as.factor(di_orgyearsworked))) + 
+    geom_bar(position="stack", 
+             stat="identity")+
+  labs(x="Years Worked at CBO", 
+       y="Percentage of respondants",
+       title="Agreement that TB reduced costs related to storing tools/equipment") +
+  scale_x_discrete(labels = c("0-2 years", "3-5 years", "More than 5 years"))
+
+
+#The TB has positively impacted our CBO by reducing staff time to complete community projects
+data%>%
+  group_by(di_orgyearsworked)%>%
+  summarize(agree = sum(att_redtime=="Agree",na.rm=T)/n(),
+            strongly_agree = sum(att_redtime=="Strongly agree",na.rm=T)/n(),
+            neutral = sum(att_redtime=="Neutral",na.rm=T)/n(),
+            disagree = sum(att_redtime=="Disagree",na.rm=T)/n(),
+            strongly_disagree = sum(att_redtime=="Strongly disagree",na.rm=T)/n(),
+            N_A = sum(att_redtime=="N/A",na.rm=T)/n())%>%
+  pivot_longer(agree:N_A, 
+               names_to= "Response", 
+               values_to = "Percentage")%>%
+  mutate(Response = factor(Response, levels = c("strongly_agree",
+                                                "agree",
+                                                "neutral", 
+                                                "disagree",
+                                                "strongly_disagree", 
+                                                 "N_A")))%>%
+  ggplot(aes(fill=Response,
+             y=Percentage, 
+             x=as.factor(di_orgyearsworked))) + 
+    geom_bar(position="stack", 
+             stat="identity")+
+  labs(x="Years Worked at CBO", 
+       y="Percentage of respondants",
+       title="Agreement that TB reduced staff time for projects") +
+  scale_x_discrete(labels = c("0-2 years", "3-5 years", "More than 5 years"))
+
+#Tools made available through the TB allow our CBO to complete higher quality events/projects without additional funding
+data%>%
+  group_by(di_orgyearsworked)%>%
+  summarize(agree = sum(att_evquality=="Agree",na.rm=T)/n(),
+            strongly_agree = sum(att_evquality=="Strongly agree",na.rm=T)/n(),
+            neutral = sum(att_evquality=="Neutral",na.rm=T)/n(),
+            disagree = sum(att_evquality=="Disagree",na.rm=T)/n(),
+            strongly_disagree = sum(att_evquality=="Strongly disagree",na.rm=T)/n(),
+            N_A = sum(att_evquality=="N/A",na.rm=T)/n())%>%
+  pivot_longer(agree:N_A, 
+               names_to= "Response", 
+               values_to = "Percentage")%>%
+  mutate(Response = factor(Response, levels = c("strongly_agree",
+                                                "agree",
+                                                "neutral", 
+                                                "disagree",
+                                                "strongly_disagree", 
+                                                 "N_A")))%>%
+  ggplot(aes(fill=Response,
+             y=Percentage, 
+             x=as.factor(di_orgyearsworked))) + 
+    geom_bar(position="stack", 
+             stat="identity")+
+  labs(x="Years Worked at CBO", 
+       y="Percentage of respondants",
+       title="Agreement that TB allows for higher qual events/projs") +
+  scale_x_discrete(labels = c("0-2 years", "3-5 years", "More than 5 years"))
+
+#The TB has positively impacted our CBO
+data%>%
+  group_by(di_orgyearsworked)%>%
+  summarize(agree = sum(att_posimpact=="Agree",na.rm=T)/n(),
+            strongly_agree = sum(att_posimpact=="Strongly agree",na.rm=T)/n(),
+            neutral = sum(att_posimpact=="Neutral",na.rm=T)/n(),
+            disagree = sum(att_posimpact=="Disagree",na.rm=T)/n(),
+            strongly_disagree = sum(att_posimpact=="Strongly disagree",na.rm=T)/n(),
+            N_A = sum(att_posimpact=="N/A",na.rm=T)/n())%>%
+  pivot_longer(agree:N_A, 
+               names_to= "Response", 
+               values_to = "Percentage")%>%
+  mutate(Response = factor(Response, levels = c("strongly_agree",
+                                                "agree",
+                                                "neutral", 
+                                                "disagree",
+                                                "strongly_disagree", 
+                                                 "N_A")))%>%
+  ggplot(aes(fill=Response,
+             y=Percentage, 
+             x=as.factor(di_orgyearsworked))) + 
+    geom_bar(position="stack", 
+             stat="identity")+
+  labs(x="Years Worked at CBO", 
+       y="Percentage of respondants",
+       title="Agreement that TB pos. impacted CBO") +
+  scale_x_discrete(labels = c("0-2 years", "3-5 years", "More than 5 years"))
+```
+
+### Questions 4-8: Plots of General Sentiment and Minority Status
+
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+#The ToolBank (TB) has positively impacted our CBO by reducing costs related to purchasing or renting tools and equipment
+data <- data%>%
+  mutate(top_exec_minority = str_detect(di_mled,"Our top executive position is held by a minority."),
+         maj_prog_recip_minority = str_detect(di_mled,"More than 50% of program recipients are minorities"),
+         none = str_detect(di_mled,"None of the above"),
+         maj_board_minority = str_detect(di_mled,"More than 50% of our board is made up of minorities"),
+         )
+
+                                                                                                                                    
+# sentiments of top exec minority
+data%>%
+  filter(top_exec_minority==TRUE)%>%
+  pivot_longer(cols=att_purtool:att_posimpact,names_to="question",values_to="response")%>%
+  group_by(question)%>%
+  summarize(agree = sum(response=="Agree",na.rm=T)/n(),
+            strongly_agree = sum(response=="Strongly agree",na.rm=T)/n(),
+            neutral = sum(response=="Neutral",na.rm=T)/n(),
+            disagree = sum(response=="Disagree",na.rm=T)/n(),
+            strongly_disagree = sum(response=="Strongly disagree",na.rm=T)/n(),
+            N_A = sum(response=="N/A",na.rm=T)/n())%>%
+  pivot_longer(agree:N_A, 
+               names_to= "Response", 
+               values_to = "Percentage")%>%
+  mutate(Response = factor(Response, levels = c("strongly_agree",
+                                                "agree",
+                                                "neutral", 
+                                                "disagree",
+                                                "strongly_disagree", 
+                                                 "N_A")))%>%
+  ggplot(aes(fill=Response,
+             y=Percentage, 
+             x=question)) + 
+    geom_bar(position="stack", 
+             stat="identity")+
+  labs(x="General Attitude", 
+       y="Percentage of respondants",
+       title="Sentiment on TB among CBOs w/ top exec. a minority") +
+  scale_x_discrete(labels = c("higher quality event", "positive impact", "purchase tool", "reduce time", "store tool"))
+
+# sentiments of CBOS w "More than 50% of program recipients are minorities"
+data%>%
+  filter(maj_prog_recip_minority==TRUE)%>%
+  pivot_longer(cols=att_purtool:att_posimpact,names_to="question",values_to="response")%>%
+  group_by(question)%>%
+  summarize(agree = sum(response=="Agree",na.rm=T)/n(),
+            strongly_agree = sum(response=="Strongly agree",na.rm=T)/n(),
+            neutral = sum(response=="Neutral",na.rm=T)/n(),
+            disagree = sum(response=="Disagree",na.rm=T)/n(),
+            strongly_disagree = sum(response=="Strongly disagree",na.rm=T)/n(),
+            N_A = sum(response=="N/A",na.rm=T)/n())%>%
+  pivot_longer(agree:N_A, 
+               names_to= "Response", 
+               values_to = "Percentage")%>%
+  mutate(Response = factor(Response, levels = c("strongly_agree",
+                                                "agree",
+                                                "neutral", 
+                                                "disagree",
+                                                "strongly_disagree", 
+                                                 "N_A")))%>%
+  ggplot(aes(fill=Response,
+             y=Percentage, 
+             x=question)) + 
+    geom_bar(position="stack", 
+             stat="identity")+
+  labs(x="General Attitude", 
+       y="Percentage of respondants",
+       title="Sentiment on TB among CBOs w/ 50%+ program recipients are minorities") +
+  scale_x_discrete(labels = c("higher quality event", "positive impact", "purchase tool", "reduce time", "store tool"))
+
+#sentiment of CBOs w "More than 50% of our board is made up of minorities"
+data%>%
+  filter(maj_board_minority==TRUE)%>%
+  pivot_longer(cols=att_purtool:att_posimpact,names_to="question",values_to="response")%>%
+  group_by(question)%>%
+  summarize(agree = sum(response=="Agree",na.rm=T)/n(),
+            strongly_agree = sum(response=="Strongly agree",na.rm=T)/n(),
+            neutral = sum(response=="Neutral",na.rm=T)/n(),
+            disagree = sum(response=="Disagree",na.rm=T)/n(),
+            strongly_disagree = sum(response=="Strongly disagree",na.rm=T)/n(),
+            N_A = sum(response=="N/A",na.rm=T)/n())%>%
+  pivot_longer(agree:N_A, 
+               names_to= "Response", 
+               values_to = "Percentage")%>%
+  mutate(Response = factor(Response, levels = c("strongly_agree",
+                                                "agree",
+                                                "neutral", 
+                                                "disagree",
+                                                "strongly_disagree", 
+                                                 "N_A")))%>%
+  ggplot(aes(fill=Response,
+             y=Percentage, 
+             x=question)) + 
+    geom_bar(position="stack", 
+             stat="identity")+
+  labs(x="General Attitude", 
+       y="Percentage of respondants",
+       title="Sentiment on TB among CBOs w/ 50%+ board members are minorities") +
+  scale_x_discrete(labels = c("higher quality event", "positive impact", "purchase tool", "reduce time", "store tool"))
+
+# sentiments of CBOs who responded "None of the above"
+data%>%
+  filter(none==TRUE)%>%
+  pivot_longer(cols=att_purtool:att_posimpact,names_to="question",values_to="response")%>%
+  group_by(question)%>%
+  summarize(agree = sum(response=="Agree",na.rm=T)/n(),
+            strongly_agree = sum(response=="Strongly agree",na.rm=T)/n(),
+            neutral = sum(response=="Neutral",na.rm=T)/n(),
+            disagree = sum(response=="Disagree",na.rm=T)/n(),
+            strongly_disagree = sum(response=="Strongly disagree",na.rm=T)/n(),
+            N_A = sum(response=="N/A",na.rm=T)/n())%>%
+  pivot_longer(agree:N_A, 
+               names_to= "Response", 
+               values_to = "Percentage")%>%
+  mutate(Response = factor(Response, levels = c("strongly_agree",
+                                                "agree",
+                                                "neutral", 
+                                                "disagree",
+                                                "strongly_disagree", 
+                                                 "N_A")))%>%
+  ggplot(aes(fill=Response,
+             y=Percentage, 
+             x=question)) + 
+    geom_bar(position="stack", 
+             stat="identity")+
+  labs(x="General Attitude", 
+       y="Percentage of respondants",
+       title="Sentiment on TB among CBOs reporting none for minority status Q") +
+  scale_x_discrete(labels = c("higher quality event", "positive impact", "purchase tool", "reduce time", "store tool"))
+```
+
+Percent of respondents that reported they "Agree" or "Strongly Agree" that "the ToolBank (TB) has positively impacted our CBO by reducing costs related to purchasing or renting tools and equipment"
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+table_att_purtool<- table(data$att_purtool)
+percentages <- prop.table(table_att_purtool)
+summary_table_att_purtool <-data.frame(count=table_att_purtool, Percentage=percentages)
+print(summary_table_att_purtool)
+```
+
+Percent of respondents that reported they "Agree" or "Strongly Agree" that "the TB has positively impacted our CBO by reducing costs related to storing tools and equipment
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+table_att_strtool<- table(data$att_strtool)
+percentages <- prop.table(table_att_strtool)
+summary_table_att_strtool <-data.frame(count=table_att_strtool, Percentage=percentages)
+print(summary_table_att_strtool)
+```
+
+
+Percent of respondents that reported they "Agree" or "Strongly Agree" that "theTB has positively impacted our CBO by reducing staff time to complete maintenance/projects
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+table_att_redtime<- table(data$att_redtime)
+percentages <- prop.table(table_att_redtime)
+summary_table_att_redtime <-data.frame(count=table_att_redtime, Percentage=percentages)
+print(summary_table_att_redtime)
+```
+
+
+Percent of respondents that reported they "Agree" or "Strongly Agree" that "the Tools made available through the TB allow our CBO to complete higher quality events/projects without additional funding
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+table_att_evquality<- table(data$att_evquality)
+percentages <- prop.table(table_att_evquality)
+summary_table_att_evquality <-data.frame(count=table_att_evquality, Percentage=percentages)
+print(summary_table_att_evquality)
+```
+
+Question: TB has positively impacted our CBO 
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+table_att_posimpact<- table(data$att_posimpact)
+percentages <- prop.table(table_att_posimpact)
+summary_table_att_posimpact <-data.frame(count=table_att_posimpact, Percentage=percentages)
+print(summary_table_att_posimpact)
+```
+
+### Plots
+
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+#overall 
+data%>%
+  mutate(num_orgs = n())%>%
+  pivot_longer(cols=att_purtool:att_posimpact,names_to="question",values_to="response")%>%
+  group_by(question)%>%
+  summarize(agree = sum(response=="Agree",na.rm=T)/n(),
+            strongly_agree = sum(response=="Strongly agree",na.rm=T)/n(),
+            neutral = sum(response=="Neutral",na.rm=T)/n(),
+            disagree = sum(response=="Disagree",na.rm=T)/n(),
+            strongly_disagree = sum(response=="Strongly disagree",na.rm=T)/n(),
+            N_A = sum(response=="N/A",na.rm=T)/n())%>%
+  pivot_longer(agree:N_A, 
+               names_to= "Response", 
+               values_to = "Percentage")%>%
+  mutate(Response = factor(Response, levels = c("strongly_agree",
+                                                "agree",
+                                                "neutral", 
+                                                "disagree",
+                                                "strongly_disagree", 
+                                                 "N_A")))%>%
+  ggplot(aes(fill=Response,
+             y=Percentage, 
+             x=question)) + 
+    geom_bar(position="stack", 
+             stat="identity")+
+  labs(x="General Attitude", 
+       y="Percentage of respondants",
+       title="Agreement that TB helps with different aspects") +
+  scale_x_discrete(labels = c("higher quality event", "positive impact", "purchase tool", "reduce time", "store tool"))
+```
+
+## Section 4: Economic Benefit 
+
+### Response analysis
+
+Question: How much would you have spent purchasing or renting tools and equipment had the TB not existed?
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+# Create a vector 
+eco_purchase<- data$eco_purchase
+
+# Define a function to calculate the mode
+Mode <- function(x) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
+# Calculate mean, median, and mode
+mean_value <- mean(eco_purchase)
+median_value <- median(eco_purchase)
+mode_value <- Mode(eco_purchase)
+
+# Create a summary table
+summary_table_eco_purchase<- data.frame(
+  Measure = c("Mean", "Median", "Mode"),
+  Value = c(mean_value, median_value, mode_value)
+)
+
+# Display the summary table
+print(summary_table_eco_purchase)
+
+# Display histogram
+hist(eco_purchase, main = "Histogram of Spending on Purchasing/Renting Tools/Equip if without TB", xlab = "spending (dollars)")
+```
+
+
+Question: How much would you have spent on storage of tools and equipment had the TB not existed ?
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+# Create a vector 
+eco_storage<- data$eco_storage
+
+# Define a function to calculate the mode
+Mode <- function(x) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
+# Calculate mean, median, and mode
+mean_value <- mean(eco_storage)
+median_value <- median(eco_storage)
+mode_value <- Mode(eco_storage)
+
+# Create a summary table
+summary_table_eco_storage<- data.frame(
+  Measure = c("Mean", "Median", "Mode"),
+  Value = c(mean_value, median_value, mode_value)
+)
+
+# Display the summary table
+print(summary_table_eco_storage)
+
+# Display histogram
+hist(eco_storage, main = "Histogram of Spending on Storaging Tools/Equip if without TB", xlab = "spending (dollars)")
+```
+
+
+Question: How much would you have spent on maintenance of tools and equipment had the TB not existed?
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+# Create a vector 
+eco_maintain<- data$eco_maintain
+
+# Define a function to calculate the mode
+Mode <- function(x) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
+# Calculate mean, median, and mode
+mean_value <- mean(eco_maintain)
+median_value <- median(eco_maintain)
+mode_value <- Mode(eco_maintain)
+
+# Create a summary table
+summary_table_eco_maintain<- data.frame(
+  Measure = c("Mean", "Median", "Mode"),
+  Value = c(mean_value, median_value, mode_value)
+)
+
+# Display the summary table
+print(summary_table_eco_maintain)
+
+# Display histogram
+hist(eco_maintain, main = "Histogram of Maintaining on Purchasing/Renting Tools/Equip if without TB", xlab = "spending (dollars)")
+```
+
+Question: Reflecting on your events in the past year: If the TB did not exist, how much funding would your organization allocate to buying, storing, tracking and maintaining your own inventory of tools and equipment?
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+# Create a vector 
+eco_totalcost<- data$eco_totalcost
+
+# Define a function to calculate the mode
+Mode <- function(x) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
+# Calculate mean, median, and mode
+mean_value <- mean(eco_totalcost)
+median_value <- median(eco_totalcost)
+mode_value <- Mode(eco_totalcost)
+
+# Create a summary table
+summary_table_eco_totalcost<- data.frame(
+  Measure = c("Mean", "Median", "Mode"),
+  Value = c(mean_value, median_value, mode_value)
+)
+
+# Display the summary table
+print(summary_table_eco_totalcost)
+
+# Display histogram
+hist(eco_totalcost, main = "Histogram of Total Spending in Past Year if without TB", xlab = "spending (dollars)")
+```
+Question: number of total events hosted during last year
+```{r}
+# Create a vector 
+eco_events<- data$eco_events
+
+# Define a function to calculate the mode
+Mode <- function(x) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
+# Calculate mean, median, and mode
+mean_value <- mean(eco_events)
+median_value <- median(eco_events)
+mode_value <- Mode(eco_events)
+
+# Create a summary table
+summary_table_eco_events<- data.frame(
+  Measure = c("Mean", "Median", "Mode"),
+  Value = c(mean_value, median_value, mode_value)
+)
+
+# Display the summary table
+print(summary_table_eco_events)
+
+# Display histogram
+hist(eco_events, main = "Histogram of Total Event Hosted in Past Year", xlab = "count of events")
+```
+
+Question: If there were no TB, how many of your events in the past year would you not have been hosted for any reason?
+
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+# Create a vector 
+eco_nothost<- data$eco_nothost
+
+# Define a function to calculate the mode
+Mode <- function(x) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
+# Calculate mean, median, and mode
+mean_value <- mean(eco_nothost)
+median_value <- median(eco_nothost)
+mode_value <- Mode(eco_nothost)
+
+# Create a summary table
+summary_table_eco_nothost<- data.frame(
+  Measure = c("Mean", "Median", "Mode"),
+  Value = c(mean_value, median_value, mode_value)
+)
+
+# Display the summary table
+print(summary_table_eco_nothost)
+
+# Display histogram
+hist(eco_nothost, main = "Histogram of Events not able to Host in Past Year if without TB", xlab = "count of events")
+```
+
+Extra analysis: percent of event not host during last year
+```{r}
+data$eco_nothost_pct_calc = data$eco_nothost/data$eco_events
+eco_nothost_pct_calc = data$eco_nothost_pct_calc
+# Define a function to calculate the mode
+Mode <- function(x) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
+# Calculate mean, median, and mode
+mean_value <- mean(eco_nothost_pct_calc)
+median_value <- median(eco_nothost_pct_calc)
+mode_value <- Mode(eco_nothost_pct_calc)
+
+# Create a summary table
+summary_table_eco_nothost_pct_calc<- data.frame(
+  Measure = c("Mean", "Median", "Mode"),
+  Value = c(mean_value, median_value, mode_value)
+)
+
+# Display the summary table
+print(summary_table_eco_nothost_pct_calc)
+
+# Display histogram
+hist(eco_nothost_pct_calc*100, main = "Histogram: Percentage of Events not able to Host in Past Year if without TB", xlab = "Percentage(%)")
+```
+
+
+
+Questions: If there were no TB, how many of your constituents, including volunteers, members, and event attendees, would have been negatively impacted in the past year?
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+# Create a vector 
+eco_constit<- data$eco_constit
+
+# Define a function to calculate the mode
+Mode <- function(x) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
+# Calculate mean, median, and mode
+max_value <- max(eco_constit)
+min_value <- min(eco_constit)
+range_value <- max(eco_constit)- min(eco_constit)
+mean_value <- mean(eco_constit)
+median_value <- median(eco_constit)
+mode_value <- Mode(eco_constit)
+
+
+# Create a summary table
+summary_table_eco_constit<- data.frame(
+  Measure = c("Max","Min","Range","Mean", "Median", "Mode"),
+  Value = c(max_value, min_value, range_value, mean_value, median_value, mode_value)
+)
+
+# Display the summary table
+print(summary_table_eco_constit)
+
+# Display histogram
+hist(eco_constit, main = "Histogram of Number of Constituents Affected if without TB", xlab = "count")
+```
+
+Calculated: 
+
+Reflecting on your events in the past year, how many events did your organization host?
+
+If there were no TB, how many of your events in the past year would you not have been able to host?
+
+What percentage of the events hosted last year did the TB help make possible?
+### Plots
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+data%>%
+  group_by(row_number())%>%
+  mutate(`Percent of events posible by TB (%)` = round(eco_nothost/eco_events*100,1))%>%
+  ggplot(aes(x=`Percent of events posible by TB (%)`))+
+  geom_boxplot()+
+  labs(title="Percentage of events in the least year made posible by TB")
+#events in past year: eco_events
+
+#stratify by minority status
+data%>%
+  filter(top_exec_minority==TRUE)%>%
+  group_by(row_number())%>%
+  mutate(`Percent of events posible by TB (%)` = round(eco_nothost/eco_events*100,1))%>%
+  ggplot(aes(x=`Percent of events posible by TB (%)`))+
+  geom_boxplot()+
+  labs(title="% events through TB: among CBOs w/ top exec a minority")
+data%>%
+  filter(maj_prog_recip_minority==TRUE)%>%
+  group_by(row_number())%>%
+  mutate(`Percent of events posible by TB (%)` = round(eco_nothost/eco_events*100,1))%>%
+  ggplot(aes(x=`Percent of events posible by TB (%)`))+
+  geom_boxplot()+
+  labs(title="% events through TB: among CBOs w/ 50%+ prog. recipients minorities")
+data%>%
+  filter(maj_board_minority==TRUE)%>%
+  group_by(row_number())%>%
+  mutate(`Percent of events posible by TB (%)` = round(eco_nothost/eco_events*100,1))%>%
+  ggplot(aes(x=`Percent of events posible by TB (%)`))+
+  geom_boxplot()+
+  labs(title="% events through TB: among CBOs w/ 50%+ board members minorities")
+data%>%
+  filter(none==TRUE)%>%
+  group_by(row_number())%>%
+  mutate(`Percent of events posible by TB (%)` = round(eco_nothost/eco_events*100,1))%>%
+  ggplot(aes(x=`Percent of events posible by TB (%)`))+
+  geom_boxplot()+
+  labs(title="% events through TB: among CBOs w/ no minority status listed")
+
+
+data%>%
+  group_by(row_number())%>%
+  mutate(`Percent of events posible by TB` = round(eco_nothost/eco_events*100,1))%>%
+  ungroup()%>%
+  summarize(`Average % of a CBO's events possible through TB in past year` = mean(`Percent of events posible by TB`))
+```
+
+
+
+## Section 5: Community Impact
+
+Question: With the money that you have saved on purchasing, storing, and maintaining tools and equipment, what have you been able to accomplish?
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+sum_table = data.frame(cbind(choices = c("Hired additional staff positions",
+                                         "Hosted additional projects or events",
+                                         "other"),
+                             percentage = round(c(nrow(data[data$ci_exaccomp_stf == 1,])/nrow(data),
+                                            nrow(data[data$ci_exaccomp_prj == 1,])/nrow(data),
+                                            nrow(data[!is.na(data$ci_exaccomp_otr),])/nrow(data)),3)))
+sum_table
+```
+
+
+Question: Without the TB, what would you no longer be able to fund?
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+sum_table = data.frame(cbind(choices = c("Staff",
+                                         "Projects",
+                                         "other"),
+                             percentage = round(c(nrow(data[data$ci_cutfund_stf == 1,])/nrow(data),
+                                            nrow(data[data$ci_cutfund_prj == 1,])/nrow(data),
+                                            nrow(data[!is.na(data$ci_cutfund_otr),])/nrow(data)),3)))
+sum_table
+```
+
+Among partners indicated certain effect, what is the average quantified effects
+```{r}
+mean(data$ci_staff, na.rm = T)
+mean(data$ci_project, na.rm = T)
+```
+
+Quantify effect of "other", if selected
+
+# Analysis surroundingg questions 
+
+Question: do organizations with higher savings through toolbank report more of a positive impact? 
+
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+data%>%
+  mutate(att_posimpact = factor(att_posimpact, levels = c("Strongly agree",
+                                                "Agree",
+                                                "Neutral", 
+                                                "Disagree",
+                                                "Strongly disagree", 
+                                                 "N/A")))%>%    
+  ggplot(aes(x=att_posimpact, y=eco_totalcost))+
+  geom_boxplot()+
+  labs(x="Agreement with TB has positively impacted CBO",
+       y= "Money org would spend on buying/storing/etc. equipment w/o TB?")
+
+data%>%
+  mutate(att_purtool = factor(att_purtool, levels = c("Strongly agree",
+                                                "Agree",
+                                                "Neutral", 
+                                                "Disagree",
+                                                "Strongly disagree", 
+                                                 "N/A")))%>%  
+  ggplot(aes(x=att_purtool, y=eco_totalcost))+
+  geom_boxplot()+
+  labs(x="Agreement with TB reducing costs related to purchasing/renting tools/equipment",
+       y= "Money org would spend on buying/storing/etc. equipment w/o TB?")
+
+data%>%
+  mutate(att_strtool = factor(att_strtool, levels = c("Strongly agree",
+                                                "Agree",
+                                                "Neutral", 
+                                                "Disagree",
+                                                "Strongly disagree", 
+                                                 "N/A")))%>%  
+  ggplot(aes(x=att_strtool, y=eco_totalcost))+
+  geom_boxplot()+
+  labs(x="Agreement with TB reducing costs related to storing tools/equipment",
+       y= "Money org would spend on buying/storing/etc. equipment w/o TB?")
+
+data%>%
+  mutate(att_redtime = factor(att_redtime, levels = c("Strongly agree",
+                                                "Agree",
+                                                "Neutral", 
+                                                "Disagree",
+                                                "Strongly disagree", 
+                                                 "N/A")))%>%
+  ggplot(aes(x=att_redtime, y=eco_totalcost))+
+  geom_boxplot()+
+  labs(x="Agreement with TB reducing taff time for projects",
+       y= "Money org would spend on buying/storing/etc. equipment w/o TB?")
+
+data%>%
+  mutate(att_evquality = factor(att_evquality, levels = c("Strongly agree",
+                                                "Agree",
+                                                "Neutral", 
+                                                "Disagree",
+                                                "Strongly disagree", 
+                                                 "N/A")))%>%
+  ggplot(aes(x=att_evquality, y=eco_totalcost))+
+  geom_boxplot()+
+  labs(x="Agreement with TB increaing event quality",
+       y= "Money org would spend on buying/storing/etc. equipment w/o TB?")
+```
+
+
+
+Question: How do savings vary by different toolbank offerings?
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+data%>%
+  pivot_longer(eco_purchase:eco_maintain,names_to="service", values_to = "amount_saved")%>%
+  mutate(`TB service` = case_when(service=="eco_purchase"~"purchasing/renting tools/equipment",
+                                  service=="eco_storage"~"storing tools/equipment",
+                                  service=="eco_maintain"~"maintaining tools/equipment"
+                                  ))%>%
+  ggplot(aes(x=`TB service`,y=amount_saved))+
+  geom_boxplot()+
+  labs(y="amount saved in an average year",
+       title= "amount saved through TB services")
+
+data%>%
+  pivot_longer(eco_purchase:eco_maintain,names_to="service", values_to = "amount_saved")%>%
+  mutate(`TB service` = case_when(service=="eco_purchase"~"purchasing/renting tools/equipment",
+                                  service=="eco_storage"~"storing tools/equipment",
+                                  service=="eco_maintain"~"maintaining tools/equipment"
+                                  ))%>%
+  filter(amount_saved<25000)%>%
+  ggplot(aes(x=`TB service`,y=amount_saved))+
+  geom_boxplot()+
+  labs(y="amount saved in an average year",
+       title= "amount saved through TB services (excl. outliers)")
+```
+
+
+
+Question: What is the relationship like between minority-led CBOs and the toolbank compared to non-minority led CBOs?
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+
+```
+
+
+
+Question: where within the organization does the Toolbank impact most?
+
+
+Histogram, faceted by responded staff versus responded projects– can incorporate “Other” if consistent across organizations 
+X = number (of staff or projects)
+Facet: Without the TB, what would you no longer be able to fund?
+(code note: will also have to manipulate data a bit to get this)
+
+
+
+Question: In what ways has the community benefited through the toolbank? What are the most prominent types of events (or organization types) the toolbank supports?
+
+
+2 bar chart
+X1 = ways of impact; X2 = event types
+Y = % respondent
+Can incorporate other if there is consistency across respondents
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+sum_table = data.frame(choices = c("Quantity",
+                                         "Quality",
+                                         "Diversity",
+                                         "Consistency",
+                                         "other"),
+                       percentage = round(c(nrow(data[data$ci_evimpact_qtt == 1,])/nrow(data),
+                                            nrow(data[data$ci_evimpact_qlt == 1,])/nrow(data),
+                                            nrow(data[data$ci_evimpact_dvt == 1,])/nrow(data),
+                                            nrow(data[data$ci_evimpact_cst == 1,])/nrow(data),
+                                            nrow(data[!is.na(data$ci_evimpact_otr),])/nrow(data)),3))
+sum_table
+
+ggplot(sum_table)+
+  geom_bar(aes(x = choices, y = percentage), stat='identity') +
+  labs(x = "ways events impacted without TB", y = "percentage responded", title = "Percentage for Ways Events Got Impacted 
+       without TB among Respondents") +
+  ylim(c(0,1))
+```
+
+
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+sum_table = data.frame(choices = c("Fundraising",
+                                         "Service Projects",
+                                         "Educational Workshops",
+                                         "Community Building",
+                                         "other"),
+                       percentage = round(c(nrow(data[data$eve_type_fr == 1,])/nrow(data),
+                                            nrow(data[data$eve_type_sp == 1,])/nrow(data),
+                                            nrow(data[data$eve_type_ew == 1,])/nrow(data),
+                                            nrow(data[data$eve_type_cb == 1,])/nrow(data),
+                                            nrow(data[!is.na(data$eve_type_otr),])/nrow(data)),3))
+sum_table
+
+ggplot(sum_table)+
+  geom_bar(aes(x = choices, y = percentage), stat='identity') +
+  labs(x = "event types TB helps to complete", y = "percentage responded", title = "Percentage for Each Event Types 
+       TB helps to Complete among Respondents") +
+  ylim(c(0,1))
+
+```
+
+
+
+
+
