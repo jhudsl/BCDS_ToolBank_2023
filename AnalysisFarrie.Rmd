@@ -2,7 +2,9 @@
 title: "Baltimore Community Data Science Collaboration, ToolBank Community and Economic Impact Survey Analysis"
 author: "Analysis by: Charlotte Clapham, Tianxu Chen, Haley Farrie"
 date: "2023-11-23"
-output: html_document
+output:
+  html_document:
+    toc: true
 ---
 
 # Report Outline
@@ -374,7 +376,7 @@ head(data)
 ```
 
 
-## Section 3: Data Analysis by Survey Question
+# Section 3: Data Analysis by Survey Question
 
 ## Section 3A: Demographic Information 
 
