@@ -5,7 +5,7 @@ date: "2023-11-23"
 output: html_document
 ---
 
-# Report Outline
+### Report Outline
 - Section 1: Key Findings
 - Section 1A: Supporting Visualizations and Quotes 
 - Section 2: Data Analysis Overview
@@ -20,7 +20,7 @@ output: html_document
 - Section 3F: marginal analysis on fundraising questions
 
 
-# Section 1: Key Findings
+### Section 1: Key Findings
 - 100% of respondents strongly agreed or agreed that the ToolBank positively impacts their CBO 
 - 100% of respondents strongly agreed or agreed that the ToolBank reduced costs related to purchasing and renting tools and equipment
 - 86% of the survey respondents reported to at least of the minority service or leadership criteria. 
@@ -32,13 +32,13 @@ For the past year,
 - half of the respondents reported that at least 150 of their constituents (volunteers, members, and event attendees) would have been negatively impacted without the help of the TB.
 
 
-## Section 1A: Supporting Visualizations and Quotes 
+#### Section 1A: Supporting Visualizations and Quotes 
 
 TBD
 
-# Section 2: Data Analysis Process
+### Section 2: Data Analysis Process
 
-## Section 2A: Data Wrangling 
+#### Section 2A: Data Wrangling 
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -58,27 +58,28 @@ library(ggplot2)
 library(htmlTable)
 ```
 
-```{r eval=FALSE}
+```{r eval=FALSE,include=FALSE}
 # Prompts a browser pop-up
 gs4_auth()
 ```
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE,include=FALSE}
 # Once set up, you can automate this process by passing your email
-gs4_auth(email = "karinchen737@gmail.com")
-#gs4_auth(email = "chclapham@gmail.com")
+#gs4_auth(email = "karinchen737@gmail.com")
+gs4_auth(email = "chclapham@gmail.com")
 ```
 
-### Reading data with the googlesheets4 package {.smaller}
+#### Reading data with the googlesheets4 package {.smaller}
 
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE,include=FALSE}
 sheet_url <- 
   "https://docs.google.com/spreadsheets/d/1W5kgOFSJux4lqpwqwJ_h9tJnd5oTY3-wBs57cpkyM3U/edit#gid=1386397630"
 sheet_dat_1 <- read_sheet(sheet_url)
 head(sheet_dat_1)
 ```
 
-### Reading gross receipts data
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+#### Reading gross receipts data
+
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE,include=FALSE}
 sheet_gr_url = "https://docs.google.com/spreadsheets/d/1W5kgOFSJux4lqpwqwJ_h9tJnd5oTY3-wBs57cpkyM3U/edit#gid=1036871075"
 data_gr <- read_sheet(sheet_gr_url, sheet = "Sheet1")
 colnames(data_gr) = c("timestamp", "cbo_name", "cbo_gr", "cbo_size", "comment")
@@ -86,9 +87,10 @@ head(data_gr)
 ```
 
 
-## Section 2B: Data Cleaning
-### Delete extra variables
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+#### Section 2B: Data Cleaning
+#### Delete extra variables
+
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE,include=FALSE}
 # delete Noah's test response
 # also delete the "Please specify:" question after receiving the first response, so we want to delete the corresponding column
 data = sheet_dat_1[sheet_dat_1$`Name of your current organization` != "Baltimore ToolBank", 
@@ -96,16 +98,18 @@ data = sheet_dat_1[sheet_dat_1$`Name of your current organization` != "Baltimore
 head(data)
 ```
 
-### change column names to variables
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+#### change column names to variables
+
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE,include=FALSE}
 varlist = c("timestamp","di_org", "di_orgyearsworked", "di_mled", "att_purtool", "att_strtool", "att_redtime", "att_evquality", "att_posimpact", "att_mostimpact", "eco_purchase", "eco_storage", "eco_maintain", "eco_totalcost", "eco_events", "eco_nothost", "eco_constit", "ci_exaccomp", "ci_cutfund", "ci_otr", "ci_staff", "ci_project", "ci_evimpact", "eve_type", "eve_fundraise", "eve_fundraise_p")
 
 colnames(data) = varlist
 str(data)
 ```
 
-### change multiple choice answer into numbers
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+#### change multiple choice answer into numbers
+
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE,include=FALSE}
 # Question: how long have you worked with this organization
 # variable: di_orgyearsworked; choice: 1 - 0-2 years; 2 - 3-5 years; 3 - More than 5 years
 
@@ -113,8 +117,11 @@ data$di_orgyearsworked = ifelse(data$di_orgyearsworked == "0-2 years", 1,
                                 ifelse(data$di_orgyearsworked == "3-5 years", 2, 3))
 head(data)
 ```
-The following section is commented out as we used text format choices in the following study
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+
+
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE,include=FALSE}
+#The following section is commented out as we used text format choices in the following study
+
 # # Question: general attitudes
 # # variables: "att_purtool", "att_strtool", "att_redtime", "att_evquality", "att_posimpact"
 # # 1 - Strongly agree; 2 - Agree; 3 - Neutral; 4 - Disagree; 5 - Strongly disagree; 6 - N/A
@@ -131,8 +138,9 @@ The following section is commented out as we used text format choices in the fol
 # head(data)
 ```
 
-### split check all that apply responses into indicators
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+#### split check all that apply responses into indicators
+
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE,include=FALSE}
 # Question 1: minority leadership
 data = mutate(data, di_mled_top = NA, di_mled_board = NA, di_mled_rep = NA, di_mled_na = NA)
 
@@ -166,7 +174,7 @@ invisible(lapply(1:nrow(data), FUN = function(x) {
 head(data)
 ```
 
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE,include=FALSE}
 # Question 2: With the money you have saved on purchasing, storing, and maintaining tools and equipment through the TB, what have you been able to accomplish?
 data = mutate(data, ci_exaccomp_stf = NA, ci_exaccomp_prj = NA, ci_exaccomp_na = NA, ci_exaccomp_otr = NA)
 
@@ -206,7 +214,7 @@ invisible(lapply(1:nrow(data), FUN = function(x) {
 head(data)
 ```
 
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE,include=FALSE}
 # Question 3: Without the TB, what would you no longer be able to fund?
 data = mutate(data, ci_cutfund_stf = NA, ci_cutfund_prj = NA, ci_cutfund_na = NA, ci_cutfund_otr = NA)
 
@@ -246,7 +254,7 @@ invisible(lapply(1:nrow(data), FUN = function(x) {
 head(data)
 ```
 
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE,include=FALSE}
 # Question 4: Without the TB, which of the following are ways that your community events would be impacted? (check all that apply)
 data = mutate(data, ci_evimpact_qtt = NA, ci_evimpact_qlt = NA, ci_evimpact_dvt = NA, 
               ci_evimpact_cst = NA, ci_evimpact_otr = NA)
@@ -295,7 +303,7 @@ invisible(lapply(1:nrow(data), FUN = function(x) {
 head(data)
 ```
 
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE,include=FALSE}
 # Question 5: Which of the following types of events have TB tools and equipment helped your CBO complete?
 data = mutate(data, eve_type_fr = NA, eve_type_sp = NA, eve_type_ew = NA, eve_type_cb = NA, eve_type_otr = NA)
 
@@ -342,8 +350,10 @@ invisible(lapply(1:nrow(data), FUN = function(x) {
 
 head(data)
 ```
-### Merge Gross Recipts to datasheet and add stratification
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+
+#### Merge Gross Recipts to datasheet and add stratification
+
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE,include=FALSE}
 data$cbo_gr = NA
 
 for (org in unique(data$di_org)) {
@@ -374,14 +384,15 @@ head(data)
 ```
 
 
-## Section 3: Data Analysis by Survey Question
+### Section 3: Data Analysis by Survey Question
 
-## Section 3A: Demographic Information 
+### Section 3A: Demographic Information 
 
-### Question: How long have you worked with this organization? 
+#### Question: How long have you worked with this organization? 
+
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 # list the data as a table as the data is binned instead of continuous
-table(data$di_orgyearsworked) 
+#table(data$di_orgyearsworked) 
 di_orgyearsworked_table = data.frame(cbind(time = c("0-2 years", "3-5 years", "More than 5 years"),
                                 RespondentCount = table(data$di_orgyearsworked),
                                 Percentage = round(table(data$di_orgyearsworked)/nrow(data),3)))
@@ -392,17 +403,19 @@ di_orgyearsworked_table
 # mean number of year worked with the organization. Transfer choices into number by the following standard: 0-2 years -> 1yr; 3-5 years -> 4 yr; more than 5 years -> 6 year
 data = mutate(data, di_orgyearsworked_calc = ifelse(di_orgyearsworked == 1, 1, 
                                                     ifelse(di_orgyearsworked == 2, 4, 6)))
-mean(data$di_orgyearsworked_calc)
-sd(data$di_orgyearsworked_calc)
-median(data$di_orgyearsworked_calc)
+#mean(data$di_orgyearsworked_calc)
+#sd(data$di_orgyearsworked_calc)
+#median(data$di_orgyearsworked_calc)
 hist(data$di_orgyearsworked_calc, breaks = c(0, 3, 6, 9), right = F, xlim = c(0, 10), ylim = c(0, 25), main = "Time Respondents Have Worked with Their Organizations", xlab = "time (years)")
 ```
 
 
-### Question 3: The following question pertains to minority leadership and service. For the purpose of this question, minority is defined as women, people of color, and immigrants. Ehich of the following best describes your organization? (please provide your best estimate).?
+#### Question 3: The following question pertains to minority leadership and service. For the purpose of this question, minority is defined as women, people of color, and immigrants. Which of the following best describes your organization? (please provide your best estimate).?
 
-Percent of respondents stating, "our top executive position is held by a minority"
+
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+#Percent of respondents stating, "our top executive position is held by a minority"
+
 table_di_mled_top <- table(data$di_mled_top)
 percentages <- prop.table(table_di_mled_top)
 #extract percentages for table further down
@@ -412,11 +425,13 @@ count_top_yes <- table_di_mled_top[[2]]
 count_top_no <- table_di_mled_top[[1]]
 
 summary_tabledi_mled_top <-data.frame(count=table_di_mled_top, Percentage=percentages)
-print(summary_tabledi_mled_top)
+#print(summary_tabledi_mled_top)
 ```
 
-Percent of respondents stating, "More than 50% of our board is made up of minorities "
+
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+#Percent of respondents stating, "More than 50% of our board is made up of minorities "
+
 table_di_mled_board<- table(data$di_mled_board)
 percentages <- prop.table(table_di_mled_board)
 #extract percentages for table further down
@@ -425,11 +440,12 @@ pct_board_no <- round(prop.table(table_di_mled_board)[[1]]*100)
 count_board_yes <- table_di_mled_board[[2]]
 count_board_no <- table_di_mled_board[[1]]
 summary_tabledi_mled_board <-data.frame(count=table_di_mled_board, Percentage=percentages)
-print(summary_tabledi_mled_board)
+#print(summary_tabledi_mled_board)
 ```
 
-Percent of respondents stating, "More than 50% of program recipients are minorities"
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+#Percent of respondents stating, "More than 50% of program recipients are minorities"
+
 table_di_mled_rep<- table(data$di_mled_rep)
 percentages <- prop.table(table_di_mled_rep)
 #extract percentages for table further down
@@ -439,11 +455,13 @@ count_recip_yes <- table_di_mled_rep[[2]]
 count_recip_no <- table_di_mled_rep[[1]]
 
 summary_tabledi_mled_rep <-data.frame(count=table_di_mled_rep, Percentage=percentages)
-print(summary_tabledi_mled_rep)
+#print(summary_tabledi_mled_rep)
 ```
 
-Percent of respondents stating, "None of the above"
+
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+#Percent of respondents stating, "More than 50% of program recipients are minorities"
+
 table_di_mled_na<- table(data$di_mled_na)
 percentages <- prop.table(table_di_mled_na)
 #extract percentages for table further down
@@ -453,13 +471,56 @@ count_none_yes <- table_di_mled_na[[2]]
 count_none_no <- table_di_mled_na[[1]]
 
 summary_tabledi_mled_na <-data.frame(count=table_di_mled_na, Percentage=percentages)
-print(summary_tabledi_mled_na)
+#print(summary_tabledi_mled_na)
 ```
 
-Based on the metrics above, 86% of the survey respondents reported to at least of the minority service or leadership criteria. 
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+#table summarizing demographic info
+output_continuous <- matrix(c(
+#"our top executive position is held by a minority",
+  #yes
+  paste0(count_top_yes, " (",pct_top_yes,"%)"),
+  #no
+  paste0(count_top_no, " (",pct_top_no,"%)"),
+#"More than 50% of our board is made up of minorities",
+  #yes
+  paste0(count_board_yes, " (",pct_board_yes,"%)"),
+  #no
+  paste0(count_board_no, " (",pct_board_no,"%)"),
+#"More than 50% of program recipients are minorities",
+  #yes
+  paste0(count_recip_yes, " (",pct_recip_yes,"%)"),
+  #no
+  paste0(count_recip_no, " (",pct_recip_no,"%)"),
+#"None of the above"
+  #yes
+  paste0(count_none_yes, " (",pct_none_yes,"%)"),
+  #no
+  paste0(count_none_no, " (",pct_none_no,"%)")
+),
 
-## Section 3B: General sentiment
-### Questions 4-8:Plots of General sentiment and Years with the CBO
+         ncol = 2, byrow = TRUE)
+
+output_continuous%>% 
+  addHtmlTableStyle(col.columns = c("none", "#F7F7F7"))%>% 
+  htmlTable(header =  c("# Yes (% Yes) ", "# No (% No)"),
+            rnames = c(
+"Our top executive position is held by a minority",
+"More than 50% of our board is made up of minorities",
+"More than 50% of program recipients are minorities",
+"None of the above"
+            ),
+            rgroup = c("Minority Leadership"),
+            n.rgroup = c(4),
+            caption = "Number, percentages of respondants indicating minority leadership"
+            )
+```
+
+Based on the metrics above, 89% of the survey respondents reported to at least of the minority service or leadership criteria. 
+
+### Section 3B: General sentiment
+
+#### Questions 4-8:Plots of General sentiment and Years with the CBO
 
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 #The ToolBank (TB) has positively impacted our CBO by reducing costs related to purchasing or renting tools and equipment
@@ -605,7 +666,7 @@ data%>%
 ```
 
 
-### Questions 4-8: Plots of General sentiment and size of CBO
+#### Questions 4-8: Plots of General sentiment and size of CBO
 
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 table_size<- table(data$cbo_size)
@@ -812,50 +873,7 @@ data%>%
 ```
 
 
-### Questions 4-8: Plots of General Sentiment and Minority Status
-
-
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
-#table summarizing demographic info
-output_continuous <- matrix(c(
-#"our top executive position is held by a minority",
-  #yes
-  paste0(count_top_yes, " (",pct_top_yes,"%)"),
-  #no
-  paste0(count_top_no, " (",pct_top_no,"%)"),
-#"More than 50% of our board is made up of minorities",
-  #yes
-  paste0(count_board_yes, " (",pct_board_yes,"%)"),
-  #no
-  paste0(count_board_no, " (",pct_board_no,"%)"),
-#"More than 50% of program recipients are minorities",
-  #yes
-  paste0(count_recip_yes, " (",pct_recip_yes,"%)"),
-  #no
-  paste0(count_recip_no, " (",pct_recip_no,"%)"),
-#"None of the above"
-  #yes
-  paste0(count_none_yes, " (",pct_none_yes,"%)"),
-  #no
-  paste0(count_none_no, " (",pct_none_no,"%)")
-),
-
-         ncol = 2, byrow = TRUE)
-
-output_continuous%>% 
-  addHtmlTableStyle(col.columns = c("none", "#F7F7F7"))%>% 
-  htmlTable(header =  c("# Yes (% Yes) ", "# No (% No)"),
-            rnames = c(
-"Our top executive position is held by a minority",
-"More than 50% of our board is made up of minorities",
-"More than 50% of program recipients are minorities",
-"None of the above"
-            ),
-            rgroup = c("Minority Leadership"),
-            n.rgroup = c(4),
-            caption = "Number, percentages of respondants indicating minority leadership"
-            )
-```
+#### Questions 4-8: Plots of General Sentiment and Minority Status
 
 
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
@@ -990,7 +1008,7 @@ data%>%
 ```
 
 
-### Response analysis
+#### Response analysis
 
 overall table:
 
@@ -1420,50 +1438,54 @@ output_continuous%>%
 ```
 
 
-Percent of respondents that reported "Agreeing" or "Strongly Agreeing" that, "the ToolBank (TB) has positively impacted our CBO by reducing costs related to purchasing or renting tools and equipment"
+
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+# Percent of respondents that reported "Agreeing" or "Strongly Agreeing" that, "the ToolBank (TB) has positively impacted our CBO by reducing costs related to purchasing or renting tools and equipment"
+
 table_att_purtool<- table(data$att_purtool)
 percentages <- prop.table(table_att_purtool)
 summary_table_att_purtool <-data.frame(count=table_att_purtool, Percentage=percentages)
-print(summary_table_att_purtool)
+#print(summary_table_att_purtool)
 ```
 
-
-Percent of respondents that reported "Agreeing" or "strongly Agreeing" that, "the TB has positively impacted our CBO by reducing costs related to storing tools and equipment
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+# Percent of respondents that reported "Agreeing" or "strongly Agreeing" that, "the TB has positively impacted our CBO by reducing costs related to storing tools and equipment
+
 table_att_strtool<- table(data$att_strtool)
 percentages <- prop.table(table_att_strtool)
 summary_table_att_strtool <-data.frame(count=table_att_strtool, Percentage=percentages)
-print(summary_table_att_strtool)
+#print(summary_table_att_strtool)
 ```
 
 
-Percent of respondents that reported "Agreeing" or "strongly Agreeing" that, "the TB has positively impacted our CBO by reducing staff time to complete maintenance/projects
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+# Percent of respondents that reported "Agreeing" or "strongly Agreeing" that, "the TB has positively impacted our CBO by reducing staff time to complete maintenance/projects
+
 table_att_redtime<- table(data$att_redtime)
 percentages <- prop.table(table_att_redtime)
 summary_table_att_redtime <-data.frame(count=table_att_redtime, Percentage=percentages)
-print(summary_table_att_redtime)
+#print(summary_table_att_redtime)
 ```
 
 
-Percent of respondents that reported "Agreeing" or "strongly Agreeing" that, "the Tools made available through the TB allow our CBO to complete higher quality events/projects without additional funding
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+# Percent of respondents that reported "Agreeing" or "strongly Agreeing" that, "the Tools made available through the TB allow our CBO to complete higher quality events/projects without additional funding
+
 table_att_evquality<- table(data$att_evquality)
 percentages <- prop.table(table_att_evquality)
 summary_table_att_evquality <-data.frame(count=table_att_evquality, Percentage=percentages)
-print(summary_table_att_evquality)
+#print(summary_table_att_evquality)
 ```
 
-Question: TB has positively impacted our CBO 
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+#Question: TB has positively impacted our CBO 
 table_att_posimpact<- table(data$att_posimpact)
 percentages <- prop.table(table_att_posimpact)
 summary_table_att_posimpact <-data.frame(count=table_att_posimpact, Percentage=percentages)
-print(summary_table_att_posimpact)
+#print(summary_table_att_posimpact)
 ```
 
-### Plots
+#### Plots
 
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 #overall 
@@ -1499,11 +1521,12 @@ data%>%
 
 
 
-## Section 3C: Economic Benefit 
+### Section 3C: Economic Benefit 
 
-### Response analysis
+#### Response analysis
 
-Question: How much would you have spent purchasing or renting tools and equipment had the TB not existed?
+#### Question: How much would you have spent purchasing or renting tools and equipment had the TB not existed?
+
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 # Create a vector 
 eco_purchase<- data$eco_purchase
@@ -1523,12 +1546,12 @@ q75_value <- quantile(eco_purchase, 0.75)
 
 # Create a summary table
 summary_table_eco_purchase<- data.frame(
-  Measure = c("Mean", "Median", "Mode", "sd", "1st quantile", "3rd quantile"),
+  Measure = c("Mean", "Median", "Mode", "sd", "1st percentile", "3rd percentile"),
   Value = c(mean_value, median_value, mode_value, sd_value, q25_value, q75_value)
 )
 
 # Display the summary table
-print(summary_table_eco_purchase)
+#print(summary_table_eco_purchase)
 
 # Display histogram
 hist(eco_purchase, main = "Histogram of Spending on Purchasing/Renting Tools/Equip if without TB", xlab = "spending (dollars)")
@@ -1543,7 +1566,8 @@ purchase_q3 <- q75_value
 ```
 
 
-Question: How much would you have spent on storage of tools and equipment had the TB not existed ?
+#### Question: How much would you have spent on storage of tools and equipment had the TB not existed?
+
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 # Create a vector 
 eco_storage<- data$eco_storage
@@ -1568,7 +1592,7 @@ summary_table_eco_storage<- data.frame(
 )
 
 # Display the summary table
-print(summary_table_eco_storage)
+#print(summary_table_eco_storage)
 
 # Display histogram
 hist(eco_storage, main = "Histogram of Spending on Storaging Tools/Equip if without TB", xlab = "spending (dollars)")
@@ -1583,7 +1607,8 @@ storage_q3 <- q75_value
 ```
 
 
-Question: How much would you have spent on maintenance of tools and equipment had the TB not existed?
+#### Question: How much would you have spent on maintenance of tools and equipment had the TB not existed?
+
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 # Create a vector 
 eco_maintain<- data$eco_maintain
@@ -1608,7 +1633,7 @@ summary_table_eco_maintain<- data.frame(
 )
 
 # Display the summary table
-print(summary_table_eco_maintain)
+#print(summary_table_eco_maintain)
 
 # Display histogram
 hist(eco_maintain, main = "Histogram of Maintaining on Purchasing/Renting Tools/Equip if without TB", xlab = "spending (dollars)")
@@ -1622,7 +1647,8 @@ maintain_q1 <- q25_value
 maintain_q3 <- q75_value
 ```
 
-Question: Reflecting on your events in the past year: If the TB did not exist, how much funding would your organization allocate to buying, storing, tracking and maintaining your own inventory of tools and equipment?
+#### Question: Reflecting on your events in the past year: If the TB did not exist, how much funding would your organization allocate to buying, storing, tracking and maintaining your own inventory of tools and equipment?
+
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 # Create a vector 
 eco_totalcost<- data$eco_totalcost
@@ -1647,7 +1673,7 @@ summary_table_eco_totalcost<- data.frame(
 )
 
 # Display the summary table
-print(summary_table_eco_totalcost)
+#print(summary_table_eco_totalcost)
 
 # Display histogram
 hist(eco_totalcost, main = "Histogram of Total Spending in Past Year if without TB", xlab = "spending (dollars)")
@@ -1661,7 +1687,8 @@ totalcost_q1 <- q25_value
 totalcost_q3 <- q75_value
 ```
 
-Question: number of total events hosted during last year
+#### Question: number of total events hosted during last year
+
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 # Create a vector 
 eco_events<- data$eco_events
@@ -1681,7 +1708,7 @@ q75_value <- quantile(eco_events, 0.75)
 
 # Create a summary table
 summary_table_eco_events<- data.frame(
-  Measure = c("Mean", "Median", "Mode", "sd", "1st quantile", "3rd quantile"),
+  `Measure of events hosted in past year` = c("Mean", "Median", "Mode", "sd", "1st quantile", "3rd quantile"),
   Value = c(mean_value, median_value, mode_value, sd_value, q25_value, q75_value)
 )
 
@@ -1700,7 +1727,8 @@ events_q1 <- q25_value
 events_q3 <- q75_value
 ```
 
-Question: If there were no TB, how many of your events in the past year would you not have been hosted for any reason?
+#### Question: If there were no TB, how many of your events in the past year would you not have been hosted for any reason?
+
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 # Create a vector 
 eco_nothost<- data$eco_nothost
@@ -1724,7 +1752,7 @@ summary_table_eco_nothost<- data.frame(
   Value = c(mean_value, median_value, mode_value, sd_value, q25_value, q75_value)
 )
 # Display the summary table
-print(summary_table_eco_nothost)
+#print(summary_table_eco_nothost)
 
 # Display histogram
 hist(eco_nothost, main = "Histogram of Events not able to Host in Past Year if without TB", xlab = "count of events")
@@ -1737,7 +1765,8 @@ nothost_q1 <- q25_value
 nothost_q3 <- q75_value
 ```
 
-Extra analysis: percent of event not host during last year
+#### Extra analysis: percent of event not host during last year
+
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 data$eco_nothost_pct_calc = data$eco_nothost/data$eco_events
 eco_nothost_pct_calc = data$eco_nothost_pct_calc
@@ -1761,7 +1790,7 @@ summary_table_eco_nothost_pct_calc<- data.frame(
 )
 
 # Display the summary table
-print(summary_table_eco_nothost_pct_calc)
+#print(summary_table_eco_nothost_pct_calc)
 
 # Display histogram
 hist(eco_nothost_pct_calc*100, main = "Histogram: Percentage of Events not able to Host in Past Year if without TB", xlab = "Percentage(%)")
@@ -1776,7 +1805,8 @@ nothost_pct_calc_q3 <- q75_value
 
 
 
-Questions: If there were no TB, how many of your constituents, including volunteers, members, and event attendees, would have been negatively impacted in the past year?
+#### Questions: If there were no TB, how many of your constituents, including volunteers, members, and event attendees, would have been negatively impacted in the past year?
+
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 # Create a vector 
 eco_constit<- data$eco_constit
@@ -1804,7 +1834,7 @@ summary_table_eco_constit<- data.frame(
 )
 
 # Display the summary table
-print(summary_table_eco_constit)
+#print(summary_table_eco_constit)
 
 # Display histogram
 hist(eco_constit, main = "Histogram of Number of Constituents Affected if without TB", xlab = "count")
@@ -1817,15 +1847,9 @@ constit_q1 <- q25_value
 constit_q3 <- q75_value
 ```
 
-Calculated: 
 
-Reflecting on your events in the past year, how many events did your organization host?
+#### overall summary table:
 
-If there were no TB, how many of your events in the past year would you not have been able to host?
-
-What percentage of the events hosted last year did the TB help make possible?
-
-put all this into one table:
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 output_continuous <- matrix(c(
 # "on Purchasing or renting tools and equipment",
@@ -1936,7 +1960,7 @@ output_continuous%>%
             rnames = c("on Purchasing or renting tools and equipment",
                        "on storage of tools and equipment",
                        "on maintenance of tools and equipment",
-                       "on buying, storing, tracking and maintaining own tool+equiptment inventory",
+                       "on buying, storing, tracking and maintaining own tool+equiptment inventory in past year",
                        "# events that would have been impossible in past year",
                        "% of CBO's total events that would have been impossible in past year",
                        "# constituents that would have been negatively impacted in the past year "
@@ -1944,13 +1968,14 @@ output_continuous%>%
             rgroup = c("Money That Would Have Been Spent if TB Did Not Exist*",
                        "# Events/People Impacted If TB Did Not Exist"),
             n.rgroup = c(4,3),
-            caption = "Impact on CBO if TB did not exists",
+            caption = "Impact on CBO if TB did not exist",
             tfoot = "*in US dollars"
             )
 
 ```
 
-### Plots
+#### Plots
+
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 data%>%
   group_by(row_number())%>%
@@ -1991,19 +2016,20 @@ data%>%
   labs(title="% events through TB: among CBOs w/ no minority status listed")
 
 
-data%>%
-  group_by(row_number())%>%
-  mutate(`Percent of events posible by TB` = round(eco_nothost/eco_events*100,1))%>%
-  ungroup()%>%
-  summarize(`Average % of a CBO's events possible through TB in past year` = mean(`Percent of events posible by TB`))
+# data%>%
+#   group_by(row_number())%>%
+#   mutate(`Percent of events posible by TB` = round(eco_nothost/eco_events*100,1))%>%
+#   ungroup()%>%
+#   summarize(`Average % of a CBO's events possible through TB in past year` = mean(`Percent of events posible by TB`))
 ```
 
 
 
-## Section 3D: Community Impact
+### Section 3D: Community Impact
 
-Question: With the money that you have saved on purchasing, storing, and maintaining tools and equipment, what have you been able to accomplish?
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+# Question: With the money that you have saved on purchasing, storing, and maintaining tools and equipment, what have you been able to accomplish?
+  
 sum_table = data.frame(cbind(choices = c("Hired additional staff positions",
                                          "Hosted additional projects or events",
                                          "other"),
@@ -2013,7 +2039,7 @@ sum_table = data.frame(cbind(choices = c("Hired additional staff positions",
                              percentage = round(c(nrow(data[data$ci_exaccomp_stf == 1,])/nrow(data),
                                             nrow(data[data$ci_exaccomp_prj == 1,])/nrow(data),
                                             nrow(data[!is.na(data$ci_exaccomp_otr),])/nrow(data)),3)))
-sum_table
+#sum_table
 
 with_money_hire_staff_freq <- sum_table[1,2]
 with_money_hire_staff_pct <- round(as.numeric(sum_table[1,3])*100,1)
@@ -2024,8 +2050,9 @@ other_pct <- round(as.numeric(sum_table[3,3])*100,1)
 ```
 
 
-Question: Without the TB, what would you no longer be able to fund?
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+#Question: Without the TB, what would you no longer be able to fund?
+  
 sum_table = data.frame(cbind(choices = c("Staff",
                                          "Projects",
                                          "other"),
@@ -2035,7 +2062,7 @@ sum_table = data.frame(cbind(choices = c("Staff",
                              percentage = round(c(nrow(data[data$ci_cutfund_stf == 1,])/nrow(data),
                                             nrow(data[data$ci_cutfund_prj == 1,])/nrow(data),
                                             nrow(data[!is.na(data$ci_cutfund_otr),])/nrow(data)),3)))
-sum_table
+#sum_table
 
 
 without_money_hire_staff_freq <- sum_table[1,2]
@@ -2046,13 +2073,6 @@ without_other_freq <- sum_table[3,2]
 without_other_pct <- round(as.numeric(sum_table[3,3])*100,1)
 ```
 
-Among partners indicated certain effect, what is the average quantified effects
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
-mean(data$ci_staff, na.rm = T)
-sd(data$ci_staff, na.rm = T)
-mean(data$ci_project, na.rm = T)
-sd(data$ci_project, na.rm = T)
-```
 
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 output_continuous <- matrix(c(
@@ -2109,11 +2129,56 @@ output_continuous%>%
             )
 ```
 
-Quantify effect of "other", if selected
+#### Among partners indicated certain effect, what is the average quantified effects:
 
-## Section 3E: Analysis surrounding questions 
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 
-Question: do organizations with higher savings through toolbank report more of a positive impact? 
+output_continuous <- matrix(c(
+#staff
+#mean
+round(mean(data$ci_staff, na.rm = T),1),
+#25th
+round(quantile(data$ci_staff, 0.25,na.rm=T),1),
+#med
+round(median(data$ci_staff, na.rm = T),1),
+#75th
+round(quantile(data$ci_staff, 0.75,na.rm=T),1),
+#sd
+round(sd(data$ci_staff, na.rm = T),1),
+
+#projects
+#mean
+round(mean(data$ci_project, na.rm = T),1),
+#25th
+round(quantile(data$ci_project, 0.25,na.rm=T),1),
+#med
+round(median(data$ci_project, na.rm = T),1),
+#75th
+round(quantile(data$ci_project, 0.75,na.rm=T),1),
+#sd
+round(sd(data$ci_project, na.rm = T),1)
+
+),
+
+         ncol = 5, byrow = TRUE)
+
+library(htmlTable)
+output_continuous%>% 
+  addHtmlTableStyle(col.columns = c("none", "#F7F7F7"))%>% 
+  htmlTable(header =  c("Mean","25th percentile","Median","75th percentile","Standard deviation"),
+            rnames = c("Staff impacted",
+                       "Projects impacted"
+            ),
+            # rgroup = c("Accomplishments through money saved through TB",
+            #            "Where funding would be cut if TB did not exist"),
+            #n.rgroup = c(3,3),
+            caption = "Staff, projects that would be impacted without the TB"
+            )
+```
+
+### Section 3E: Analysis surrounding questions 
+
+#### Question: do organizations with higher savings through toolbank report more of a positive impact? 
 
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 data%>%
@@ -2179,7 +2244,8 @@ data%>%
 
 
 
-Question: How do savings vary by different toolbank offerings?
+#### Question: How do savings vary by different toolbank offerings?
+
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 data%>%
   pivot_longer(eco_purchase:eco_maintain,names_to="service", values_to = "amount_saved")%>%
@@ -2207,31 +2273,84 @@ data%>%
 
 
 
-Question: What is the relationship like between minority-led CBOs and the toolbank compared to non-minority led CBOs?
+#### Question: What is the relationship like between minority-led CBOs and the toolbank compared to non-minority led CBOs?
+
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 
 ```
 
 
 
-Question: where within the organization does the Toolbank impact most?
+#### Question: where within the organization does the Toolbank impact most?
 
-
-Histogram, faceted by responded staff versus responded projects– can incorporate “Other” if consistent across organizations 
-X = number (of staff or projects)
-Facet: Without the TB, what would you no longer be able to fund?
-(code note: will also have to manipulate data a bit to get this)
-
-
-
-Question: In what ways has the community benefited through the toolbank? What are the most prominent types of events (or organization types) the toolbank supports?
-
-
-2 bar chart
-X1 = ways of impact; X2 = event types
-Y = % respondent
-Can incorporate other if there is consistency across respondents
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+# histogram, faceted by responded staff versus responded projects– can incorporate “Other” if consistent across organizations 
+# X = number (of staff or projects)
+# Facet: Without the TB, what would you no longer be able to fund?
+# (code note: will also have to manipulate data a bit to get this)
+# 
+# 
+# 
+# Question: In what ways has the community benefited through the toolbank? What are the most prominent types of events (or organization types) the toolbank supports?
+# 
+# 
+# 2 bar chart
+# X1 = ways of impact; X2 = event types
+# Y = % respondent
+# Can incorporate other if there is consistency across respondents
+
+output_continuous <- matrix(c(
+# "Quantity",
+#
+#%
+# "Quality",
+#
+#%
+# "Diversity",
+#
+#%
+# "Consistency",
+#
+#%
+# "other"  
+#
+#%
+round(c(nrow(data[data$ci_evimpact_qtt == 1,]),
+        nrow(data[data$ci_evimpact_qtt == 1,])/nrow(data)*100,
+        
+       nrow(data[data$ci_evimpact_qlt == 1,]),
+       nrow(data[data$ci_evimpact_qlt == 1,])/nrow(data)*100,
+       
+       nrow(data[data$ci_evimpact_dvt == 1,]),
+       nrow(data[data$ci_evimpact_dvt == 1,])/nrow(data)*100,
+       
+       nrow(data[data$ci_evimpact_cst == 1,]),
+       nrow(data[data$ci_evimpact_cst == 1,])/nrow(data)*100,
+       
+       nrow(data[!is.na(data$ci_evimpact_otr),]),
+       nrow(data[!is.na(data$ci_evimpact_otr),])/nrow(data)*100
+       ),1)),
+
+         ncol = 2, byrow = TRUE)
+
+output_continuous%>% 
+  addHtmlTableStyle(col.columns = c("none", "#F7F7F7"))%>% 
+  htmlTable(header =  c("Number of Respondants", "Percentage of Respondants (%)"),
+            rnames = c("Quantity",
+                                         "Quality",
+                                         "Diversity",
+                                         "Consistency",
+                                         "other"
+            ),
+            # rgroup = c("Accomplishments through money saved through TB",
+            #            "Where funding would be cut if TB did not exist"),
+            #n.rgroup = c(3,3),
+            caption = "Ways community events would be impacted without the TB"
+            )
+
+
+
+
 sum_table = data.frame(choices = c("Quantity",
                                          "Quality",
                                          "Diversity",
@@ -2247,7 +2366,7 @@ sum_table = data.frame(choices = c("Quantity",
                                             nrow(data[data$ci_evimpact_dvt == 1,])/nrow(data),
                                             nrow(data[data$ci_evimpact_cst == 1,])/nrow(data),
                                             nrow(data[!is.na(data$ci_evimpact_otr),])/nrow(data)),3))
-sum_table
+#sum_table
 
 ggplot(sum_table)+
   geom_bar(aes(x = choices, y = percentage), stat='identity') +
@@ -2273,7 +2392,46 @@ sum_table = data.frame(choices = c("Fundraising",
                                             nrow(data[data$eve_type_ew == 1,])/nrow(data),
                                             nrow(data[data$eve_type_cb == 1,])/nrow(data),
                                             nrow(data[!is.na(data$eve_type_otr),])/nrow(data)),3))
-sum_table
+#sum_table
+
+
+
+output_continuous <- matrix(c(
+  
+  round(c(nrow(data[data$eve_type_fr == 1,]),
+          nrow(data[data$eve_type_fr == 1,])/nrow(data)*100,
+          
+          nrow(data[data$eve_type_sp == 1,]),
+          nrow(data[data$eve_type_sp == 1,])/nrow(data)*100,
+          
+          nrow(data[data$eve_type_ew == 1,]),
+          nrow(data[data$eve_type_ew == 1,])/nrow(data)*100,
+          
+          nrow(data[data$eve_type_cb == 1,]),
+          nrow(data[data$eve_type_cb == 1,])/nrow(data)*100,
+          
+          nrow(data[!is.na(data$eve_type_otr),]),
+          nrow(data[!is.na(data$eve_type_otr),])/nrow(data)*100
+          ),1)),
+
+         ncol = 2, byrow = TRUE)
+
+output_continuous%>% 
+  addHtmlTableStyle(col.columns = c("none", "#F7F7F7"))%>% 
+  htmlTable(header =  c("Number of Respondants", "Percentage of Respondants (%)"),
+            rnames = c("Fundraising",
+                                         "Service Projects",
+                                         "Educational Workshops",
+                                         "Community Building",
+                                         "other"
+            ),
+            # rgroup = c("Accomplishments through money saved through TB",
+            #            "Where funding would be cut if TB did not exist"),
+            #n.rgroup = c(3,3),
+            caption = "Event Types TB helps to Complete"
+            )
+
+
 
 ggplot(sum_table)+
   geom_bar(aes(x = choices, y = percentage), stat='identity') +
@@ -2283,13 +2441,43 @@ ggplot(sum_table)+
 
 ```
 
-## Section 3F: marginal analysis on fundraising questions
+### Section 3F: marginal analysis on fundraising questions
+
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
-nrow(data[!is.na(data$eve_fundraise_p),])
-mean(data$eve_fundraise_p, na.rm = T)
-median(data$eve_fundraise_p, na.rm = T)
-sd(data$eve_fundraise_p, na.rm = T)
-quantile(data$eve_fundraise_p, na.rm = T)
+# nrow(data[!is.na(data$eve_fundraise_p),])
+# mean(data$eve_fundraise_p, na.rm = T)
+# median(data$eve_fundraise_p, na.rm = T)
+# sd(data$eve_fundraise_p, na.rm = T)
+# quantile(data$eve_fundraise_p, na.rm = T)
+
+
+output_continuous <- matrix(c(
+  
+  round(c(mean(data$eve_fundraise_p, na.rm = T),
+          quantile(data$eve_fundraise_p, 0.25,na.rm = T),
+          median(data$eve_fundraise_p, na.rm = T),
+          quantile(data$eve_fundraise_p, 0.75,na.rm = T),
+          sd(data$eve_fundraise_p, na.rm = T),
+          nrow(data[!is.na(data$eve_fundraise_p),])
+          ),1)),
+
+         ncol = 1, byrow = TRUE)
+
+output_continuous%>% 
+  addHtmlTableStyle(col.columns = c("none"))%>% 
+  htmlTable(header =  c("Responses (in US dollars)"),
+            rnames = c("Mean",
+                       "25th percentile",
+                       "Median",
+                       "75th percentile",
+                       "standard deviation",
+                       "# respondants"
+            ),
+            # rgroup = c("Accomplishments through money saved through TB",
+            #            "Where funding would be cut if TB did not exist"),
+            #n.rgroup = c(3,3),
+            caption = "% of event expense budget saved by using TB equipment at event?"
+            )
 ```
 
 
