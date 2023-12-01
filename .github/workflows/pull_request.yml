@@ -99,10 +99,10 @@ jobs:
         
       # Run report rendering
       - name: Run render
-        id: bookdown
+        id: markdown
         run: Rscript -e "rmarkdown::render('Final_Report.Rmd', output_format = c('html_document'))"
 
-      # Commit the rendered bookdown files
+      # Commit the rendered markdown files
       - name: Commit rendered files to preview branch
         id: commit
         run: |

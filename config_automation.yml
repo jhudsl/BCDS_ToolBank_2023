@@ -8,8 +8,8 @@ render-preview: yes
 spell-check: yes
 
 ##### Renderings run upon merge to main branch #####
-render-bookdown: yes
+render-markdown: yes
 
 # What docker image should be used for rendering?
 # The default is jhudsl/course_template:main
-rendering-docker-image: 'jhudsl/base_ottr:main'
+rendering-docker-image: 'jhudsl/bcds_toolbank_2023:1.0'
