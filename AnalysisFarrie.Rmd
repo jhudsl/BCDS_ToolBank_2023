@@ -64,7 +64,7 @@ library(htmlTable)
 # Prompts a browser pop-up
 gs4_auth()
 ```
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE, include=F}
 # Once set up, you can automate this process by passing your email
 gs4_auth(email = "karinchen737@gmail.com")
 #gs4_auth(email = "chclapham@gmail.com")
@@ -72,7 +72,7 @@ gs4_auth(email = "karinchen737@gmail.com")
 
 ### Reading data with the googlesheets4 package {.smaller}
 
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE, include=F}
 sheet_url <- 
   "https://docs.google.com/spreadsheets/d/1W5kgOFSJux4lqpwqwJ_h9tJnd5oTY3-wBs57cpkyM3U/edit#gid=1386397630"
 sheet_dat_1 <- read_sheet(sheet_url)
@@ -80,7 +80,7 @@ head(sheet_dat_1)
 ```
 
 ### Reading gross receipts data
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE, include = F}
 sheet_gr_url = "https://docs.google.com/spreadsheets/d/1W5kgOFSJux4lqpwqwJ_h9tJnd5oTY3-wBs57cpkyM3U/edit#gid=1036871075"
 data_gr <- read_sheet(sheet_gr_url, sheet = "Sheet1")
 colnames(data_gr) = c("timestamp", "cbo_name", "cbo_gr", "cbo_size", "comment")
@@ -99,7 +99,7 @@ head(data)
 ```
 
 ### change column names to variables
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE,include=F}
 varlist = c("timestamp","di_org", "di_orgyearsworked", "di_mled", "att_purtool", "att_strtool", "att_redtime", "att_evquality", "att_posimpact", "att_mostimpact", "eco_purchase", "eco_storage", "eco_maintain", "eco_totalcost", "eco_events", "eco_nothost", "eco_constit", "ci_exaccomp", "ci_cutfund", "ci_otr", "ci_staff", "ci_project", "ci_evimpact", "eve_type", "eve_fundraise", "eve_fundraise_p")
 
 colnames(data) = varlist
@@ -107,7 +107,7 @@ str(data)
 ```
 
 ### change multiple choice answer into numbers
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE,include=F}
 # Question: how long have you worked with this organization
 # variable: di_orgyearsworked; choice: 1 - 0-2 years; 2 - 3-5 years; 3 - More than 5 years
 
@@ -116,7 +116,7 @@ data$di_orgyearsworked = ifelse(data$di_orgyearsworked == "0-2 years", 1,
 head(data)
 ```
 The following section is commented out as we used text format choices in the following study
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE,include=F}
 # # Question: general attitudes
 # # variables: "att_purtool", "att_strtool", "att_redtime", "att_evquality", "att_posimpact"
 # # 1 - Strongly agree; 2 - Agree; 3 - Neutral; 4 - Disagree; 5 - Strongly disagree; 6 - N/A
@@ -134,7 +134,7 @@ The following section is commented out as we used text format choices in the fol
 ```
 
 ### split check all that apply responses into indicators
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE,include=F}
 # Question 1: minority leadership
 data = mutate(data, di_mled_top = NA, di_mled_board = NA, di_mled_rep = NA, di_mled_na = NA)
 
@@ -168,7 +168,7 @@ invisible(lapply(1:nrow(data), FUN = function(x) {
 head(data)
 ```
 
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE,include=F}
 # Question 2: With the money you have saved on purchasing, storing, and maintaining tools and equipment through the TB, what have you been able to accomplish?
 data = mutate(data, ci_exaccomp_stf = NA, ci_exaccomp_prj = NA, ci_exaccomp_na = NA, ci_exaccomp_otr = NA)
 
