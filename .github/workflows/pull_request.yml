@@ -98,8 +98,8 @@ jobs:
         shell: bash
         
       # Set up jq so that json credentials can be read in
-      - name: 'Setup jq'
-        uses: dcarbone/install-jq-action@v2
+      - name: Install jq
+        uses: dcarbone/install-jq-action@v2.1.0
           
       # Run report rendering
       - name: Run render
