@@ -7,12 +7,33 @@
 # write_json(key, path = "key_corrected.json")
 # then copy the contents of key_corrected.json into the github secret!
 
+# --------- Get secret filename ---------
+
+# The filename is important - it can't just be called key.json. When you download
+# the key, it will have the appropriate name. Save this as a secret on GitHub.
+
+option_list <- list(
+  optparse::make_option(
+    c("--filename"),
+    type = "character",
+    default = NULL,
+    help = "Google Service Account Key Filename",
+  )
+)
+
+# Read the GH_PAT argument
+opt_parser <- optparse::OptionParser(option_list = option_list)
+opt <- optparse::parse_args(opt_parser)
+key_filename <- opt$filename
+
+message(is.character(key_filename))
+
 # --------- Authenticate ---------
 
 # Note that creds need to be passed in the pull_request.yml or render-all.yml workflows first
 googlesheets4::gs4_auth(
   token = gargle::credentials_service_account(
-    path = "key.json", 
+    path = key_filename, 
     scopes = "https://www.googleapis.com/auth/spreadsheets"
     )
 )

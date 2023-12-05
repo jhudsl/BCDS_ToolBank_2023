@@ -110,7 +110,7 @@ jobs:
           if test -f key.json; then
             echo "Key created!"
           fi
-          Rscript --vanilla "render.R"
+          Rscript --vanilla "render.R" --filename "${{ secrets.GS_SA_FILENAME}}"
           rm key.json
           if ! test -f key.json; then
             echo "Key removed."
