@@ -15,7 +15,6 @@
 library(optparse)
 library(googlesheets4)
 library(googledrive)
-options(gargle_verbosity = "debug")
 
 option_list <- list(
   optparse::make_option(
@@ -45,5 +44,6 @@ message(is.character(key_filename))
 # )
 
 drive_auth(path = key_filename)
+gs4_auth(email = TRUE)
 
 #rmarkdown::render('Final_Report.Rmd', output_format = c('html_document'))
