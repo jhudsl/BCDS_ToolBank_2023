@@ -12,4 +12,4 @@ render-markdown: yes
 
 # What docker image should be used for rendering?
 # The default is jhudsl/course_template:main
-rendering-docker-image: 'jhudsl/bcds_toolbank_2023:1.0'
+rendering-docker-image: 'jhudsl/bcds_toolbank_2023:1.1'

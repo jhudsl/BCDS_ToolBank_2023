@@ -6,7 +6,8 @@ WORKDIR /rocker-build/
 RUN Rscript -e  "options(warn = 2);install.packages( \
     c('googlesheets4', \
       'ggplot2', \
-      'htmlTable'), \
+      'htmlTable', \
+      'optparse'), \
       repos = 'https://cloud.r-project.org/')"
 
 # Set final workdir for commands
