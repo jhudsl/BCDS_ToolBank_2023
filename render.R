@@ -13,6 +13,8 @@
 # the key, it will have the appropriate name. Save this as a secret on GitHub.
 
 library(optparse)
+library(googlesheets4)
+options(gargle_verbosity = "debug")
 
 option_list <- list(
   optparse::make_option(
@@ -33,11 +35,12 @@ message(is.character(key_filename))
 # --------- Authenticate ---------
 
 # Note that creds need to be passed in the pull_request.yml or render-all.yml workflows first
-googlesheets4::gs4_auth(
-  token = gargle::credentials_service_account(
-    path = key_filename, 
-    scopes = "https://www.googleapis.com/auth/spreadsheets"
-    )
+# Sheet must be shared with service account!!
+gs4_auth(
+  token = gargle::credentials_service_account(path = paste0(
+    ".secrets/", grep(".json$", list.files(".secrets"), value = TRUE)
+  ),
+  scopes = "https://www.googleapis.com/auth/spreadsheets")
 )
 
 #rmarkdown::render('Final_Report.Rmd', output_format = c('html_document'))
