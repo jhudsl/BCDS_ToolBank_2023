@@ -103,7 +103,7 @@ jobs:
         env:
           GS_SA_KEY: ${{ secrets.GS_SA_KEY }}
         run: |
-          echo "${{ secrets.GS_SA_KEY }}" > key.json
+          printf "$GS_SA_KEY" >> key.json
           if test -f key.json; then
             echo "Key created!"
           fi
