@@ -106,15 +106,11 @@ jobs:
       - name: Run render
         id: markdown
         run: |
-          jq -n '${{ secrets.GS_SA_KEY }}' > ${{ secrets.GS_SA_FILENAME }}
-          if test -f key.json; then
+          jq -n '${{ secrets.GS_SA_KEY }}' > .secrets/${{ secrets.GS_SA_FILENAME }}
+          if test -f .secrets/${{ secrets.GS_SA_FILENAME }}; then
             echo "Key created!"
           fi
-          Rscript --vanilla "render.R" --filename "${{ secrets.GS_SA_FILENAME}}"
-          rm key.json
-          if ! test -f key.json; then
-            echo "Key removed."
-          fi
+          Rscript --vanilla "render.R" --filename ".secrets/${{ secrets.GS_SA_FILENAME}}"
 
       # Commit the rendered markdown files
       - name: Commit rendered files to preview branch
