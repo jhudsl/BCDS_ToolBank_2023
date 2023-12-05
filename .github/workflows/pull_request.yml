@@ -106,7 +106,7 @@ jobs:
       - name: Run render
         id: markdown
         run: |
-          jq -n '${{ secrets.GS_SA_KEY }}' > key.json
+          jq -n '${{ secrets.GS_SA_KEY }}' > ${{ secrets.GS_SA_FILENAME }}
           if test -f key.json; then
             echo "Key created!"
           fi
