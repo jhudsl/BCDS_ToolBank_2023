@@ -14,6 +14,7 @@
 
 library(optparse)
 library(googlesheets4)
+library(googledrive)
 options(gargle_verbosity = "debug")
 
 option_list <- list(
@@ -36,11 +37,13 @@ message(is.character(key_filename))
 
 # Note that creds need to be passed in the pull_request.yml or render-all.yml workflows first
 # Sheet must be shared with service account!!
-gs4_auth(
-  token = gargle::credentials_service_account(path = paste0(
-    ".secrets/", grep(".json$", list.files(".secrets"), value = TRUE)
-  ),
-  scopes = "https://www.googleapis.com/auth/spreadsheets")
-)
+# gs4_auth(
+#   token = gargle::credentials_service_account(path = paste0(
+#     ".secrets/", grep(".json$", list.files(".secrets"), value = TRUE)
+#   ),
+#   scopes = "https://www.googleapis.com/auth/spreadsheets")
+# )
+
+drive_auth(path = key_filename)
 
 #rmarkdown::render('Final_Report.Rmd', output_format = c('html_document'))
