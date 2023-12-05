@@ -100,7 +100,18 @@ jobs:
       # Run report rendering
       - name: Run render
         id: markdown
-        run: Rscript -e "rmarkdown::render('Final_Report.Rmd', output_format = c('html_document'))"
+        env:
+          GS_SA_KEY: ${{ secrets.GS_SA_KEY }}
+        run: |
+          echo "${{ secrets.GS_SA_KEY }}" > key.json
+          if test -f key.json; then
+            echo "Key created!"
+          fi
+          Rscript --vanilla "render.R"
+          rm key.json
+          if ! test -f key.json; then
+            echo "Key removed."
+          fi
 
       # Commit the rendered markdown files
       - name: Commit rendered files to preview branch
