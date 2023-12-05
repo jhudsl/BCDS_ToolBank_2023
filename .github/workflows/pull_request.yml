@@ -105,10 +105,8 @@ jobs:
       # Depends on step above where jq is installed
       - name: Run render
         id: markdown
-        env:
-          GS_SA_KEY: ${{ secrets.GS_SA_KEY }}
         run: |
-          jq -n '$GS_SA_KEY' > key.json
+          jq -n '${{ secrets.GS_SA_KEY }}' > key.json
           if test -f key.json; then
             echo "Key created!"
           fi
