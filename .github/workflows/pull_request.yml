@@ -97,13 +97,17 @@ jobs:
           git merge -s recursive --strategy-option=theirs origin/${{ github.head_ref }} --allow-unrelated-histories
         shell: bash
         
+      # Set up jq so that json credentials can be read in
+      - name: 'Setup jq'
+        uses: dcarbone/install-jq-action@v2
+          
       # Run report rendering
       - name: Run render
         id: markdown
         env:
           GS_SA_KEY: ${{ secrets.GS_SA_KEY }}
         run: |
-          printf "$GS_SA_KEY" >> key.json
+          jq '$GS_SA_KEY' > key.json
           if test -f key.json; then
             echo "Key created!"
           fi
