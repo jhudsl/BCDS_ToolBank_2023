@@ -106,6 +106,7 @@ jobs:
       - name: Run render
         id: markdown
         run: |
+          mkdir .secrets
           jq -n '${{ secrets.GS_SA_KEY }}' > .secrets/${{ secrets.GS_SA_FILENAME }}
           if test -f .secrets/${{ secrets.GS_SA_FILENAME }}; then
             echo "Key created!"
