@@ -12,6 +12,8 @@
 # The filename is important - it can't just be called key.json. When you download
 # the key, it will have the appropriate name. Save this as a secret on GitHub.
 
+library(optparse)
+
 option_list <- list(
   optparse::make_option(
     c("--filename"),
