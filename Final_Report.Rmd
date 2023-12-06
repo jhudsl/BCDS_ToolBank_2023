@@ -2349,3 +2349,7 @@ median(data$eve_fundraise_p, na.rm = T)
 sd(data$eve_fundraise_p, na.rm = T)
 quantile(data$eve_fundraise_p, na.rm = T)
 ```
+
+
+
+
