@@ -62,11 +62,11 @@ library(htmlTable)
 
 ```{r eval=FALSE}
 # Prompts a browser pop-up
-gs4_auth()
+gs4_auth(email = TRUE)
 ```
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE, include=F}
 # Once set up, you can automate this process by passing your email
-gs4_auth(email = "karinchen737@gmail.com")
+#gs4_auth(email = "karinchen737@gmail.com")
 #gs4_auth(email = "chclapham@gmail.com")
 ```
 

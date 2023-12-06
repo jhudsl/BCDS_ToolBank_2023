@@ -44,8 +44,4 @@ gs4_auth(
   scopes = "https://www.googleapis.com/auth/spreadsheets")
 )
 
-sheet_url <- 
-  "https://docs.google.com/spreadsheets/d/1W5kgOFSJux4lqpwqwJ_h9tJnd5oTY3-wBs57cpkyM3U/edit#gid=1386397630"
-sheet_dat_1 <- read_sheet(sheet_url)
-
-#rmarkdown::render('Final_Report.Rmd', output_format = c('html_document'))
+rmarkdown::render('Final_Report.Rmd', output_format = c('html_document'))
