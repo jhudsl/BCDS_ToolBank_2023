@@ -1,0 +1,84 @@
+
+# Candace Savonen Apr 2021
+
+name: Render Report
+
+on:
+  workflow_dispatch:
+  push:
+    branches: main
+    paths:
+      - '**.Rmd'
+
+jobs:
+
+  yaml-check:
+    name: Load user automation choices
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+        # Use the yaml-env-action action.
+      - name: Load environment from YAML
+        uses: doughepi/yaml-env-action@v1.0.0
+        with:
+            files: render/config_automation.yml # Pass a space-separated list of configuration files. Rightmost files take precedence.
+    outputs:
+      toggle_markdown: "${{ env.RENDER_MARKDOWN }}"
+      rendering_docker_image: "${{ env.RENDERING_DOCKER_IMAGE }}"
+
+  render-markdown:
+    name: Render markdown
+    needs: yaml-check
+    runs-on: ubuntu-latest
+    container:
+      image: ${{needs.yaml-check.outputs.rendering_docker_image}}
+    if: ${{needs.yaml-check.outputs.toggle_markdown == 'yes'}}
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Login as jhudsl-robot
+        run: |
+          git config --system --add safe.directory "$GITHUB_WORKSPACE"
+          git config --local user.email "itcrtrainingnetwork@gmail.com"
+          git config --local user.name "jhudsl-robot"
+
+      # We want a fresh run of the renders each time
+      - name: Delete old report
+        run: rm -rf Final_Report.html
+
+      # Set up / install jq so that json credentials can be read in
+      - name: Install jq
+        uses: dcarbone/install-jq-action@v2.1.0
+          
+      # Run report rendering
+      # This step depends on step above where jq is installed
+      - name: Run render
+        id: markdown
+        run: |
+          if [ ! -d .secrets ]; then
+            mkdir .secrets
+          fi
+          jq -n '${{ secrets.GS_SA_KEY }}' > .secrets/${{ secrets.GS_SA_FILENAME }}
+          if test -f .secrets/${{ secrets.GS_SA_FILENAME }}; then
+            echo "Key created!"
+          fi
+          Rscript --vanilla "render/render.R"
+
+      # Commit the rendered markdown files
+      - name: Commit rendered markdown files
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
+        run: |
+          git remote set-url origin https://${GH_PAT}@github.com/${GITHUB_REPOSITORY}
+          git add Final_Report.* --force
+          git commit -m 'Render markdown' || echo "No changes to commit"
+          git pull --allow-unrelated-histories --strategy-option=ours
+          git push origin main || echo "No changes to push"
+          
