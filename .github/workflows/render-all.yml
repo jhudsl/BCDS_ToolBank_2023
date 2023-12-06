@@ -12,29 +12,11 @@ on:
 
 jobs:
 
-  yaml-check:
-    name: Load user automation choices
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-        # Use the yaml-env-action action.
-      - name: Load environment from YAML
-        uses: doughepi/yaml-env-action@v1.0.0
-        with:
-            files: render/config_automation.yml # Pass a space-separated list of configuration files. Rightmost files take precedence.
-    outputs:
-      toggle_markdown: "${{ env.RENDER_MARKDOWN }}"
-      rendering_docker_image: "${{ env.RENDERING_DOCKER_IMAGE }}"
-
   render-markdown:
     name: Render markdown
-    needs: yaml-check
     runs-on: ubuntu-latest
     container:
-      image: ${{needs.yaml-check.outputs.rendering_docker_image}}
-    if: ${{needs.yaml-check.outputs.toggle_markdown == 'yes'}}
+      image: 'jhudsl/bcds_toolbank_2023:1.1'
 
     steps:
       - name: checkout

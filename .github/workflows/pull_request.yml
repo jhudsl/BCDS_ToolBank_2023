@@ -9,20 +9,17 @@ on:
 
 jobs:
 
-  yaml-check:
-    name: Load user automation choices
+  render-preview:
+    name: Render preview
     runs-on: ubuntu-latest
+    container:
+      image: 'jhudsl/bcds_toolbank_2023:1.1'
+
     steps:
-      - name: Checkout
+      - name: Checkout files
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-
-        # Use the yaml-env-action action.
-      - name: Load environment from YAML
-        uses: doughepi/yaml-env-action@v1.0.0
-        with:
-            files: render/config_automation.yml # Pass a space-separated list of configuration files. Rightmost files take precedence.
 
       # Delete the branch if this has been run before
       - name: Delete branch locally and remotely
@@ -39,39 +36,6 @@ jobs:
           echo branch doesnt exist
           git checkout -b $branch_name || echo branch exists
           git push --set-upstream origin $branch_name
-        shell: bash
-
-    outputs:
-      toggle_render_preview: "${{ env.RENDER_PREVIEW }}"
-      rendering_docker_image: "${{ env.RENDERING_DOCKER_IMAGE }}"
-
-############################# Render Preview ###################################
-
-  render-preview:
-    name: Render preview
-    needs: yaml-check
-    runs-on: ubuntu-latest
-    container:
-      image: ${{needs.yaml-check.outputs.rendering_docker_image}}
-    if: ${{needs.yaml-check.outputs.toggle_render_preview == 'yes'}}
-
-    steps:
-      - name: Checkout files
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      # Set up git checkout
-      - name: Set up git checkout
-        run: |
-          git config --global --add safe.directory $GITHUB_WORKSPACE
-          git config --global user.email "itcrtrainingnetwork@gmail.com"
-          git config --global user.name "jhudsl-robot"
-
-          branch_name='preview-${{ github.event.pull_request.number }}'
-          git fetch --all
-          git checkout $branch_name
-          git merge -s recursive --strategy-option=theirs origin/${{ github.head_ref }} --allow-unrelated-histories
         shell: bash
         
       # Set up / install jq so that json credentials can be read in
