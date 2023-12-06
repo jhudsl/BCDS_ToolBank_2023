@@ -14,36 +14,38 @@
 
 library(optparse)
 library(googlesheets4)
-library(googledrive)
+# library(googledrive)
 
-option_list <- list(
-  optparse::make_option(
-    c("--filename"),
-    type = "character",
-    default = NULL,
-    help = "Google Service Account Key Filename",
-  )
-)
-
-# Read the GH_PAT argument
-opt_parser <- optparse::OptionParser(option_list = option_list)
-opt <- optparse::parse_args(opt_parser)
-key_filename <- opt$filename
-
-message(is.character(key_filename))
+# option_list <- list(
+#   optparse::make_option(
+#     c("--filename"),
+#     type = "character",
+#     default = NULL,
+#     help = "Google Service Account Key Filename",
+#   )
+# )
+# 
+# # Read the GH_PAT argument
+# opt_parser <- optparse::OptionParser(option_list = option_list)
+# opt <- optparse::parse_args(opt_parser)
+# key_filename <- opt$filename
+# 
+# message(is.character(key_filename))
 
 # --------- Authenticate ---------
 
 # Note that creds need to be passed in the pull_request.yml or render-all.yml workflows first
 # Sheet must be shared with service account!!
-# gs4_auth(
-#   token = gargle::credentials_service_account(path = paste0(
-#     ".secrets/", grep(".json$", list.files(".secrets"), value = TRUE)
-#   ),
-#   scopes = "https://www.googleapis.com/auth/spreadsheets")
-# )
+gs4_deauth()
+gs4_auth(
+  token = gargle::credentials_service_account(path = paste0(
+    ".secrets/", grep(".json$", list.files(".secrets"), value = TRUE)
+  ),
+  scopes = "https://www.googleapis.com/auth/spreadsheets")
+)
 
-drive_auth(path = key_filename)
-gs4_auth(email = TRUE)
+sheet_url <- 
+  "https://docs.google.com/spreadsheets/d/1W5kgOFSJux4lqpwqwJ_h9tJnd5oTY3-wBs57cpkyM3U/edit#gid=1386397630"
+sheet_dat_1 <- read_sheet(sheet_url)
 
 #rmarkdown::render('Final_Report.Rmd', output_format = c('html_document'))

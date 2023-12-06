@@ -111,7 +111,7 @@ jobs:
           if test -f .secrets/${{ secrets.GS_SA_FILENAME }}; then
             echo "Key created!"
           fi
-          Rscript --vanilla "render.R" --filename ".secrets/${{ secrets.GS_SA_FILENAME}}"
+          Rscript --vanilla "render.R"
 
       # Commit the rendered markdown files
       - name: Commit rendered files to preview branch
