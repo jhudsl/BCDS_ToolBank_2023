@@ -34,8 +34,8 @@ library(googlesheets4)
 
 # --------- Authenticate ---------
 
-# Note that creds need to be passed in the pull_request.yml or render-all.yml workflows first
-# Sheet must be shared with service account!!
+# Note that creds need to be created in the pull_request.yml or render-all.yml workflows first
+# The Google Sheet in question must also be shared with the Google Service Account.
 gs4_deauth()
 gs4_auth(
   token = gargle::credentials_service_account(path = paste0(
