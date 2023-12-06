@@ -1,7 +1,7 @@
 # Candace Savonen 2021
 # Updated Jan 2023
 
-name: Pull Request
+name: Pull Request Preview
 
 on:
   pull_request:
@@ -22,7 +22,7 @@ jobs:
       - name: Load environment from YAML
         uses: doughepi/yaml-env-action@v1.0.0
         with:
-            files: config_automation.yml # Pass a space-separated list of configuration files. Rightmost files take precedence.
+            files: render/config_automation.yml # Pass a space-separated list of configuration files. Rightmost files take precedence.
 
       # Delete the branch if this has been run before
       - name: Delete branch locally and remotely
@@ -42,31 +42,8 @@ jobs:
         shell: bash
 
     outputs:
-      toggle_spell_check: "${{ env.SPELL_CHECK }}"
-      toggle_url_check: "${{ env.URL_CHECKER }}"
       toggle_render_preview: "${{ env.RENDER_PREVIEW }}"
       rendering_docker_image: "${{ env.RENDERING_DOCKER_IMAGE }}"
-
-########################## Make the error reports ##############################
-  spell-check:
-    name: Check spelling
-    needs: yaml-check
-    if: ${{needs.yaml-check.outputs.toggle_spell_check == 'yes'}}
-    uses: jhudsl/ottr-reports/.github/workflows/report-maker.yml@main
-    with:
-      check_type: spelling
-      error_min: 3
-      gh_pat: secrets.GH_PAT
-
-  url-check:
-    name: Check URLs
-    needs: yaml-check
-    if: ${{needs.yaml-check.outputs.toggle_url_check == 'yes'}}
-    uses: jhudsl/ottr-reports/.github/workflows/report-maker.yml@main
-    with:
-      check_type: urls
-      error_min: 0
-      gh_pat: secrets.GH_PAT
 
 ############################# Render Preview ###################################
 
@@ -97,13 +74,13 @@ jobs:
           git merge -s recursive --strategy-option=theirs origin/${{ github.head_ref }} --allow-unrelated-histories
         shell: bash
         
-      # Set up jq so that json credentials can be read in
+      # Set up / install jq so that json credentials can be read in
       - name: Install jq
         uses: dcarbone/install-jq-action@v2.1.0
           
       # Run report rendering
-      # Depends on step above where jq is installed
-      - name: Run render
+      # This step depends on step above where jq is installed
+      - name: Run render of report
         id: markdown
         run: |
           if [ ! -d .secrets ]; then
@@ -113,10 +90,10 @@ jobs:
           if test -f .secrets/${{ secrets.GS_SA_FILENAME }}; then
             echo "Key created!"
           fi
-          Rscript --vanilla "render.R"
+          Rscript --vanilla "render/render.R"
 
       # Commit the rendered markdown files
-      - name: Commit rendered files to preview branch
+      - name: Commit rendered report to preview branch
         id: commit
         run: |
           branch_name='preview-${{ github.event.pull_request.number }}'
@@ -139,7 +116,7 @@ jobs:
       - name: Build components of the comment
         id: build-components
         run: |
-          report_link=$(echo "https://htmlpreview.github.io/?https://raw.githubusercontent.com/$GITHUB_REPOSITORY/preview-${{ github.event.pull_request.number }}/Final_Report.html")
+          report_link=$(echo "https://github.com/$GITHUB_REPOSITORY/raw/preview-${{ github.event.pull_request.number }}/Final_Report.html")
           echo "report_link=$report_link" >> $GITHUB_OUTPUT
           echo "time=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
           echo "commit_id=$GITHUB_SHA" >> $GITHUB_OUTPUT
@@ -153,7 +130,7 @@ jobs:
           issue-number: ${{ github.event.pull_request.number }}
           body: |
             **Re-rendered previews from the latest commit:**
-            See [preview of the report here](${{ steps.build-components.outputs.report_link }})
+            Download preview of the Final Report [here](${{ steps.build-components.outputs.report_link }})
 
             _Updated at ${{ steps.build-components.outputs.time }} with changes from ${{ steps.build-components.outputs.commit_id }}_
           edit-mode: replace
