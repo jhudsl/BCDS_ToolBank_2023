@@ -23,9 +23,9 @@ output:
 
 
 # Section 1: Key Findings
-- 100% of respondents strongly agreed or agreed that the ToolBank positively impacts their CBO 
-- 100% of respondents strongly agreed or agreed that the ToolBank reduced costs related to purchasing and renting tools and equipment
-- 86% of the survey respondents reported to at least of the minority service or leadership criteria. 
+- 100% of respondents strongly agreed (93.3%) or agreed (6.7%) that the ToolBank positively impacts their CBO 
+- 100% of respondents strongly agreed (93.3%) or agreed (6.7%) that the ToolBank reduced costs related to purchasing and renting tools and equipment
+- 88.9% of the survey respondents reported to at least of the minority service or leadership criteria. 
 - Events got impacted by the TB mainly through their quality (77.8%), consistency (66.7%), and quantity (55.6%)
 - The most prominent types of events the toolbank supports are community building (84.4%) and service projects (75.6%)
 
@@ -60,7 +60,7 @@ library(ggplot2)
 library(htmlTable)
 ```
 
-```{r eval=FALSE}
+```{r eval=FALSE, include = F}
 # Prompts a browser pop-up
 gs4_auth(email = TRUE)
 ```
@@ -70,7 +70,9 @@ gs4_auth(email = TRUE)
 #gs4_auth(email = "chclapham@gmail.com")
 ```
 
-### Reading data with the googlesheets4 package {.smaller}
+Steps:
+
+1. Read in data with the googlesheets4 package {.smaller}
 
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE, include=F}
 sheet_url <- 
@@ -79,7 +81,7 @@ sheet_dat_1 <- read_sheet(sheet_url)
 head(sheet_dat_1)
 ```
 
-### Reading gross receipts data
+2. Read in gross receipts data
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE, include = F}
 sheet_gr_url = "https://docs.google.com/spreadsheets/d/1W5kgOFSJux4lqpwqwJ_h9tJnd5oTY3-wBs57cpkyM3U/edit#gid=1036871075"
 data_gr <- read_sheet(sheet_gr_url, sheet = "Sheet1")
@@ -89,8 +91,11 @@ head(data_gr)
 
 
 ## Section 2B: Data Cleaning
-### Delete extra variables
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+
+Steps:
+
+1. Delete extra variables
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE, include=F}
 # delete Noah's test response
 # also delete the "Please specify:" question after receiving the first response, so we want to delete the corresponding column
 data = sheet_dat_1[sheet_dat_1$`Name of your current organization` != "Baltimore ToolBank", 
@@ -98,7 +103,7 @@ data = sheet_dat_1[sheet_dat_1$`Name of your current organization` != "Baltimore
 head(data)
 ```
 
-### change column names to variables
+2. Change column names to variables
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE,include=F}
 varlist = c("timestamp","di_org", "di_orgyearsworked", "di_mled", "att_purtool", "att_strtool", "att_redtime", "att_evquality", "att_posimpact", "att_mostimpact", "eco_purchase", "eco_storage", "eco_maintain", "eco_totalcost", "eco_events", "eco_nothost", "eco_constit", "ci_exaccomp", "ci_cutfund", "ci_otr", "ci_staff", "ci_project", "ci_evimpact", "eve_type", "eve_fundraise", "eve_fundraise_p")
 
@@ -106,7 +111,7 @@ colnames(data) = varlist
 str(data)
 ```
 
-### change multiple choice answer into numbers
+3. Change multiple choice answer into numbers
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE,include=F}
 # Question: how long have you worked with this organization
 # variable: di_orgyearsworked; choice: 1 - 0-2 years; 2 - 3-5 years; 3 - More than 5 years
@@ -115,8 +120,9 @@ data$di_orgyearsworked = ifelse(data$di_orgyearsworked == "0-2 years", 1,
                                 ifelse(data$di_orgyearsworked == "3-5 years", 2, 3))
 head(data)
 ```
-The following section is commented out as we used text format choices in the following study
+
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE,include=F}
+# This chunk is commented out as we used text format choices in the following study
 # # Question: general attitudes
 # # variables: "att_purtool", "att_strtool", "att_redtime", "att_evquality", "att_posimpact"
 # # 1 - Strongly agree; 2 - Agree; 3 - Neutral; 4 - Disagree; 5 - Strongly disagree; 6 - N/A
@@ -133,7 +139,7 @@ The following section is commented out as we used text format choices in the fol
 # head(data)
 ```
 
-### split check all that apply responses into indicators
+4. split check all that apply responses into indicators
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE,include=F}
 # Question 1: minority leadership
 data = mutate(data, di_mled_top = NA, di_mled_board = NA, di_mled_rep = NA, di_mled_na = NA)
@@ -208,7 +214,7 @@ invisible(lapply(1:nrow(data), FUN = function(x) {
 head(data)
 ```
 
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE, include = F}
 # Question 3: Without the TB, what would you no longer be able to fund?
 data = mutate(data, ci_cutfund_stf = NA, ci_cutfund_prj = NA, ci_cutfund_na = NA, ci_cutfund_otr = NA)
 
@@ -248,7 +254,7 @@ invisible(lapply(1:nrow(data), FUN = function(x) {
 head(data)
 ```
 
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE, include = F}
 # Question 4: Without the TB, which of the following are ways that your community events would be impacted? (check all that apply)
 data = mutate(data, ci_evimpact_qtt = NA, ci_evimpact_qlt = NA, ci_evimpact_dvt = NA, 
               ci_evimpact_cst = NA, ci_evimpact_otr = NA)
@@ -297,7 +303,7 @@ invisible(lapply(1:nrow(data), FUN = function(x) {
 head(data)
 ```
 
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE, include=F}
 # Question 5: Which of the following types of events have TB tools and equipment helped your CBO complete?
 data = mutate(data, eve_type_fr = NA, eve_type_sp = NA, eve_type_ew = NA, eve_type_cb = NA, eve_type_otr = NA)
 
@@ -344,8 +350,8 @@ invisible(lapply(1:nrow(data), FUN = function(x) {
 
 head(data)
 ```
-### Merge Gross Recipts to datasheet and add stratification
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+5. Merge Gross Recipts to datasheet and add stratification
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE, include=F}
 data$cbo_gr = NA
 
 for (org in unique(data$di_org)) {
@@ -458,7 +464,7 @@ summary_tabledi_mled_na <-data.frame(count=table_di_mled_na, Percentage=percenta
 print(summary_tabledi_mled_na)
 ```
 
-Based on the metrics above, 86% of the survey respondents reported to at least of the minority service or leadership criteria. 
+ - **Based on the metrics above, 88.9% of the survey respondents reported to at least of the minority service or leadership criteria.** 
 
 ## Section 3B: General sentiment
 ### Questions 4-8:Plots of General sentiment and Years with the CBO
@@ -606,9 +612,13 @@ data%>%
   scale_x_discrete(labels = c("0-2 years", "3-5 years", "More than 5 years"))
 ```
 
+**Findings:**
+
+- Respondents working with their organization for 3-5 years have slightly more positive opinion towards the TB (not statistically significant)
+
 
 ### Questions 4-8: Plots of General sentiment and size of CBO
-
+*Still waiting for Noah to update size classification standards*
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 table_size<- table(data$cbo_size)
 count_size_1 <- table_size[[1]]
@@ -814,6 +824,10 @@ data%>%
 ```
 
 
+**Findings:**
+
+- As the median size CBO group has a **much smaller sample size**, we cannot safely conclude that small or large CBOs have more positive attitude towards the TB in all aspects.
+
 ### Questions 4-8: Plots of General Sentiment and Minority Status
 
 
@@ -991,6 +1005,10 @@ data%>%
   scale_x_discrete(labels = c("higher quality event", "positive impact", "purchase tool", "reduce time", "store tool"))
 ```
 
+**Findings:**
+
+- respondents' attitude towards the TB are similar across organizations with different minority status. Part of the reason may be that respondents in these categories overlap with each other.
+- attitudes of respondents from organizations with no minority status are more flunctuated, which is likely related to the small sample size for that group
 
 ### Response analysis
 
@@ -1317,6 +1335,7 @@ if(is_empty(count_posimpact_na_initial)){
 
 ```
 
+
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 
 #table summarizing demographic info
@@ -1499,9 +1518,15 @@ data%>%
   scale_x_discrete(labels = c("higher quality event", "positive impact", "purchase tool", "reduce time", "store tool"))
 ```
 
+**Findings:**
 
+- 100% of respondents strongly agreed (93.3%) or agreed (6.7%) that the ToolBank positively impacts their CBO 
+- 100% of respondents strongly agreed (93.3%) or agreed (6.7%) that the ToolBank reduced costs related to purchasing and renting tools and equipment
+- More than 95% or respondents strongly agreed (80.0%) or agreed (15.6%) that the tools made available through the ToolBank allow their CBO to complete higher quality events/projects without additional funding
+- respondents have comparatively less positive attitudes towards (still more than 60% of the respondent strongly agreed or agreed) the statements that the ToolBank positively impacted their CBO by reducing costs related to storing tools and equipment, and the ToolBank has positively impacted their CBO by reducing staff time to complete maintenance/projects
 
 ## Section 3C: Economic Benefit 
+*Respondence of all questions within this section are highly skewed, so we recommended reporting the data through sum, medians, or quantiles*
 
 ### Response analysis
 
@@ -1522,11 +1547,12 @@ mode_value <- Mode(eco_purchase)
 sd_value <- sd(eco_purchase)
 q25_value <- quantile(eco_purchase, 0.25)
 q75_value <- quantile(eco_purchase, 0.75)
+sum_value <- sum(eco_purchase)
 
 # Create a summary table
 summary_table_eco_purchase<- data.frame(
-  Measure = c("Mean", "Median", "Mode", "sd", "1st quantile", "3rd quantile"),
-  Value = c(mean_value, median_value, mode_value, sd_value, q25_value, q75_value)
+  Measure = c("Mean", "Median", "Mode", "sd", "1st quantile", "3rd quantile", "Sum"),
+  Value = c(mean_value, median_value, mode_value, sd_value, q25_value, q75_value, sum_value)
 )
 
 # Display the summary table
@@ -1542,6 +1568,7 @@ purchase_mod <- mode_value
 purchase_sd <- sd_value
 purchase_q1 <- q25_value
 purchase_q3 <- q75_value
+purchase_sum <- sum_value
 ```
 
 
@@ -1562,11 +1589,12 @@ mode_value <- Mode(eco_storage)
 sd_value <- sd(eco_storage)
 q25_value <- quantile(eco_storage, 0.25)
 q75_value <- quantile(eco_storage, 0.75)
+sum_value <- sum(eco_storage)
 
 # Create a summary table
 summary_table_eco_storage<- data.frame(
-  Measure = c("Mean", "Median", "Mode", "sd", "1st quantile", "3rd quantile"),
-  Value = c(mean_value, median_value, mode_value, sd_value, q25_value, q75_value)
+  Measure = c("Mean", "Median", "Mode", "sd", "1st quantile", "3rd quantile", "Sum"),
+  Value = c(mean_value, median_value, mode_value, sd_value, q25_value, q75_value, sum_value)
 )
 
 # Display the summary table
@@ -1582,6 +1610,7 @@ storage_mod <- mode_value
 storage_sd <- sd_value
 storage_q1 <- q25_value
 storage_q3 <- q75_value
+storage_sum <- sum_value
 ```
 
 
@@ -1602,11 +1631,12 @@ mode_value <- Mode(eco_maintain)
 sd_value <- sd(eco_maintain)
 q25_value <- quantile(eco_maintain, 0.25)
 q75_value <- quantile(eco_maintain, 0.75)
+sum_value <- sum(eco_maintain)
 
 # Create a summary table
 summary_table_eco_maintain<- data.frame(
-  Measure = c("Mean", "Median", "Mode", "sd", "1st quantile", "3rd quantile"),
-  Value = c(mean_value, median_value, mode_value, sd_value, q25_value, q75_value)
+  Measure = c("Mean", "Median", "Mode", "sd", "1st quantile", "3rd quantile", "Sum"),
+  Value = c(mean_value, median_value, mode_value, sd_value, q25_value, q75_value, sum_value)
 )
 
 # Display the summary table
@@ -1622,6 +1652,7 @@ maintain_mod <- mode_value
 maintain_sd <- sd_value
 maintain_q1 <- q25_value
 maintain_q3 <- q75_value
+maintain_sum <- sum_value
 ```
 
 Question: Reflecting on your events in the past year: If the TB did not exist, how much funding would your organization allocate to buying, storing, tracking and maintaining your own inventory of tools and equipment?
@@ -1641,11 +1672,12 @@ mode_value <- Mode(eco_totalcost)
 sd_value <- sd(eco_totalcost)
 q25_value <- quantile(eco_totalcost, 0.25)
 q75_value <- quantile(eco_totalcost, 0.75)
+sum_value <- sum(eco_totalcost)
 
 # Create a summary table
 summary_table_eco_totalcost<- data.frame(
-  Measure = c("Mean", "Median", "Mode", "sd", "1st quantile", "3rd quantile"),
-  Value = c(mean_value, median_value, mode_value, sd_value, q25_value, q75_value)
+  Measure = c("Mean", "Median", "Mode", "sd", "1st quantile", "3rd quantile", "Sum"),
+  Value = c(mean_value, median_value, mode_value, sd_value, q25_value, q75_value, sum_value)
 )
 
 # Display the summary table
@@ -1661,6 +1693,7 @@ totalcost_mod <- mode_value
 totalcost_sd <- sd_value
 totalcost_q1 <- q25_value
 totalcost_q3 <- q75_value
+totalcost_sum <- sum_value
 ```
 
 Question: number of total events hosted during last year
@@ -1680,11 +1713,12 @@ mode_value <- Mode(eco_events)
 sd_value <- sd(eco_events)
 q25_value <- quantile(eco_events, 0.25)
 q75_value <- quantile(eco_events, 0.75)
+sum_value <- sum(eco_events)
 
 # Create a summary table
 summary_table_eco_events<- data.frame(
-  Measure = c("Mean", "Median", "Mode", "sd", "1st quantile", "3rd quantile"),
-  Value = c(mean_value, median_value, mode_value, sd_value, q25_value, q75_value)
+  Measure = c("Mean", "Median", "Mode", "sd", "1st quantile", "3rd quantile", "Sum"),
+  Value = c(mean_value, median_value, mode_value, sd_value, q25_value, q75_value, sum_value)
 )
 
 # Display the summary table
@@ -1700,6 +1734,7 @@ events_mod <- mode_value
 events_sd <- sd_value
 events_q1 <- q25_value
 events_q3 <- q75_value
+events_sum <- sum_value
 ```
 
 Question: If there were no TB, how many of your events in the past year would you not have been hosted for any reason?
@@ -1719,11 +1754,12 @@ mode_value <- Mode(eco_nothost)
 sd_value <- sd(eco_nothost)
 q25_value <- quantile(eco_nothost, 0.25)
 q75_value <- quantile(eco_nothost, 0.75)
+sum_value <- sum(eco_nothost)
 
 # Create a summary table
 summary_table_eco_nothost<- data.frame(
-  Measure = c("Mean", "Median", "Mode", "sd", "1st quantile", "3rd quantile"),
-  Value = c(mean_value, median_value, mode_value, sd_value, q25_value, q75_value)
+  Measure = c("Mean", "Median", "Mode", "sd", "1st quantile", "3rd quantile", "Sum"),
+  Value = c(mean_value, median_value, mode_value, sd_value, q25_value, q75_value, sum_value)
 )
 # Display the summary table
 print(summary_table_eco_nothost)
@@ -1737,6 +1773,7 @@ nothost_mod <- mode_value
 nothost_sd <- sd_value
 nothost_q1 <- q25_value
 nothost_q3 <- q75_value
+nothost_sum <- sum_value
 ```
 
 Extra analysis: percent of event not host during last year
@@ -1755,6 +1792,8 @@ mode_value <- Mode(eco_nothost_pct_calc)
 sd_value <- sd(eco_nothost_pct_calc)
 q25_value <- quantile(eco_nothost_pct_calc, 0.25)
 q75_value <- quantile(eco_nothost_pct_calc, 0.75)
+sum_value <- sum(eco_nothost_pct_calc)
+
 
 # Create a summary table
 summary_table_eco_nothost_pct_calc<- data.frame(
@@ -1774,6 +1813,7 @@ nothost_pct_calc_mod <- mode_value
 nothost_pct_calc_sd <- sd_value
 nothost_pct_calc_q1 <- q25_value
 nothost_pct_calc_q3 <- q75_value
+nothost_pct_calc_sum <- sum_value
 ```
 
 
@@ -1798,11 +1838,12 @@ mode_value <- Mode(eco_constit)
 sd_value <- sd(eco_constit)
 q25_value <- quantile(eco_constit, 0.25)
 q75_value <- quantile(eco_constit, 0.75)
+sum_value <- sum(eco_constit)
 
 # Create a summary table
 summary_table_eco_constit<- data.frame(
-  Measure = c("Mean", "Median", "Mode", "sd", "1st quantile", "3rd quantile"),
-  Value = c(mean_value, median_value, mode_value, sd_value, q25_value, q75_value)
+  Measure = c("Mean", "Median", "Mode", "sd", "1st quantile", "3rd quantile", "Sum"),
+  Value = c(mean_value, median_value, mode_value, sd_value, q25_value, q75_value, sum_value)
 )
 
 # Display the summary table
@@ -1817,6 +1858,7 @@ constit_mod <- mode_value
 constit_sd <- sd_value
 constit_q1 <- q25_value
 constit_q3 <- q75_value
+constit_sum <- sum_value
 ```
 
 Calculated: 
@@ -1843,6 +1885,8 @@ round(purchase_mod),
 round(purchase_q3),
   #"Standard deviation"
 round(purchase_sd),
+  #"Sum"
+round(purchase_sum),
 
 # "on storage of tools and equipment",
   #"Mean"
@@ -1857,6 +1901,8 @@ round(storage_mod),
 round(storage_q3),
   #"Standard deviation"
 round(storage_sd),
+#"Sum"
+round(storage_sum),
 
 # "on maintenance of tools and equipment",
   #"Mean"
@@ -1871,6 +1917,8 @@ round(maintain_mod),
 round(maintain_q3),
   #"Standard deviation"
 round(maintain_sd),
+#"Sum"
+round(maintain_sum),
 
 # "on buying, storing, tracking and maintaining own tool+equiptment inventory",
   #"Mean"
@@ -1885,6 +1933,8 @@ round(totalcost_mod),
 round(totalcost_q3),
   #"Standard deviation"
 round(totalcost_sd),
+#"Sum"
+round(totalcost_sum),
 # "# events that would have been impossible in past year",
   #"Mean"
 round(nothost_mean),
@@ -1898,6 +1948,8 @@ round(nothost_mod),
 round(nothost_q3),
   #"Standard deviation"
 round(nothost_sd),
+#"Sum"
+round(nothost_sum),
 # "% of CBO's total events that would have been impossible in past year",
   #"Mean"
 round(nothost_pct_calc_mean*100),
@@ -1911,6 +1963,8 @@ round(nothost_pct_calc_mod*100),
 round(nothost_pct_calc_q3*100),
   #"Standard deviation"
 round(nothost_pct_calc_sd*100),
+#"Sum"
+round(nothost_pct_calc_sum*100),
 # "# constituents that would have been negatively impacted in the past year "
   #"Mean"
 round(constit_mean),
@@ -1923,18 +1977,20 @@ round(constit_mod),
   #"75th quantile",
 round(constit_q3),
   #"Standard deviation"
-round(constit_sd)
+round(constit_sd),
+#"Sum"
+round(constit_sum)
                               
                               ),
 
-         ncol = 6, byrow = TRUE)
+         ncol = 7, byrow = TRUE)
 
 library(htmlTable)
 output_continuous%>% 
   addHtmlTableStyle(col.columns = c("none", "#F7F7F7",
                                     "none", "#F7F7F7",
                                     "none", "#F7F7F7"))%>% 
-  htmlTable(header =  c("Mean","25th quantile", "Median", "Mode","75th quantile","Standard deviation"),
+  htmlTable(header =  c("Mean","25th quantile", "Median", "Mode","75th quantile","Standard deviation", "Sum"),
             rnames = c("on Purchasing or renting tools and equipment",
                        "on storage of tools and equipment",
                        "on maintenance of tools and equipment",
