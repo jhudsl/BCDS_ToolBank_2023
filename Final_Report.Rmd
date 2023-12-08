@@ -7,6 +7,8 @@ output:
     toc: true
 ---
 
+example details
+
 # Report Outline
 - Section 1: Key Findings
 - Section 1A: Supporting Visualizations and Quotes 
