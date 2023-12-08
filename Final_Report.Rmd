@@ -7,20 +7,6 @@ output:
     toc: true
 ---
 
-# Report Outline
-- Section 1: Key Findings
-- Section 1A: Supporting Visualizations and Quotes 
-- Section 2: Data Analysis Overview
-- Section 2A: Data Wrangling
-- Section 2B: Data Cleaning
-- Section 3: Data Analysis by Survey Question 
-- Section 3A: Demographic Information
-- Section 3B: General sentiment
-- Section 3C: Economic Benefit
-- Section 3D: Community Impact
-- Section 3E: Analysis on surrounding questions
-- Section 3F: marginal analysis on fundraising questions
-
 
 # Section 1: Key Findings
 - 100% of respondents strongly agreed (93.3%) or agreed (6.7%) that the ToolBank positively impacts their CBO 
@@ -38,11 +24,12 @@ output:
 
 TBD
 
+
+```{r setup, include=FALSE}
 # Section 2: Data Analysis Process
 
 ## Section 2A: Data Wrangling 
 
-```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
@@ -70,19 +57,21 @@ gs4_auth(email = TRUE)
 #gs4_auth(email = "chclapham@gmail.com")
 ```
 
-Steps:
 
-1. Read in data with the googlesheets4 package {.smaller}
 
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE, include=F}
+#1. Read in data with the googlesheets4 package {.smaller}
+
 sheet_url <- 
   "https://docs.google.com/spreadsheets/d/1W5kgOFSJux4lqpwqwJ_h9tJnd5oTY3-wBs57cpkyM3U/edit#gid=1386397630"
 sheet_dat_1 <- read_sheet(sheet_url)
 head(sheet_dat_1)
 ```
 
-2. Read in gross receipts data
+
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE, include = F}
+#2. Read in gross receipts data
+
 sheet_gr_url = "https://docs.google.com/spreadsheets/d/1W5kgOFSJux4lqpwqwJ_h9tJnd5oTY3-wBs57cpkyM3U/edit#gid=1036871075"
 data_gr <- read_sheet(sheet_gr_url, sheet = "Sheet1")
 colnames(data_gr) = c("timestamp", "cbo_name", "cbo_gr", "cbo_size", "comment")
@@ -90,12 +79,11 @@ head(data_gr)
 ```
 
 
+
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE, include=F}
+## Section 2B: Data Cleaning
 ## Section 2B: Data Cleaning
 
-Steps:
-
-1. Delete extra variables
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE, include=F}
 # delete Noah's test response
 # also delete the "Please specify:" question after receiving the first response, so we want to delete the corresponding column
 data = sheet_dat_1[sheet_dat_1$`Name of your current organization` != "Baltimore ToolBank", 
@@ -103,16 +91,20 @@ data = sheet_dat_1[sheet_dat_1$`Name of your current organization` != "Baltimore
 head(data)
 ```
 
-2. Change column names to variables
+
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE,include=F}
+#2. Change column names to variables
+
 varlist = c("timestamp","di_org", "di_orgyearsworked", "di_mled", "att_purtool", "att_strtool", "att_redtime", "att_evquality", "att_posimpact", "att_mostimpact", "eco_purchase", "eco_storage", "eco_maintain", "eco_totalcost", "eco_events", "eco_nothost", "eco_constit", "ci_exaccomp", "ci_cutfund", "ci_otr", "ci_staff", "ci_project", "ci_evimpact", "eve_type", "eve_fundraise", "eve_fundraise_p")
 
 colnames(data) = varlist
 str(data)
 ```
 
-3. Change multiple choice answer into numbers
+
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE,include=F}
+#3. Change multiple choice answer into numbers
+
 # Question: how long have you worked with this organization
 # variable: di_orgyearsworked; choice: 1 - 0-2 years; 2 - 3-5 years; 3 - More than 5 years
 
@@ -139,8 +131,10 @@ head(data)
 # head(data)
 ```
 
-4. split check all that apply responses into indicators
+
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE,include=F}
+#4. split check all that apply responses into indicators
+
 # Question 1: minority leadership
 data = mutate(data, di_mled_top = NA, di_mled_board = NA, di_mled_rep = NA, di_mled_na = NA)
 
@@ -350,8 +344,10 @@ invisible(lapply(1:nrow(data), FUN = function(x) {
 
 head(data)
 ```
-5. Merge Gross Recipts to datasheet and add stratification
+
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE, include=F}
+#5. Merge Gross Recipts to datasheet and add stratification
+
 data$cbo_gr = NA
 
 for (org in unique(data$di_org)) {
@@ -382,12 +378,12 @@ head(data)
 ```
 
 
-# Section 3: Data Analysis by Survey Question
+# Section 2: Data Analysis by Survey Question
 
-## Section 3A: Demographic Information 
+## Section 2A: Demographic Information 
 
 ### Question: How long have you worked with this organization? 
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE,include=FALSE}
 # list the data as a table as the data is binned instead of continuous
 table(data$di_orgyearsworked) 
 di_orgyearsworked_table = data.frame(cbind(time = c("0-2 years", "3-5 years", "More than 5 years"),
@@ -396,21 +392,27 @@ di_orgyearsworked_table = data.frame(cbind(time = c("0-2 years", "3-5 years", "M
 
 di_orgyearsworked_table
 ```
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE,include=FALSE}
 # mean number of year worked with the organization. Transfer choices into number by the following standard: 0-2 years -> 1yr; 3-5 years -> 4 yr; more than 5 years -> 6 year
 data = mutate(data, di_orgyearsworked_calc = ifelse(di_orgyearsworked == 1, 1, 
                                                     ifelse(di_orgyearsworked == 2, 4, 6)))
 mean(data$di_orgyearsworked_calc)
 sd(data$di_orgyearsworked_calc)
 median(data$di_orgyearsworked_calc)
+```
+
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 hist(data$di_orgyearsworked_calc, breaks = c(0, 3, 6, 9), right = F, xlim = c(0, 10), ylim = c(0, 25), main = "Time Respondents Have Worked with Their Organizations", xlab = "time (years)")
 ```
 
 
-### Question 3: The following question pertains to minority leadership and service. For the purpose of this question, minority is defined as women, people of color, and immigrants. Ehich of the following best describes your organization? (please provide your best estimate).?
+### Question 3: The following question pertains to minority leadership and service. For the purpose of this question, minority is defined as women, people of color, and immigrants. Which of the following best describes your organization? (please provide your best estimate).?
 
-Percent of respondents stating, "our top executive position is held by a minority"
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE,include=FALSE}
+#Percent of respondents stating, "our top executive position is held by a minority"
+
 table_di_mled_top <- table(data$di_mled_top)
 percentages <- prop.table(table_di_mled_top)
 #extract percentages for table further down
@@ -423,8 +425,8 @@ summary_tabledi_mled_top <-data.frame(count=table_di_mled_top, Percentage=percen
 print(summary_tabledi_mled_top)
 ```
 
-Percent of respondents stating, "More than 50% of our board is made up of minorities "
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE,include=FALSE}
+#Percent of respondents stating, "More than 50% of our board is made up of minorities "
 table_di_mled_board<- table(data$di_mled_board)
 percentages <- prop.table(table_di_mled_board)
 #extract percentages for table further down
@@ -436,8 +438,10 @@ summary_tabledi_mled_board <-data.frame(count=table_di_mled_board, Percentage=pe
 print(summary_tabledi_mled_board)
 ```
 
-Percent of respondents stating, "More than 50% of program recipients are minorities"
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE,include=FALSE}
+#Percent of respondents stating, "More than 50% of program recipients are minorities"
+
 table_di_mled_rep<- table(data$di_mled_rep)
 percentages <- prop.table(table_di_mled_rep)
 #extract percentages for table further down
@@ -450,8 +454,10 @@ summary_tabledi_mled_rep <-data.frame(count=table_di_mled_rep, Percentage=percen
 print(summary_tabledi_mled_rep)
 ```
 
-Percent of respondents stating, "None of the above"
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE,include=FALSE}
+#Percent of respondents stating, "None of the above"
+
 table_di_mled_na<- table(data$di_mled_na)
 percentages <- prop.table(table_di_mled_na)
 #extract percentages for table further down
@@ -466,7 +472,7 @@ print(summary_tabledi_mled_na)
 
  - **Based on the metrics above, 88.9% of the survey respondents reported to at least of the minority service or leadership criteria.** 
 
-## Section 3B: General sentiment
+## Section 2B: General sentiment
 ### Questions 4-8:Plots of General sentiment and Years with the CBO
 
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
@@ -1525,7 +1531,7 @@ data%>%
 - More than 95% or respondents strongly agreed (80.0%) or agreed (15.6%) that the tools made available through the ToolBank allow their CBO to complete higher quality events/projects without additional funding
 - respondents have comparatively less positive attitudes towards (still more than 60% of the respondent strongly agreed or agreed) the statements that the ToolBank positively impacted their CBO by reducing costs related to storing tools and equipment, and the ToolBank has positively impacted their CBO by reducing staff time to complete maintenance/projects
 
-## Section 3C: Economic Benefit 
+## Section 2C: Economic Benefit 
 *Respondence of all questions within this section are highly skewed, so we recommended reporting the data through sum, medians, or quantiles*
 
 ### Response analysis
@@ -2058,7 +2064,7 @@ data%>%
 
 
 
-## Section 3D: Community Impact
+## Section 2D: Community Impact
 
 Question: With the money that you have saved on purchasing, storing, and maintaining tools and equipment, what have you been able to accomplish?
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
@@ -2169,7 +2175,7 @@ output_continuous%>%
 
 Quantify effect of "other", if selected
 
-## Section 3E: Analysis surrounding questions 
+## Section 2E: Analysis surrounding questions 
 
 Question: do organizations with higher savings through toolbank report more of a positive impact? 
 
@@ -2341,7 +2347,7 @@ ggplot(sum_table)+
 
 ```
 
-## Section 3F: marginal analysis on fundraising questions
+## Section 2F: marginal analysis on fundraising questions
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 nrow(data[!is.na(data$eve_fundraise_p),])
 mean(data$eve_fundraise_p, na.rm = T)
