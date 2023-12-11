@@ -2056,7 +2056,14 @@ data%>%
   summarize(`Average % of a CBO's events possible through TB in past year` = mean(`Percent of events posible by TB`))
 ```
 
+**Findings:**
 
+- In an average year, the ToolBank helps to save money in buying, storing, tracking, and maintaining tools or equipments for the 45 respondents a sum value of \$304, 700, among which purchasing tools and equipments cost our partner CBO the most with \$226,300 (74.3%).
+- In the past year, the ToolBank helps to save money in buying, storing, tracking, and maintaining tools or equipments for the 45 respondents a sum value of \$113,720.
+- Half of the respondents reported that at least 35% of their events would have been impossible without the help of the ToolBank.
+- A total of 280 events would have been impossible if the ToolBank did not exist.
+- Half of the respondents reported that at least 150 of their constituents (volunteers, members, and event attendees) would have been negatively impacted without the help of the ToolBank.
+- A total of 58,790 constituents (volunteers, members, and event attendees) of our CBO partners would haven been negatively impacted without the help of the ToolBank.
 
 ## Section 3D: Community Impact
 
@@ -2169,6 +2176,13 @@ output_continuous%>%
 
 Quantify effect of "other", if selected
 
+**Findings:**
+
+- More than half of the respondents agree that they can host additional projects or event with the fundings the ToolBanks helped to save (60.0%) and would need to cut project fundings if the ToolBank did not exist (57.8%).
+- Funding related to staff positions were less impacted by the ToolBank action.
+- 24.4% respondents reported the fundings the ToolBank helps them to save make them able to achieve accomplishments other than staff positions and projects.
+- 15.6% respondents reported that they need to cut fundings in items other than staff positions and projects if the ToolBank did not exist.
+
 ## Section 3E: Analysis surrounding questions 
 
 Question: do organizations with higher savings through toolbank report more of a positive impact? 
@@ -2275,20 +2289,9 @@ Question: What is the relationship like between minority-led CBOs and the toolba
 Question: where within the organization does the Toolbank impact most?
 
 
-Histogram, faceted by responded staff versus responded projects– can incorporate “Other” if consistent across organizations 
-X = number (of staff or projects)
-Facet: Without the TB, what would you no longer be able to fund?
-(code note: will also have to manipulate data a bit to get this)
-
-
-
 Question: In what ways has the community benefited through the toolbank? What are the most prominent types of events (or organization types) the toolbank supports?
 
 
-2 bar chart
-X1 = ways of impact; X2 = event types
-Y = % respondent
-Can incorporate other if there is consistency across respondents
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 sum_table = data.frame(choices = c("Quantity",
                                          "Quality",
@@ -2341,6 +2344,15 @@ ggplot(sum_table)+
 
 ```
 
+**Findings:**
+
+- Respondents with more positive attitudes with the ToolBank helping reduce their costs in multiple aspects would have spent more on buying, storing and maintaining tools or equipments if the ToolBank did not exist (not statistically significant).
+- the ToolBank helps to save the most in purchasing tools and equipments than storing and maintaining those (not statistically significant).
+- Events got impacted by the TB mainly through their quality (77.8%), consistency (66.7%), and quantity (55.6%).
+- The most prominent types of events the toolbank supports are community building (84.4%) and service projects (75.6%).
+
+
+
 ## Section 3F: marginal analysis on fundraising questions
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 nrow(data[!is.na(data$eve_fundraise_p),])
@@ -2350,6 +2362,8 @@ sd(data$eve_fundraise_p, na.rm = T)
 quantile(data$eve_fundraise_p, na.rm = T)
 ```
 
+**Findings:**
 
+- Half of the respond reported that using the the ToolBank equipements helped to save at least 30% of their event expense budget.
 
 
