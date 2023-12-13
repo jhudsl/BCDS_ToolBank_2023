@@ -1,26 +1,13 @@
 ---
 title: "Baltimore Community Data Science Collaboration, ToolBank Community and Economic Impact Survey Analysis"
 author: "Analysis by: Charlotte Clapham, Tianxu Chen, Haley Farrie"
-date: "2023-11-23"
+date: "2023-12-14"
 output:
   html_document:
     toc: true
 ---
-
-# Report Outline
-- Section 1: Key Findings
-- Section 1A: Supporting Visualizations and Quotes 
-- Section 2: Data Analysis Overview
-- Section 2A: Data Wrangling
-- Section 2B: Data Cleaning
-- Section 3: Data Analysis by Survey Question 
-- Section 3A: Demographic Information
-- Section 3B: General sentiment
-- Section 3C: Economic Benefit
-- Section 3D: Community Impact
-- Section 3E: Analysis on surrounding questions
-- Section 3F: marginal analysis on fundraising questions
-
+# Overview
+The following report outlines the findings from a survey of ToolBank member organizations regarding their attitudes, economic and community outcomes as a result of utilizing the ToolBank tool lending service. The survey was developed by the ToolBank with support from the Johns Hopkins Baltimore Community Data Science class based upon the results of a pilot survey to high-frequency ToolBank member organizations. The survey contained 25 response fields and was available for members to complete from November 9th 2023 to November 17th 2023. ToolBank members were incentivized to participate by receiving a $25 tool credit for each completed survey, with the the first ten survey responses receiving an additional $25 tool credit. Multiple responses per organization were encouraged to allow for a diversity of experiences to be captured and each additional response per organization was provided a credit of an additional $10. The following sections outline the key findings from the survey; general sentiment stratified by years with the member organization, size of the member organization, and minority status of the member organization; the economic and community impact of the ToolBank, as indicated by respondents; and the impact of the ToolBank on Community Based Organizations' self-reported fundraising capacity. The full project repository is available here: https://github.com/jhudsl/BCDS_ToolBank_2023.git. 
 
 # Section 1: Key Findings
 - 100% of respondents strongly agreed (93.3%) or agreed (6.7%) that the ToolBank positively impacts their CBO 
@@ -28,24 +15,12 @@ output:
 - 88.9% of the survey respondents reported to at least of the minority service or leadership criteria. 
 - Events got impacted by the TB mainly through their quality (77.8%), consistency (66.7%), and quantity (55.6%)
 - The most prominent types of events the toolbank supports are community building (84.4%) and service projects (75.6%)
-
-- For the past year,
-- half of the respondents reported that at least 1/3 (35%) of their events would have been impossible without the help of the TB
-- half of the respondents reported that at least 150 of their constituents (volunteers, members, and event attendees) would have been negatively impacted without the help of the TB.
-
-
-## Section 1A: Supporting Visualizations and Quotes 
-
-TBD
-
-# Section 2: Data Analysis Process
-
-## Section 2A: Data Wrangling 
+- For the past year, half of the respondents reported that at least 1/3 (35%) of their events would have been impossible without the help of the TB
+- For the past year, half of the respondents reported that at least 150 of their constituents (volunteers, members, and event attendees) would have been negatively impacted without the help of the TB.
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-
 
 ```{r, echo = FALSE, include=FALSE, purl=FALSE}
 library(knitr)
@@ -68,21 +43,21 @@ gs4_auth(email = TRUE)
 # Once set up, you can automate this process by passing your email
 #gs4_auth(email = "karinchen737@gmail.com")
 #gs4_auth(email = "chclapham@gmail.com")
+gs4_auth(email = "haley.farrie@gmail.com")
 ```
 
-Steps:
-
-1. Read in data with the googlesheets4 package {.smaller}
 
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE, include=F}
+#Read in data with the googlesheets4 package {.smaller}
 sheet_url <- 
   "https://docs.google.com/spreadsheets/d/1W5kgOFSJux4lqpwqwJ_h9tJnd5oTY3-wBs57cpkyM3U/edit#gid=1386397630"
 sheet_dat_1 <- read_sheet(sheet_url)
 head(sheet_dat_1)
 ```
 
-2. Read in gross receipts data
+
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE, include = F}
+#2. Read in gross receipts data
 sheet_gr_url = "https://docs.google.com/spreadsheets/d/1W5kgOFSJux4lqpwqwJ_h9tJnd5oTY3-wBs57cpkyM3U/edit#gid=1036871075"
 data_gr <- read_sheet(sheet_gr_url, sheet = "Sheet1")
 colnames(data_gr) = c("timestamp", "cbo_name", "cbo_gr", "cbo_size", "comment")
@@ -90,11 +65,6 @@ head(data_gr)
 ```
 
 
-## Section 2B: Data Cleaning
-
-Steps:
-
-1. Delete extra variables
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE, include=F}
 # delete Noah's test response
 # also delete the "Please specify:" question after receiving the first response, so we want to delete the corresponding column
@@ -103,16 +73,17 @@ data = sheet_dat_1[sheet_dat_1$`Name of your current organization` != "Baltimore
 head(data)
 ```
 
-2. Change column names to variables
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE,include=F}
+# Change column names to variables
 varlist = c("timestamp","di_org", "di_orgyearsworked", "di_mled", "att_purtool", "att_strtool", "att_redtime", "att_evquality", "att_posimpact", "att_mostimpact", "eco_purchase", "eco_storage", "eco_maintain", "eco_totalcost", "eco_events", "eco_nothost", "eco_constit", "ci_exaccomp", "ci_cutfund", "ci_otr", "ci_staff", "ci_project", "ci_evimpact", "eve_type", "eve_fundraise", "eve_fundraise_p")
 
 colnames(data) = varlist
 str(data)
 ```
 
-3. Change multiple choice answer into numbers
+
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE,include=F}
+#Change multiple choice answer into numbers
 # Question: how long have you worked with this organization
 # variable: di_orgyearsworked; choice: 1 - 0-2 years; 2 - 3-5 years; 3 - More than 5 years
 
@@ -139,8 +110,9 @@ head(data)
 # head(data)
 ```
 
-4. split check all that apply responses into indicators
+
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE,include=F}
+#split check all that apply responses into indicators
 # Question 1: minority leadership
 data = mutate(data, di_mled_top = NA, di_mled_board = NA, di_mled_rep = NA, di_mled_na = NA)
 
@@ -350,8 +322,9 @@ invisible(lapply(1:nrow(data), FUN = function(x) {
 
 head(data)
 ```
-5. Merge Gross Recipts to datasheet and add stratification
+
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE, include=F}
+#5. Merge Gross Recipts to datasheet and add stratification
 data$cbo_gr = NA
 
 for (org in unique(data$di_org)) {
@@ -382,12 +355,9 @@ head(data)
 ```
 
 
-# Section 3: Data Analysis by Survey Question
-
-## Section 3A: Demographic Information 
-
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE, include=F}
+## Demographic Information 
 ### Question: How long have you worked with this organization? 
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 # list the data as a table as the data is binned instead of continuous
 table(data$di_orgyearsworked) 
 di_orgyearsworked_table = data.frame(cbind(time = c("0-2 years", "3-5 years", "More than 5 years"),
@@ -396,7 +366,8 @@ di_orgyearsworked_table = data.frame(cbind(time = c("0-2 years", "3-5 years", "M
 
 di_orgyearsworked_table
 ```
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE, include=F}
 # mean number of year worked with the organization. Transfer choices into number by the following standard: 0-2 years -> 1yr; 3-5 years -> 4 yr; more than 5 years -> 6 year
 data = mutate(data, di_orgyearsworked_calc = ifelse(di_orgyearsworked == 1, 1, 
                                                     ifelse(di_orgyearsworked == 2, 4, 6)))
@@ -407,10 +378,11 @@ hist(data$di_orgyearsworked_calc, breaks = c(0, 3, 6, 9), right = F, xlim = c(0,
 ```
 
 
-### Question 3: The following question pertains to minority leadership and service. For the purpose of this question, minority is defined as women, people of color, and immigrants. Ehich of the following best describes your organization? (please provide your best estimate).?
 
-Percent of respondents stating, "our top executive position is held by a minority"
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE, include=F}
+### Question 3: The following question pertains to minority leadership and service. For the purpose of this question, minority is defined as women, people of color, and immigrants. Ehich of the following best describes your organization? (please provide your best estimate).?
+#Percent of respondents stating, "our top executive position is held by a minority"
+
 table_di_mled_top <- table(data$di_mled_top)
 percentages <- prop.table(table_di_mled_top)
 #extract percentages for table further down
@@ -423,8 +395,8 @@ summary_tabledi_mled_top <-data.frame(count=table_di_mled_top, Percentage=percen
 print(summary_tabledi_mled_top)
 ```
 
-Percent of respondents stating, "More than 50% of our board is made up of minorities "
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE, include=F}
+#Percent of respondents stating, "More than 50% of our board is made up of minorities "
 table_di_mled_board<- table(data$di_mled_board)
 percentages <- prop.table(table_di_mled_board)
 #extract percentages for table further down
@@ -436,8 +408,9 @@ summary_tabledi_mled_board <-data.frame(count=table_di_mled_board, Percentage=pe
 print(summary_tabledi_mled_board)
 ```
 
-Percent of respondents stating, "More than 50% of program recipients are minorities"
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE, include=F}
+#Percent of respondents stating, "More than 50% of program recipients are minorities"
 table_di_mled_rep<- table(data$di_mled_rep)
 percentages <- prop.table(table_di_mled_rep)
 #extract percentages for table further down
@@ -450,8 +423,8 @@ summary_tabledi_mled_rep <-data.frame(count=table_di_mled_rep, Percentage=percen
 print(summary_tabledi_mled_rep)
 ```
 
-Percent of respondents stating, "None of the above"
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE, include=F}
+#Percent of respondents stating, "None of the above"
 table_di_mled_na<- table(data$di_mled_na)
 percentages <- prop.table(table_di_mled_na)
 #extract percentages for table further down
@@ -464,429 +437,23 @@ summary_tabledi_mled_na <-data.frame(count=table_di_mled_na, Percentage=percenta
 print(summary_tabledi_mled_na)
 ```
 
- - **Based on the metrics above, 88.9% of the survey respondents reported to at least of the minority service or leadership criteria.** 
 
-## Section 3B: General sentiment
-### Questions 4-8:Plots of General sentiment and Years with the CBO
+# Section 2: Community Based Organization Attitudes Towards ToolBank Impact
+Respondents were asked five questions to assess their attitudes towards the ToolBank's impact on their organization and their community. Respondents were asked to rank their agreement with statements on a scale from Strongly Agree to Strongly Disagree, including options for neutral and not applicable. The statements included the following: 
 
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
-#The ToolBank (TB) has positively impacted our CBO by reducing costs related to purchasing or renting tools and equipment
-data%>%
-  group_by(di_orgyearsworked)%>%
-  summarize(agree = sum(att_purtool=="Agree",na.rm=T)/n(),
-            strongly_agree = sum(att_purtool=="Strongly agree",na.rm=T)/n(),
-            neutral = sum(att_purtool=="Neutral",na.rm=T)/n(),
-            disagree = sum(att_purtool=="Disagree",na.rm=T)/n(),
-            strongly_disagree = sum(att_purtool=="Strongly disagree",na.rm=T)/n(),
-            N_A = sum(att_purtool=="N/A",na.rm=T)/n())%>%
-  pivot_longer(agree:N_A, 
-               names_to= "Response", 
-               values_to = "Percentage")%>%
-  mutate(Response = factor(Response, levels = c("strongly_agree",
-                                                "agree",
-                                                "neutral", 
-                                                "disagree",
-                                                "strongly_disagree", 
-                                                 "N_A")))%>%
-  ggplot(aes(fill=Response,
-             y=Percentage, 
-             x=as.factor(di_orgyearsworked))) + 
-    geom_bar(position="stack", 
-             stat="identity")+
-  labs(x="Years Worked at CBO", 
-       y="Percentage of respondants",
-       title="Agreement that TB reduced costs related to purchasing/renting tools/equipment") +
-  scale_x_discrete(labels = c("0-2 years", "3-5 years", "More than 5 years"))
-
-#The TB has positively impacted our CBO by reducing costs related to storing tools and equipment
-data%>%
-  group_by(di_orgyearsworked)%>%
-  summarize(agree = sum(att_strtool=="Agree",na.rm=T)/n(),
-            strongly_agree = sum(att_strtool=="Strongly agree",na.rm=T)/n(),
-            neutral = sum(att_strtool=="Neutral",na.rm=T)/n(),
-            disagree = sum(att_strtool=="Disagree",na.rm=T)/n(),
-            strongly_disagree = sum(att_strtool=="Strongly disagree",na.rm=T)/n(),
-            N_A = sum(att_strtool=="N/A",na.rm=T)/n())%>%
-  pivot_longer(agree:N_A, 
-               names_to= "Response", 
-               values_to = "Percentage")%>%
-  mutate(Response = factor(Response, levels = c("strongly_agree",
-                                                "agree",
-                                                "neutral", 
-                                                "disagree",
-                                                "strongly_disagree", 
-                                                 "N_A")))%>%
-  ggplot(aes(fill=Response,
-             y=Percentage, 
-             x=as.factor(di_orgyearsworked))) + 
-    geom_bar(position="stack", 
-             stat="identity")+
-  labs(x="Years Worked at CBO", 
-       y="Percentage of respondants",
-       title="Agreement that TB reduced costs related to storing tools/equipment") +
-  scale_x_discrete(labels = c("0-2 years", "3-5 years", "More than 5 years"))
+- "The ToolBank (TB) has positively impacted our Community-Based Organization (CBO) by reducing costs related to purchasing or renting tools and equipment"; 
+- "The TB has positively impacted our CBO by reducing costs related to storing tools and equipment";
+- "The TB has positively impacted our CBO by reducing staff time to complete community projects"'
+- "Tools made available through the TB allow our CBO to complete higher quality events/projects without additional funding";
+-"The TB has positively impacted our CBO"
 
 
-#The TB has positively impacted our CBO by reducing staff time to complete community projects
-data%>%
-  group_by(di_orgyearsworked)%>%
-  summarize(agree = sum(att_redtime=="Agree",na.rm=T)/n(),
-            strongly_agree = sum(att_redtime=="Strongly agree",na.rm=T)/n(),
-            neutral = sum(att_redtime=="Neutral",na.rm=T)/n(),
-            disagree = sum(att_redtime=="Disagree",na.rm=T)/n(),
-            strongly_disagree = sum(att_redtime=="Strongly disagree",na.rm=T)/n(),
-            N_A = sum(att_redtime=="N/A",na.rm=T)/n())%>%
-  pivot_longer(agree:N_A, 
-               names_to= "Response", 
-               values_to = "Percentage")%>%
-  mutate(Response = factor(Response, levels = c("strongly_agree",
-                                                "agree",
-                                                "neutral", 
-                                                "disagree",
-                                                "strongly_disagree", 
-                                                 "N_A")))%>%
-  ggplot(aes(fill=Response,
-             y=Percentage, 
-             x=as.factor(di_orgyearsworked))) + 
-    geom_bar(position="stack", 
-             stat="identity")+
-  labs(x="Years Worked at CBO", 
-       y="Percentage of respondants",
-       title="Agreement that TB reduced staff time for projects") +
-  scale_x_discrete(labels = c("0-2 years", "3-5 years", "More than 5 years"))
-
-#Tools made available through the TB allow our CBO to complete higher quality events/projects without additional funding
-data%>%
-  group_by(di_orgyearsworked)%>%
-  summarize(agree = sum(att_evquality=="Agree",na.rm=T)/n(),
-            strongly_agree = sum(att_evquality=="Strongly agree",na.rm=T)/n(),
-            neutral = sum(att_evquality=="Neutral",na.rm=T)/n(),
-            disagree = sum(att_evquality=="Disagree",na.rm=T)/n(),
-            strongly_disagree = sum(att_evquality=="Strongly disagree",na.rm=T)/n(),
-            N_A = sum(att_evquality=="N/A",na.rm=T)/n())%>%
-  pivot_longer(agree:N_A, 
-               names_to= "Response", 
-               values_to = "Percentage")%>%
-  mutate(Response = factor(Response, levels = c("strongly_agree",
-                                                "agree",
-                                                "neutral", 
-                                                "disagree",
-                                                "strongly_disagree", 
-                                                 "N_A")))%>%
-  ggplot(aes(fill=Response,
-             y=Percentage, 
-             x=as.factor(di_orgyearsworked))) + 
-    geom_bar(position="stack", 
-             stat="identity")+
-  labs(x="Years Worked at CBO", 
-       y="Percentage of respondants",
-       title="Agreement that TB allows for higher qual events/projs") +
-  scale_x_discrete(labels = c("0-2 years", "3-5 years", "More than 5 years"))
-
-#The TB has positively impacted our CBO
-data%>%
-  group_by(di_orgyearsworked)%>%
-  summarize(agree = sum(att_posimpact=="Agree",na.rm=T)/n(),
-            strongly_agree = sum(att_posimpact=="Strongly agree",na.rm=T)/n(),
-            neutral = sum(att_posimpact=="Neutral",na.rm=T)/n(),
-            disagree = sum(att_posimpact=="Disagree",na.rm=T)/n(),
-            strongly_disagree = sum(att_posimpact=="Strongly disagree",na.rm=T)/n(),
-            N_A = sum(att_posimpact=="N/A",na.rm=T)/n())%>%
-  pivot_longer(agree:N_A, 
-               names_to= "Response", 
-               values_to = "Percentage")%>%
-  mutate(Response = factor(Response, levels = c("strongly_agree",
-                                                "agree",
-                                                "neutral", 
-                                                "disagree",
-                                                "strongly_disagree", 
-                                                 "N_A")))%>%
-  ggplot(aes(fill=Response,
-             y=Percentage, 
-             x=as.factor(di_orgyearsworked))) + 
-    geom_bar(position="stack", 
-             stat="identity")+
-  labs(x="Years Worked at CBO", 
-       y="Percentage of respondants",
-       title="Agreement that TB pos. impacted CBO") +
-  scale_x_discrete(labels = c("0-2 years", "3-5 years", "More than 5 years"))
-```
-
-**Findings:**
-
-- Respondents working with their organization for 3-5 years have slightly more positive opinion towards the TB (not statistically significant)
-
-
-### Questions 4-8: Plots of General sentiment and size of CBO
-*Still waiting for Noah to update size classification standards*
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
-table_size<- table(data$cbo_size)
-count_size_1 <- table_size[[1]]
-count_size_2 <- table_size[[2]]
-count_size_3 <- table_size[[3]]
-count_size_NA <- sum(is.na(data$cbo_size))
-num_obsv <- sum(count_size_1,
-                count_size_2,
-                count_size_3,
-                count_size_NA)
-pct_size_1 <- round(count_size_1/num_obsv*100,1)
-pct_size_2 <- round(count_size_2/num_obsv*100,1)
-pct_size_3 <- round(count_size_3/num_obsv*100,1)
-pct_size_NA <- round(count_size_NA/num_obsv*100,1)
-
-
-
-
-#table summarizing demographic info
-output_continuous <- matrix(c(
-# "Less than 500k (group 1)",
-  # number
-  count_size_1,
-  # pct
-  paste0(pct_size_1,"%"),
-# "Between 500k and 1000k (group 2)",
-  # number
-  count_size_2,
-  # pct
-  paste0(pct_size_2,"%"),
-# "Greater than 1000k (group 3)",
-  # number
-  count_size_3,
-  # pct
-  paste0(pct_size_3,"%"),
-# "NA"
-  # number
-  count_size_NA,
-  # pct
-  paste0(pct_size_NA,"%")
-
-),
-
-         ncol = 2, byrow = TRUE)
-
-library(htmlTable)
-output_continuous%>% 
-  addHtmlTableStyle(col.columns = c("none", "#F7F7F7"))%>% 
-  htmlTable(header =  c("Number Respondants   ", "   Percent of Total Respondants"),
-            rnames = c(
-"Less than 500k (group 1)",
-"Between 500k and 1000k (group 2)",
-"Greater than 1000k (group 3)",
-"NA"
-            ),
-            rgroup = c("CBO Size"),
-            n.rgroup = c(4),
-            caption = "Number, percentages of CBOs in size categories"
-            )
-```
+**Figure 1: Respondent Attitudes Toward ToolBank Impact**
 
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
-#The ToolBank (TB) has positively impacted our CBO by reducing costs related to purchasing or renting tools and equipment
+#overall 
 data%>%
-  group_by(cbo_size)%>%
-  summarize(agree = sum(att_purtool=="Agree",na.rm=T)/n(),
-            strongly_agree = sum(att_purtool=="Strongly agree",na.rm=T)/n(),
-            neutral = sum(att_purtool=="Neutral",na.rm=T)/n(),
-            disagree = sum(att_purtool=="Disagree",na.rm=T)/n(),
-            strongly_disagree = sum(att_purtool=="Strongly disagree",na.rm=T)/n(),
-            N_A = sum(att_purtool=="N/A",na.rm=T)/n())%>%
-  pivot_longer(agree:N_A, 
-               names_to= "Response", 
-               values_to = "Percentage")%>%
-  mutate(Response = factor(Response, levels = c("strongly_agree",
-                                                "agree",
-                                                "neutral", 
-                                                "disagree",
-                                                "strongly_disagree", 
-                                                 "N_A")))%>%
-  ggplot(aes(fill=Response,
-             y=Percentage, 
-             x=as.factor(cbo_size))) + 
-    geom_bar(position="stack", 
-             stat="identity")+
-  labs(x="Size of CBO*", 
-       y="Percentage of respondants",
-       title="Agreement that TB reduced costs related to purchasing/renting tools/equipment",
-       caption = "*Groups 1,2 3 are CBOs with size 500kor less, b/w 500k and 1000k, and over 1000k, respectively") 
-
-#The TB has positively impacted our CBO by reducing costs related to storing tools and equipment
-data%>%
-  group_by(cbo_size)%>%
-  summarize(agree = sum(att_strtool=="Agree",na.rm=T)/n(),
-            strongly_agree = sum(att_strtool=="Strongly agree",na.rm=T)/n(),
-            neutral = sum(att_strtool=="Neutral",na.rm=T)/n(),
-            disagree = sum(att_strtool=="Disagree",na.rm=T)/n(),
-            strongly_disagree = sum(att_strtool=="Strongly disagree",na.rm=T)/n(),
-            N_A = sum(att_strtool=="N/A",na.rm=T)/n())%>%
-  pivot_longer(agree:N_A, 
-               names_to= "Response", 
-               values_to = "Percentage")%>%
-  mutate(Response = factor(Response, levels = c("strongly_agree",
-                                                "agree",
-                                                "neutral", 
-                                                "disagree",
-                                                "strongly_disagree", 
-                                                 "N_A")))%>%
-  ggplot(aes(fill=Response,
-             y=Percentage, 
-             x=as.factor(cbo_size))) + 
-    geom_bar(position="stack", 
-             stat="identity")+
-  labs(x="Size of CBO*", 
-       y="Percentage of respondants",
-       title="Agreement that TB reduced costs related to storing tools/equipment",
-       caption = "*Groups 1,2 3 are CBOs with size 500kor less, b/w 500k and 1000k, and over 1000k, respectively") 
-
-
-#The TB has positively impacted our CBO by reducing staff time to complete community projects
-data%>%
-  group_by(cbo_size)%>%
-  summarize(agree = sum(att_redtime=="Agree",na.rm=T)/n(),
-            strongly_agree = sum(att_redtime=="Strongly agree",na.rm=T)/n(),
-            neutral = sum(att_redtime=="Neutral",na.rm=T)/n(),
-            disagree = sum(att_redtime=="Disagree",na.rm=T)/n(),
-            strongly_disagree = sum(att_redtime=="Strongly disagree",na.rm=T)/n(),
-            N_A = sum(att_redtime=="N/A",na.rm=T)/n())%>%
-  pivot_longer(agree:N_A, 
-               names_to= "Response", 
-               values_to = "Percentage")%>%
-  mutate(Response = factor(Response, levels = c("strongly_agree",
-                                                "agree",
-                                                "neutral", 
-                                                "disagree",
-                                                "strongly_disagree", 
-                                                 "N_A")))%>%
-  ggplot(aes(fill=Response,
-             y=Percentage, 
-             x=as.factor(cbo_size))) + 
-    geom_bar(position="stack", 
-             stat="identity")+
-  labs(x="Size of CBO*", 
-       y="Percentage of respondants",
-       title="Agreement that TB reduced staff time for projects",
-       caption = "*Groups 1,2 3 are CBOs with size 500kor less, b/w 500k and 1000k, and over 1000k, respectively") 
-
-#Tools made available through the TB allow our CBO to complete higher quality events/projects without additional funding
-data%>%
-  group_by(cbo_size)%>%
-  summarize(agree = sum(att_evquality=="Agree",na.rm=T)/n(),
-            strongly_agree = sum(att_evquality=="Strongly agree",na.rm=T)/n(),
-            neutral = sum(att_evquality=="Neutral",na.rm=T)/n(),
-            disagree = sum(att_evquality=="Disagree",na.rm=T)/n(),
-            strongly_disagree = sum(att_evquality=="Strongly disagree",na.rm=T)/n(),
-            N_A = sum(att_evquality=="N/A",na.rm=T)/n())%>%
-  pivot_longer(agree:N_A, 
-               names_to= "Response", 
-               values_to = "Percentage")%>%
-  mutate(Response = factor(Response, levels = c("strongly_agree",
-                                                "agree",
-                                                "neutral", 
-                                                "disagree",
-                                                "strongly_disagree", 
-                                                 "N_A")))%>%
-  ggplot(aes(fill=Response,
-             y=Percentage, 
-             x=as.factor(cbo_size))) + 
-    geom_bar(position="stack", 
-             stat="identity")+
-  labs(x="Size of CBO*", 
-       y="Percentage of respondants",
-       title="Agreement that TB allows for higher qual events/projs",
-       caption = "*Groups 1,2 3 are CBOs with size 500kor less, b/w 500k and 1000k, and over 1000k, respectively") 
-
-#The TB has positively impacted our CBO
-data%>%
-  group_by(cbo_size)%>%
-  summarize(agree = sum(att_posimpact=="Agree",na.rm=T)/n(),
-            strongly_agree = sum(att_posimpact=="Strongly agree",na.rm=T)/n(),
-            neutral = sum(att_posimpact=="Neutral",na.rm=T)/n(),
-            disagree = sum(att_posimpact=="Disagree",na.rm=T)/n(),
-            strongly_disagree = sum(att_posimpact=="Strongly disagree",na.rm=T)/n(),
-            N_A = sum(att_posimpact=="N/A",na.rm=T)/n())%>%
-  pivot_longer(agree:N_A, 
-               names_to= "Response", 
-               values_to = "Percentage")%>%
-  mutate(Response = factor(Response, levels = c("strongly_agree",
-                                                "agree",
-                                                "neutral", 
-                                                "disagree",
-                                                "strongly_disagree", 
-                                                 "N_A")))%>%
-  ggplot(aes(fill=Response,
-             y=Percentage, 
-             x=as.factor(cbo_size))) + 
-    geom_bar(position="stack", 
-             stat="identity")+
-  labs(x="Size of CBO*", 
-       y="Percentage of respondants",
-       title="Agreement that TB pos. impacted CBO",
-       caption = "*Groups 1,2 3 are CBOs with size 500kor less, b/w 500k and 1000k, and over 1000k, respectively") 
-```
-
-
-**Findings:**
-
-- As the median size CBO group has a **much smaller sample size**, we cannot safely conclude that small or large CBOs have more positive attitude towards the TB in all aspects.
-
-### Questions 4-8: Plots of General Sentiment and Minority Status
-
-
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
-#table summarizing demographic info
-output_continuous <- matrix(c(
-#"our top executive position is held by a minority",
-  #yes
-  paste0(count_top_yes, " (",pct_top_yes,"%)"),
-  #no
-  paste0(count_top_no, " (",pct_top_no,"%)"),
-#"More than 50% of our board is made up of minorities",
-  #yes
-  paste0(count_board_yes, " (",pct_board_yes,"%)"),
-  #no
-  paste0(count_board_no, " (",pct_board_no,"%)"),
-#"More than 50% of program recipients are minorities",
-  #yes
-  paste0(count_recip_yes, " (",pct_recip_yes,"%)"),
-  #no
-  paste0(count_recip_no, " (",pct_recip_no,"%)"),
-#"None of the above"
-  #yes
-  paste0(count_none_yes, " (",pct_none_yes,"%)"),
-  #no
-  paste0(count_none_no, " (",pct_none_no,"%)")
-),
-
-         ncol = 2, byrow = TRUE)
-
-output_continuous%>% 
-  addHtmlTableStyle(col.columns = c("none", "#F7F7F7"))%>% 
-  htmlTable(header =  c("# Yes (% Yes) ", "# No (% No)"),
-            rnames = c(
-"Our top executive position is held by a minority",
-"More than 50% of our board is made up of minorities",
-"More than 50% of program recipients are minorities",
-"None of the above"
-            ),
-            rgroup = c("Minority Leadership"),
-            n.rgroup = c(4),
-            caption = "Number, percentages of respondants indicating minority leadership"
-            )
-```
-
-
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
-#The ToolBank (TB) has positively impacted our CBO by reducing costs related to purchasing or renting tools and equipment
-data <- data%>%
-  mutate(top_exec_minority = str_detect(di_mled,"Our top executive position is held by a minority."),
-         maj_prog_recip_minority = str_detect(di_mled,"More than 50% of program recipients are minorities"),
-         none = str_detect(di_mled,"None of the above"),
-         maj_board_minority = str_detect(di_mled,"More than 50% of our board is made up of minorities"),
-         )
-
-                                                                                                                                    
-# sentiments of top exec minority
-data%>%
-  filter(top_exec_minority==TRUE)%>%
+  mutate(num_orgs = n())%>%
   pivot_longer(cols=att_purtool:att_posimpact,names_to="question",values_to="response")%>%
   group_by(question)%>%
   summarize(agree = sum(response=="Agree",na.rm=T)/n(),
@@ -911,108 +478,10 @@ data%>%
              stat="identity")+
   labs(x="General Attitude", 
        y="Percentage of respondants",
-       title="Sentiment on TB among CBOs w/ top exec. a minority") +
-  scale_x_discrete(labels = c("higher quality event", "positive impact", "purchase tool", "reduce time", "store tool"))
-
-# sentiments of CBOS w "More than 50% of program recipients are minorities"
-data%>%
-  filter(maj_prog_recip_minority==TRUE)%>%
-  pivot_longer(cols=att_purtool:att_posimpact,names_to="question",values_to="response")%>%
-  group_by(question)%>%
-  summarize(agree = sum(response=="Agree",na.rm=T)/n(),
-            strongly_agree = sum(response=="Strongly agree",na.rm=T)/n(),
-            neutral = sum(response=="Neutral",na.rm=T)/n(),
-            disagree = sum(response=="Disagree",na.rm=T)/n(),
-            strongly_disagree = sum(response=="Strongly disagree",na.rm=T)/n(),
-            N_A = sum(response=="N/A",na.rm=T)/n())%>%
-  pivot_longer(agree:N_A, 
-               names_to= "Response", 
-               values_to = "Percentage")%>%
-  mutate(Response = factor(Response, levels = c("strongly_agree",
-                                                "agree",
-                                                "neutral", 
-                                                "disagree",
-                                                "strongly_disagree", 
-                                                 "N_A")))%>%
-  ggplot(aes(fill=Response,
-             y=Percentage, 
-             x=question)) + 
-    geom_bar(position="stack", 
-             stat="identity")+
-  labs(x="General Attitude", 
-       y="Percentage of respondants",
-       title="Sentiment on TB among CBOs w/ 50%+ program recipients are minorities") +
-  scale_x_discrete(labels = c("higher quality event", "positive impact", "purchase tool", "reduce time", "store tool"))
-
-#sentiment of CBOs w "More than 50% of our board is made up of minorities"
-data%>%
-  filter(maj_board_minority==TRUE)%>%
-  pivot_longer(cols=att_purtool:att_posimpact,names_to="question",values_to="response")%>%
-  group_by(question)%>%
-  summarize(agree = sum(response=="Agree",na.rm=T)/n(),
-            strongly_agree = sum(response=="Strongly agree",na.rm=T)/n(),
-            neutral = sum(response=="Neutral",na.rm=T)/n(),
-            disagree = sum(response=="Disagree",na.rm=T)/n(),
-            strongly_disagree = sum(response=="Strongly disagree",na.rm=T)/n(),
-            N_A = sum(response=="N/A",na.rm=T)/n())%>%
-  pivot_longer(agree:N_A, 
-               names_to= "Response", 
-               values_to = "Percentage")%>%
-  mutate(Response = factor(Response, levels = c("strongly_agree",
-                                                "agree",
-                                                "neutral", 
-                                                "disagree",
-                                                "strongly_disagree", 
-                                                 "N_A")))%>%
-  ggplot(aes(fill=Response,
-             y=Percentage, 
-             x=question)) + 
-    geom_bar(position="stack", 
-             stat="identity")+
-  labs(x="General Attitude", 
-       y="Percentage of respondants",
-       title="Sentiment on TB among CBOs w/ 50%+ board members are minorities") +
-  scale_x_discrete(labels = c("higher quality event", "positive impact", "purchase tool", "reduce time", "store tool"))
-
-# sentiments of CBOs who responded "None of the above"
-data%>%
-  filter(none==TRUE)%>%
-  pivot_longer(cols=att_purtool:att_posimpact,names_to="question",values_to="response")%>%
-  group_by(question)%>%
-  summarize(agree = sum(response=="Agree",na.rm=T)/n(),
-            strongly_agree = sum(response=="Strongly agree",na.rm=T)/n(),
-            neutral = sum(response=="Neutral",na.rm=T)/n(),
-            disagree = sum(response=="Disagree",na.rm=T)/n(),
-            strongly_disagree = sum(response=="Strongly disagree",na.rm=T)/n(),
-            N_A = sum(response=="N/A",na.rm=T)/n())%>%
-  pivot_longer(agree:N_A, 
-               names_to= "Response", 
-               values_to = "Percentage")%>%
-  mutate(Response = factor(Response, levels = c("strongly_agree",
-                                                "agree",
-                                                "neutral", 
-                                                "disagree",
-                                                "strongly_disagree", 
-                                                 "N_A")))%>%
-  ggplot(aes(fill=Response,
-             y=Percentage, 
-             x=question)) + 
-    geom_bar(position="stack", 
-             stat="identity")+
-  labs(x="General Attitude", 
-       y="Percentage of respondants",
-       title="Sentiment on TB among CBOs reporting none for minority status Q") +
+       title="Respondent Attitudes Toward ToolBank Impact") +
   scale_x_discrete(labels = c("higher quality event", "positive impact", "purchase tool", "reduce time", "store tool"))
 ```
 
-**Findings:**
-
-- respondents' attitude towards the TB are similar across organizations with different minority status. Part of the reason may be that respondents in these categories overlap with each other.
-- attitudes of respondents from organizations with no minority status are more flunctuated, which is likely related to the small sample size for that group
-
-### Response analysis
-
-overall table:
 
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 #creating a table to give these summary stats
@@ -1336,7 +805,1416 @@ if(is_empty(count_posimpact_na_initial)){
 ```
 
 
+**Table 1: Respondent Attitudes Toward ToolBank Impact**
+
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+
+#table summarizing demographic info
+output_continuous <- matrix(c(
+  
+# att_purtool:"TB has pos. impacted our CBO by reducing costs related to purchasing or renting tools and equipment",
+  # "# Strongly Agree (%)", 
+  paste0(count_purtool_s_a," (",pct_purtool_s_a,"%)"),
+  # "# Agree (%)",
+  paste0(count_purtool_a," (",pct_purtool_a,"%)"),
+  # "# Neutral (%)",
+  paste0(count_purtool_n," (",pct_purtool_n,"%)"),
+  # "# Disagree (%)",
+  paste0(count_purtool_d," (",pct_purtool_d,"%)"),
+  # "# Strongly Disagree (%)",
+  paste0(count_purtool_s_d," (",pct_purtool_s_d,"%)"),
+  # "# N/A (%)"
+  paste0(count_purtool_na," (",pct_purtool_na,"%)"),
+  
+# att_strtool:"TB has pos. impacted our CBO by reducing costs related to storing tools and equipment",
+  # "# Strongly Agree (%)", 
+  paste0(count_strtool_s_a," (",pct_strtool_s_a,"%)"),
+  # "# Agree (%)",
+  paste0(count_strtool_a," (",pct_strtool_a,"%)"),
+  # "# Neutral (%)",
+  paste0(count_strtool_n," (",pct_strtool_n,"%)"),
+  # "# Disagree (%)",
+  paste0(count_strtool_d," (",pct_strtool_d,"%)"),
+  # "# Strongly Disagree (%)",
+  paste0(count_strtool_s_d," (",pct_strtool_s_d,"%)"),
+  # "# N/A (%)"
+  paste0(count_strtool_na," (",pct_strtool_na,"%)"),
+
+# att_redtime:"TB has pos. impacted our CBO by reducing staff time to complete maintenance/projects",
+  # "# Strongly Agree (%)", 
+  paste0(count_redtime_s_a," (",pct_redtime_s_a,"%)"),
+  # "# Agree (%)",
+  paste0(count_redtime_a," (",pct_redtime_a,"%)"),
+  # "# Neutral (%)",
+  paste0(count_redtime_n," (",pct_redtime_n,"%)"),
+  # "# Disagree (%)",
+  paste0(count_redtime_d," (",pct_redtime_d,"%)"),
+  # "# Strongly Disagree (%)",
+  paste0(count_redtime_s_d," (",pct_redtime_s_d,"%)"),
+  # "# N/A (%)"
+  paste0(count_redtime_na," (",pct_redtime_na,"%)"),
+# att_evquality: "the Tools made available through the TB allow our CBO to complete higher quality events/projects without additional funding",
+  # "# Strongly Agree (%)", 
+  paste0(count_evquality_s_a," (",pct_evquality_s_a,"%)"),
+  # "# Agree (%)",
+  paste0(count_evquality_a," (",pct_evquality_a,"%)"),
+  # "# Neutral (%)",
+  paste0(count_evquality_n," (",pct_evquality_n,"%)"),
+  # "# Disagree (%)",
+  paste0(count_evquality_d," (",pct_evquality_d,"%)"),
+  # "# Strongly Disagree (%)",
+  paste0(count_evquality_s_d," (",pct_evquality_s_d,"%)"),
+  # "# N/A (%)"
+  paste0(count_evquality_na," (",pct_evquality_na,"%)"),
+
+# att_posimpact: "TB has pos. impacted our CBO"
+  # "# Strongly Agree (%)", 
+  paste0(count_posimpact_s_a," (",pct_posimpact_s_a,"%)"),
+  # "# Agree (%)",
+  paste0(count_posimpact_a," (",pct_posimpact_a,"%)"),
+  # "# Neutral (%)",
+  paste0(count_posimpact_n," (",pct_posimpact_n,"%)"),
+  # "# Disagree (%)",
+  paste0(count_posimpact_d," (",pct_posimpact_d,"%)"),
+  # "# Strongly Disagree (%)",
+  paste0(count_posimpact_s_d," (",pct_posimpact_s_d,"%)"),
+  # "# N/A (%)"
+  paste0(count_posimpact_na," (",pct_posimpact_na,"%)")
+
+
+),
+
+         ncol = 6, byrow = TRUE)
+
+output_continuous%>% 
+  addHtmlTableStyle(col.columns = c("none", "#F7F7F7"),
+                    col.rgroup = c("none", "#F5FBFF")
+                    )%>% 
+  htmlTable(header =  c("#Strongly Agree (%)", 
+                        "#Agree (%)",
+                        "#Neutral (%)",
+                        "#Disagree (%)",
+                        "#Strongly Disagree (%)",
+                        "#N/A (%)"),
+            rnames = c(
+"TB has pos. impacted our CBO by reducing costs related to purchasing or renting tools and equipment",
+"TB has pos. impacted our CBO by reducing costs related to storing tools and equipment",
+"TB has pos. impacted our CBO by reducing staff time to complete maintenance/projects",
+"the Tools made available through the TB allow our CBO to complete higher quality events/projects without additional funding",
+"TB has pos. impacted our CBO"
+
+            ),
+            # rgroup = c("Sentiment "),
+            # n.rgroup = c(4),
+            caption = "Number, percentages of respondents to sentiment questions"
+            )
+
+```
+**Findings**
+
+- 100% of respondents strongly agreed (93.3%) or agreed (6.7%) that the ToolBank positively impacts their CBO 
+- 100% of respondents strongly agreed (93.3%) or agreed (6.7%) that the ToolBank reduced costs related to purchasing and renting tools and equipment
+- More than 95% or respondents strongly agreed (80.0%) or agreed (15.6%) that the tools made available through the ToolBank allow their CBO to complete higher quality events/projects without additional funding
+- respondents have comparatively less positive attitudes towards (still more than 60% of the respondent strongly agreed or agreed) the statements that the ToolBank positively impacted their CBO by reducing costs related to storing tools and equipment, and the ToolBank has positively impacted their CBO by reducing staff time to complete maintenance/project
+
+
+
+# Section 3: General Attitudes Stratified by Respondent and Community Based Organization (CBO) Characteristics 
+The following plots analyze the questions from section one above, stratified by the number of years that the respondent reported working at the CBO, the size of the CBO, and the minority status of the CBO. These plots explore if there is a relationship between these self-reported characteristics and the respondents' attitudes towards the ToolBank's economic and community impact.  
+
+### General Attitudes Stratified by Respondent Years with the CBO
+The following plots analyze the questions from section two, stratified by the number of years that the respondent reported working at the CBO. These plots explore if there is a relationship between respondents' self-reported number of years with the CBO and their attitudes towards the ToolBank's economic and community impact.
+
+**Figure 2: Respondent Agreement that the ToolBank Reduced Their CBOs Costs Related to Purchasing and Renting Tools and Equipment, Stratified by Respondent Years with the CBO**
+
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+#The ToolBank (TB) has positively impacted our CBO by reducing costs related to purchasing or renting tools and equipment
+data%>%
+  group_by(di_orgyearsworked)%>%
+  summarize(agree = sum(att_purtool=="Agree",na.rm=T)/n(),
+            strongly_agree = sum(att_purtool=="Strongly agree",na.rm=T)/n(),
+            neutral = sum(att_purtool=="Neutral",na.rm=T)/n(),
+            disagree = sum(att_purtool=="Disagree",na.rm=T)/n(),
+            strongly_disagree = sum(att_purtool=="Strongly disagree",na.rm=T)/n(),
+            N_A = sum(att_purtool=="N/A",na.rm=T)/n())%>%
+  pivot_longer(agree:N_A, 
+               names_to= "Response", 
+               values_to = "Percentage")%>%
+  mutate(Response = factor(Response, levels = c("strongly_agree",
+                                                "agree",
+                                                "neutral", 
+                                                "disagree",
+                                                "strongly_disagree", 
+                                                 "N_A")))%>%
+  ggplot(aes(fill=Response,
+             y=Percentage, 
+             x=as.factor(di_orgyearsworked))) + 
+    geom_bar(position="stack", 
+             stat="identity")+
+  labs(x="Years Worked at CBO", 
+       y="Percentage of respondents",
+       title="Respondent Agreement that TB Reduced Purchasing and Renting Costs") +
+  scale_x_discrete(labels = c("0-2 years", "3-5 years", "More than 5 years"))
+
+```
+
+**Figure 3: Respondent Agreement that the ToolBank Reduced Their CBOs Costs Related Storing Tools and Equipment, Stratified by Respondent Years with the CBO**
+
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+#The TB has positively impacted our CBO by reducing costs related to storing tools and equipment
+data%>%
+  group_by(di_orgyearsworked)%>%
+  summarize(agree = sum(att_strtool=="Agree",na.rm=T)/n(),
+            strongly_agree = sum(att_strtool=="Strongly agree",na.rm=T)/n(),
+            neutral = sum(att_strtool=="Neutral",na.rm=T)/n(),
+            disagree = sum(att_strtool=="Disagree",na.rm=T)/n(),
+            strongly_disagree = sum(att_strtool=="Strongly disagree",na.rm=T)/n(),
+            N_A = sum(att_strtool=="N/A",na.rm=T)/n())%>%
+  pivot_longer(agree:N_A, 
+               names_to= "Response", 
+               values_to = "Percentage")%>%
+  mutate(Response = factor(Response, levels = c("strongly_agree",
+                                                "agree",
+                                                "neutral", 
+                                                "disagree",
+                                                "strongly_disagree", 
+                                                 "N_A")))%>%
+  ggplot(aes(fill=Response,
+             y=Percentage, 
+             x=as.factor(di_orgyearsworked))) + 
+    geom_bar(position="stack", 
+             stat="identity")+
+  labs(x="Years Worked at CBO", 
+       y="Percentage of respondants",
+       title="Agreement that TB reduced costs related to storing tools/equipment") +
+  scale_x_discrete(labels = c("0-2 years", "3-5 years", "More than 5 years"))
+```
+
+
+**Figure 4: Respondent Agreement that the ToolBank Reduced Their CBOs Costs Related to Staff Time to Complete Community Projects, Stratified by Respondent Years with the CBO**
+
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+#The TB has positively impacted our CBO by reducing staff time to complete community projects
+data%>%
+  group_by(di_orgyearsworked)%>%
+  summarize(agree = sum(att_redtime=="Agree",na.rm=T)/n(),
+            strongly_agree = sum(att_redtime=="Strongly agree",na.rm=T)/n(),
+            neutral = sum(att_redtime=="Neutral",na.rm=T)/n(),
+            disagree = sum(att_redtime=="Disagree",na.rm=T)/n(),
+            strongly_disagree = sum(att_redtime=="Strongly disagree",na.rm=T)/n(),
+            N_A = sum(att_redtime=="N/A",na.rm=T)/n())%>%
+  pivot_longer(agree:N_A, 
+               names_to= "Response", 
+               values_to = "Percentage")%>%
+  mutate(Response = factor(Response, levels = c("strongly_agree",
+                                                "agree",
+                                                "neutral", 
+                                                "disagree",
+                                                "strongly_disagree", 
+                                                 "N_A")))%>%
+  ggplot(aes(fill=Response,
+             y=Percentage, 
+             x=as.factor(di_orgyearsworked))) + 
+    geom_bar(position="stack", 
+             stat="identity")+
+  labs(x="Years Worked at CBO", 
+       y="Percentage of respondents",
+       title="Agreement that TB reduced staff time for projects") +
+  scale_x_discrete(labels = c("0-2 years", "3-5 years", "More than 5 years"))
+
+
+```
+
+
+
+**Figure 5: Respondent Agreement that the ToolBank Has Positively Impacted Their CBO, Stratified by Respondent Years with the CBO**
+
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+#The TB has positively impacted our CBO
+data%>%
+  group_by(di_orgyearsworked)%>%
+  summarize(agree = sum(att_posimpact=="Agree",na.rm=T)/n(),
+            strongly_agree = sum(att_posimpact=="Strongly agree",na.rm=T)/n(),
+            neutral = sum(att_posimpact=="Neutral",na.rm=T)/n(),
+            disagree = sum(att_posimpact=="Disagree",na.rm=T)/n(),
+            strongly_disagree = sum(att_posimpact=="Strongly disagree",na.rm=T)/n(),
+            N_A = sum(att_posimpact=="N/A",na.rm=T)/n())%>%
+  pivot_longer(agree:N_A, 
+               names_to= "Response", 
+               values_to = "Percentage")%>%
+  mutate(Response = factor(Response, levels = c("strongly_agree",
+                                                "agree",
+                                                "neutral", 
+                                                "disagree",
+                                                "strongly_disagree", 
+                                                 "N_A")))%>%
+  ggplot(aes(fill=Response,
+             y=Percentage, 
+             x=as.factor(di_orgyearsworked))) + 
+    geom_bar(position="stack", 
+             stat="identity")+
+  labs(x="Years Worked at CBO", 
+       y="Percentage of respondants",
+       title="Respondent Agreement that the ToolBank Has Positively Impacted Their CBO") +
+  scale_x_discrete(labels = c("0-2 years", "3-5 years", "More than 5 years"))
+```
+
+
+
+
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE, include=F}
+#The ToolBank (TB) has positively impacted our CBO by reducing costs related to purchasing or renting tools and equipment
+data%>%
+  group_by(di_orgyearsworked)%>%
+  summarize(agree = sum(att_purtool=="Agree",na.rm=T)/n(),
+            strongly_agree = sum(att_purtool=="Strongly agree",na.rm=T)/n(),
+            neutral = sum(att_purtool=="Neutral",na.rm=T)/n(),
+            disagree = sum(att_purtool=="Disagree",na.rm=T)/n(),
+            strongly_disagree = sum(att_purtool=="Strongly disagree",na.rm=T)/n(),
+            N_A = sum(att_purtool=="N/A",na.rm=T)/n())%>%
+  pivot_longer(agree:N_A, 
+               names_to= "Response", 
+               values_to = "Percentage")%>%
+  mutate(Response = factor(Response, levels = c("strongly_agree",
+                                                "agree",
+                                                "neutral", 
+                                                "disagree",
+                                                "strongly_disagree", 
+                                                 "N_A")))%>%
+  ggplot(aes(fill=Response,
+             y=Percentage, 
+             x=as.factor(di_orgyearsworked))) + 
+    geom_bar(position="stack", 
+             stat="identity")+
+  labs(x="Years Worked at CBO", 
+       y="Percentage of respondants",
+       title="Agreement that TB reduced costs related to purchasing/renting tools/equipment") +
+  scale_x_discrete(labels = c("0-2 years", "3-5 years", "More than 5 years"))
+
+#The TB has positively impacted our CBO by reducing costs related to storing tools and equipment
+data%>%
+  group_by(di_orgyearsworked)%>%
+  summarize(agree = sum(att_strtool=="Agree",na.rm=T)/n(),
+            strongly_agree = sum(att_strtool=="Strongly agree",na.rm=T)/n(),
+            neutral = sum(att_strtool=="Neutral",na.rm=T)/n(),
+            disagree = sum(att_strtool=="Disagree",na.rm=T)/n(),
+            strongly_disagree = sum(att_strtool=="Strongly disagree",na.rm=T)/n(),
+            N_A = sum(att_strtool=="N/A",na.rm=T)/n())%>%
+  pivot_longer(agree:N_A, 
+               names_to= "Response", 
+               values_to = "Percentage")%>%
+  mutate(Response = factor(Response, levels = c("strongly_agree",
+                                                "agree",
+                                                "neutral", 
+                                                "disagree",
+                                                "strongly_disagree", 
+                                                 "N_A")))%>%
+  ggplot(aes(fill=Response,
+             y=Percentage, 
+             x=as.factor(di_orgyearsworked))) + 
+    geom_bar(position="stack", 
+             stat="identity")+
+  labs(x="Years Worked at CBO", 
+       y="Percentage of respondants",
+       title="Agreement that TB reduced costs related to storing tools/equipment") +
+  scale_x_discrete(labels = c("0-2 years", "3-5 years", "More than 5 years"))
+
+
+#The TB has positively impacted our CBO by reducing staff time to complete community projects
+data%>%
+  group_by(di_orgyearsworked)%>%
+  summarize(agree = sum(att_redtime=="Agree",na.rm=T)/n(),
+            strongly_agree = sum(att_redtime=="Strongly agree",na.rm=T)/n(),
+            neutral = sum(att_redtime=="Neutral",na.rm=T)/n(),
+            disagree = sum(att_redtime=="Disagree",na.rm=T)/n(),
+            strongly_disagree = sum(att_redtime=="Strongly disagree",na.rm=T)/n(),
+            N_A = sum(att_redtime=="N/A",na.rm=T)/n())%>%
+  pivot_longer(agree:N_A, 
+               names_to= "Response", 
+               values_to = "Percentage")%>%
+  mutate(Response = factor(Response, levels = c("strongly_agree",
+                                                "agree",
+                                                "neutral", 
+                                                "disagree",
+                                                "strongly_disagree", 
+                                                 "N_A")))%>%
+  ggplot(aes(fill=Response,
+             y=Percentage, 
+             x=as.factor(di_orgyearsworked))) + 
+    geom_bar(position="stack", 
+             stat="identity")+
+  labs(x="Years Worked at CBO", 
+       y="Percentage of respondants",
+       title="Agreement that TB reduced staff time for projects") +
+  scale_x_discrete(labels = c("0-2 years", "3-5 years", "More than 5 years"))
+
+#Tools made available through the TB allow our CBO to complete higher quality events/projects without additional funding
+data%>%
+  group_by(di_orgyearsworked)%>%
+  summarize(agree = sum(att_evquality=="Agree",na.rm=T)/n(),
+            strongly_agree = sum(att_evquality=="Strongly agree",na.rm=T)/n(),
+            neutral = sum(att_evquality=="Neutral",na.rm=T)/n(),
+            disagree = sum(att_evquality=="Disagree",na.rm=T)/n(),
+            strongly_disagree = sum(att_evquality=="Strongly disagree",na.rm=T)/n(),
+            N_A = sum(att_evquality=="N/A",na.rm=T)/n())%>%
+  pivot_longer(agree:N_A, 
+               names_to= "Response", 
+               values_to = "Percentage")%>%
+  mutate(Response = factor(Response, levels = c("strongly_agree",
+                                                "agree",
+                                                "neutral", 
+                                                "disagree",
+                                                "strongly_disagree", 
+                                                 "N_A")))%>%
+  ggplot(aes(fill=Response,
+             y=Percentage, 
+             x=as.factor(di_orgyearsworked))) + 
+    geom_bar(position="stack", 
+             stat="identity")+
+  labs(x="Years Worked at CBO", 
+       y="Percentage of respondants",
+       title="Agreement that TB allows for higher qual events/projs") +
+  scale_x_discrete(labels = c("0-2 years", "3-5 years", "More than 5 years"))
+
+#The TB has positively impacted our CBO
+data%>%
+  group_by(di_orgyearsworked)%>%
+  summarize(agree = sum(att_posimpact=="Agree",na.rm=T)/n(),
+            strongly_agree = sum(att_posimpact=="Strongly agree",na.rm=T)/n(),
+            neutral = sum(att_posimpact=="Neutral",na.rm=T)/n(),
+            disagree = sum(att_posimpact=="Disagree",na.rm=T)/n(),
+            strongly_disagree = sum(att_posimpact=="Strongly disagree",na.rm=T)/n(),
+            N_A = sum(att_posimpact=="N/A",na.rm=T)/n())%>%
+  pivot_longer(agree:N_A, 
+               names_to= "Response", 
+               values_to = "Percentage")%>%
+  mutate(Response = factor(Response, levels = c("strongly_agree",
+                                                "agree",
+                                                "neutral", 
+                                                "disagree",
+                                                "strongly_disagree", 
+                                                 "N_A")))%>%
+  ggplot(aes(fill=Response,
+             y=Percentage, 
+             x=as.factor(di_orgyearsworked))) + 
+    geom_bar(position="stack", 
+             stat="identity")+
+  labs(x="Years Worked at CBO", 
+       y="Percentage of respondants",
+       title="Agreement that TB pos. impacted CBO") +
+  scale_x_discrete(labels = c("0-2 years", "3-5 years", "More than 5 years"))
+```
+
+**Findings**
+
+- Respondents working with their organization for 3-5 years have slightly more positive opinion towards the TB, however this difference compared to other groups was not statistically significant
+
+
+### General Attitudes Stratified by Size of CBO
+The following plots analyze the general attitude questions from section two, stratified by the size of the organization, as determined by their publicly available gross receipts. These plots explore if there is a relationship between the size of the funding available to the CBO and the respondents' attitudes towards the ToolBank's economic and community impact.
+
+*confirm size classification standards*
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+table_size<- table(data$cbo_size)
+count_size_1 <- table_size[[1]]
+count_size_2 <- table_size[[2]]
+count_size_3 <- table_size[[3]]
+count_size_NA <- sum(is.na(data$cbo_size))
+num_obsv <- sum(count_size_1,
+                count_size_2,
+                count_size_3,
+                count_size_NA)
+pct_size_1 <- round(count_size_1/num_obsv*100,1)
+pct_size_2 <- round(count_size_2/num_obsv*100,1)
+pct_size_3 <- round(count_size_3/num_obsv*100,1)
+pct_size_NA <- round(count_size_NA/num_obsv*100,1)
+
+
+
+
+#table summarizing demographic info
+output_continuous <- matrix(c(
+# "Less than 500k (group 1)",
+  # number
+  count_size_1,
+  # pct
+  paste0(pct_size_1,"%"),
+# "Between 500k and 1000k (group 2)",
+  # number
+  count_size_2,
+  # pct
+  paste0(pct_size_2,"%"),
+# "Greater than 1000k (group 3)",
+  # number
+  count_size_3,
+  # pct
+  paste0(pct_size_3,"%"),
+# "NA"
+  # number
+  count_size_NA,
+  # pct
+  paste0(pct_size_NA,"%")
+
+),
+
+         ncol = 2, byrow = TRUE)
+
+library(htmlTable)
+output_continuous%>% 
+  addHtmlTableStyle(col.columns = c("none", "#F7F7F7"))%>% 
+  htmlTable(header =  c("Number Respondents   ", "   Percent of Total Respondents"),
+            rnames = c(
+"Less than 500k (group 1)",
+"Between 500k and 1000k (group 2)",
+"Greater than 1000k (group 3)",
+"NA"
+            ),
+            rgroup = c("CBO Size"),
+            n.rgroup = c(4),
+            caption = "Table 2: Number and Percentage of CBOs by Size"
+            )
+```
+
+
+**Figure 6: Respondent Agreement that the ToolBank Reduced Their CBO's Purchasing and Renting Costs, Stratified by CBO Size**
+
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+#The ToolBank (TB) has positively impacted our CBO by reducing costs related to purchasing or renting tools and equipment
+data%>%
+  group_by(cbo_size)%>%
+  summarize(agree = sum(att_purtool=="Agree",na.rm=T)/n(),
+            strongly_agree = sum(att_purtool=="Strongly agree",na.rm=T)/n(),
+            neutral = sum(att_purtool=="Neutral",na.rm=T)/n(),
+            disagree = sum(att_purtool=="Disagree",na.rm=T)/n(),
+            strongly_disagree = sum(att_purtool=="Strongly disagree",na.rm=T)/n(),
+            N_A = sum(att_purtool=="N/A",na.rm=T)/n())%>%
+  pivot_longer(agree:N_A, 
+               names_to= "Response", 
+               values_to = "Percentage")%>%
+  mutate(Response = factor(Response, levels = c("strongly_agree",
+                                                "agree",
+                                                "neutral", 
+                                                "disagree",
+                                                "strongly_disagree", 
+                                                 "N_A")))%>%
+  ggplot(aes(fill=Response,
+             y=Percentage, 
+             x=as.factor(cbo_size))) + 
+    geom_bar(position="stack", 
+             stat="identity")+
+  labs(x="Size of CBO*", 
+       y="Percentage of respondents",
+       title="Respondent Agreement that TB Reduced Purchasing and Renting Costs",
+       caption = "*Groups 1,2 3 are CBOs with size 500kor less, b/w 500k and 1000k, and over 1000k, respectively") 
+```
+
+**Figure 7: Respondent Agreement that the ToolBank Reduced Their CBOs Costs Related Storing Tools and Equipment, Stratified by, Stratified by CBO Size**
+
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+#The TB has positively impacted our CBO by reducing costs related to storing tools and equipment
+data%>%
+  group_by(cbo_size)%>%
+  summarize(agree = sum(att_strtool=="Agree",na.rm=T)/n(),
+            strongly_agree = sum(att_strtool=="Strongly agree",na.rm=T)/n(),
+            neutral = sum(att_strtool=="Neutral",na.rm=T)/n(),
+            disagree = sum(att_strtool=="Disagree",na.rm=T)/n(),
+            strongly_disagree = sum(att_strtool=="Strongly disagree",na.rm=T)/n(),
+            N_A = sum(att_strtool=="N/A",na.rm=T)/n())%>%
+  pivot_longer(agree:N_A, 
+               names_to= "Response", 
+               values_to = "Percentage")%>%
+  mutate(Response = factor(Response, levels = c("strongly_agree",
+                                                "agree",
+                                                "neutral", 
+                                                "disagree",
+                                                "strongly_disagree", 
+                                                 "N_A")))%>%
+  ggplot(aes(fill=Response,
+             y=Percentage, 
+             x=as.factor(cbo_size))) + 
+    geom_bar(position="stack", 
+             stat="identity")+
+  labs(x="Size of CBO*", 
+       y="Percentage of respondents",
+       title="Agreement that TB reduced costs related to storing tools/equipment",
+       caption = "*Groups 1,2 3 are CBOs with size 500kor less, b/w 500k and 1000k, and over 1000k, respectively")  
+```
+
+
+**Figure 8: Respondent Agreement that the ToolBank Reduced Their CBOs Costs Related to Staff Time to Complete Community Projects, Stratified by CBO Size**
+
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+#The TB has positively impacted our CBO by reducing staff time to complete community projects
+data%>%
+  group_by(cbo_size)%>%
+  summarize(agree = sum(att_redtime=="Agree",na.rm=T)/n(),
+            strongly_agree = sum(att_redtime=="Strongly agree",na.rm=T)/n(),
+            neutral = sum(att_redtime=="Neutral",na.rm=T)/n(),
+            disagree = sum(att_redtime=="Disagree",na.rm=T)/n(),
+            strongly_disagree = sum(att_redtime=="Strongly disagree",na.rm=T)/n(),
+            N_A = sum(att_redtime=="N/A",na.rm=T)/n())%>%
+  pivot_longer(agree:N_A, 
+               names_to= "Response", 
+               values_to = "Percentage")%>%
+  mutate(Response = factor(Response, levels = c("strongly_agree",
+                                                "agree",
+                                                "neutral", 
+                                                "disagree",
+                                                "strongly_disagree", 
+                                                 "N_A")))%>%
+  ggplot(aes(fill=Response,
+             y=Percentage, 
+             x=as.factor(cbo_size))) + 
+    geom_bar(position="stack", 
+             stat="identity")+
+  labs(x="Size of CBO*", 
+       y="Percentage of respondants",
+       title="Agreement That TB Reduced Costs Related to Staff Time for Projects",
+       caption = "*Groups 1,2 3 are CBOs with size 500kor less, b/w 500k and 1000k, and over 1000k, respectively")   
+```
+
+
+**Figure 9: Respondent Agreement that the ToolBank Has Positively Impacted Their CBO, Stratified by CBO Size**
+
+
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+#The TB has positively impacted our CBO
+data%>%
+  group_by(cbo_size)%>%
+  summarize(agree = sum(att_posimpact=="Agree",na.rm=T)/n(),
+            strongly_agree = sum(att_posimpact=="Strongly agree",na.rm=T)/n(),
+            neutral = sum(att_posimpact=="Neutral",na.rm=T)/n(),
+            disagree = sum(att_posimpact=="Disagree",na.rm=T)/n(),
+            strongly_disagree = sum(att_posimpact=="Strongly disagree",na.rm=T)/n(),
+            N_A = sum(att_posimpact=="N/A",na.rm=T)/n())%>%
+  pivot_longer(agree:N_A, 
+               names_to= "Response", 
+               values_to = "Percentage")%>%
+  mutate(Response = factor(Response, levels = c("strongly_agree",
+                                                "agree",
+                                                "neutral", 
+                                                "disagree",
+                                                "strongly_disagree", 
+                                                 "N_A")))%>%
+  ggplot(aes(fill=Response,
+             y=Percentage, 
+             x=as.factor(cbo_size))) + 
+    geom_bar(position="stack", 
+             stat="identity")+
+  labs(x="Size of CBO*", 
+       y="Percentage of respondants",
+       title="Agreement that TB Postively Impacted the CBO",
+       caption = "*Groups 1,2 3 are CBOs with size 500kor less, b/w 500k and 1000k, and over 1000k, respectively")   
+```
+
+
+
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE, include=F}
+#The ToolBank (TB) has positively impacted our CBO by reducing costs related to purchasing or renting tools and equipment
+data%>%
+  group_by(cbo_size)%>%
+  summarize(agree = sum(att_purtool=="Agree",na.rm=T)/n(),
+            strongly_agree = sum(att_purtool=="Strongly agree",na.rm=T)/n(),
+            neutral = sum(att_purtool=="Neutral",na.rm=T)/n(),
+            disagree = sum(att_purtool=="Disagree",na.rm=T)/n(),
+            strongly_disagree = sum(att_purtool=="Strongly disagree",na.rm=T)/n(),
+            N_A = sum(att_purtool=="N/A",na.rm=T)/n())%>%
+  pivot_longer(agree:N_A, 
+               names_to= "Response", 
+               values_to = "Percentage")%>%
+  mutate(Response = factor(Response, levels = c("strongly_agree",
+                                                "agree",
+                                                "neutral", 
+                                                "disagree",
+                                                "strongly_disagree", 
+                                                 "N_A")))%>%
+  ggplot(aes(fill=Response,
+             y=Percentage, 
+             x=as.factor(cbo_size))) + 
+    geom_bar(position="stack", 
+             stat="identity")+
+  labs(x="Size of CBO*", 
+       y="Percentage of respondants",
+       title="Agreement that TB reduced costs related to purchasing/renting tools/equipment",
+       caption = "*Groups 1,2 3 are CBOs with size 500kor less, b/w 500k and 1000k, and over 1000k, respectively") 
+
+#The TB has positively impacted our CBO by reducing costs related to storing tools and equipment
+data%>%
+  group_by(cbo_size)%>%
+  summarize(agree = sum(att_strtool=="Agree",na.rm=T)/n(),
+            strongly_agree = sum(att_strtool=="Strongly agree",na.rm=T)/n(),
+            neutral = sum(att_strtool=="Neutral",na.rm=T)/n(),
+            disagree = sum(att_strtool=="Disagree",na.rm=T)/n(),
+            strongly_disagree = sum(att_strtool=="Strongly disagree",na.rm=T)/n(),
+            N_A = sum(att_strtool=="N/A",na.rm=T)/n())%>%
+  pivot_longer(agree:N_A, 
+               names_to= "Response", 
+               values_to = "Percentage")%>%
+  mutate(Response = factor(Response, levels = c("strongly_agree",
+                                                "agree",
+                                                "neutral", 
+                                                "disagree",
+                                                "strongly_disagree", 
+                                                 "N_A")))%>%
+  ggplot(aes(fill=Response,
+             y=Percentage, 
+             x=as.factor(cbo_size))) + 
+    geom_bar(position="stack", 
+             stat="identity")+
+  labs(x="Size of CBO*", 
+       y="Percentage of respondants",
+       title="Agreement that TB reduced costs related to storing tools/equipment",
+       caption = "*Groups 1,2 3 are CBOs with size 500kor less, b/w 500k and 1000k, and over 1000k, respectively") 
+
+
+#The TB has positively impacted our CBO by reducing staff time to complete community projects
+data%>%
+  group_by(cbo_size)%>%
+  summarize(agree = sum(att_redtime=="Agree",na.rm=T)/n(),
+            strongly_agree = sum(att_redtime=="Strongly agree",na.rm=T)/n(),
+            neutral = sum(att_redtime=="Neutral",na.rm=T)/n(),
+            disagree = sum(att_redtime=="Disagree",na.rm=T)/n(),
+            strongly_disagree = sum(att_redtime=="Strongly disagree",na.rm=T)/n(),
+            N_A = sum(att_redtime=="N/A",na.rm=T)/n())%>%
+  pivot_longer(agree:N_A, 
+               names_to= "Response", 
+               values_to = "Percentage")%>%
+  mutate(Response = factor(Response, levels = c("strongly_agree",
+                                                "agree",
+                                                "neutral", 
+                                                "disagree",
+                                                "strongly_disagree", 
+                                                 "N_A")))%>%
+  ggplot(aes(fill=Response,
+             y=Percentage, 
+             x=as.factor(cbo_size))) + 
+    geom_bar(position="stack", 
+             stat="identity")+
+  labs(x="Size of CBO*", 
+       y="Percentage of respondants",
+       title="Agreement that TB reduced staff time for projects",
+       caption = "*Groups 1,2 3 are CBOs with size 500kor less, b/w 500k and 1000k, and over 1000k, respectively") 
+
+#Tools made available through the TB allow our CBO to complete higher quality events/projects without additional funding
+data%>%
+  group_by(cbo_size)%>%
+  summarize(agree = sum(att_evquality=="Agree",na.rm=T)/n(),
+            strongly_agree = sum(att_evquality=="Strongly agree",na.rm=T)/n(),
+            neutral = sum(att_evquality=="Neutral",na.rm=T)/n(),
+            disagree = sum(att_evquality=="Disagree",na.rm=T)/n(),
+            strongly_disagree = sum(att_evquality=="Strongly disagree",na.rm=T)/n(),
+            N_A = sum(att_evquality=="N/A",na.rm=T)/n())%>%
+  pivot_longer(agree:N_A, 
+               names_to= "Response", 
+               values_to = "Percentage")%>%
+  mutate(Response = factor(Response, levels = c("strongly_agree",
+                                                "agree",
+                                                "neutral", 
+                                                "disagree",
+                                                "strongly_disagree", 
+                                                 "N_A")))%>%
+  ggplot(aes(fill=Response,
+             y=Percentage, 
+             x=as.factor(cbo_size))) + 
+    geom_bar(position="stack", 
+             stat="identity")+
+  labs(x="Size of CBO*", 
+       y="Percentage of respondants",
+       title="Agreement that TB allows for higher qual events/projs",
+       caption = "*Groups 1,2 3 are CBOs with size 500kor less, b/w 500k and 1000k, and over 1000k, respectively") 
+
+#The TB has positively impacted our CBO
+data%>%
+  group_by(cbo_size)%>%
+  summarize(agree = sum(att_posimpact=="Agree",na.rm=T)/n(),
+            strongly_agree = sum(att_posimpact=="Strongly agree",na.rm=T)/n(),
+            neutral = sum(att_posimpact=="Neutral",na.rm=T)/n(),
+            disagree = sum(att_posimpact=="Disagree",na.rm=T)/n(),
+            strongly_disagree = sum(att_posimpact=="Strongly disagree",na.rm=T)/n(),
+            N_A = sum(att_posimpact=="N/A",na.rm=T)/n())%>%
+  pivot_longer(agree:N_A, 
+               names_to= "Response", 
+               values_to = "Percentage")%>%
+  mutate(Response = factor(Response, levels = c("strongly_agree",
+                                                "agree",
+                                                "neutral", 
+                                                "disagree",
+                                                "strongly_disagree", 
+                                                 "N_A")))%>%
+  ggplot(aes(fill=Response,
+             y=Percentage, 
+             x=as.factor(cbo_size))) + 
+    geom_bar(position="stack", 
+             stat="identity")+
+  labs(x="Size of CBO*", 
+       y="Percentage of respondants",
+       title="Agreement that TB pos. impacted CBO",
+       caption = "*Groups 1,2 3 are CBOs with size 500kor less, b/w 500k and 1000k, and over 1000k, respectively") 
+```
+
+
+**Findings:**
+
+- As the median size CBO group has a **much smaller sample size**, we cannot safely conclude that small or large CBOs have more positive attitude towards the TB in all aspects.
+
+### General Attitudes Stratified Minority Status
+The following plots analyze the general attitude questions from section one, stratified by the minority status of the CBO, as determined by respondent self-report. For this survey, minority was defined as women, people of color, non-gender conforming individuals, LGBTQ+ individuals, and immigrants, and respondents were asked if they met one of more the following criteria: 1) the top executive position is held by a minority, 2) more than 50% of the board is made up of minorities, 3) more than 50% of program recipients are minorities, 4) none of the above. Respondents were able to select more than one of each criteria. The plots below explore if there is a relationship between the  minority criteria of the CBO provided by the respondent and the respondents' attitudes towards the ToolBank's economic and community impact.
+
+
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+#table summarizing demographic info
+output_continuous <- matrix(c(
+#"our top executive position is held by a minority",
+  #yes
+  paste0(count_top_yes, " (",pct_top_yes,"%)"),
+  #no
+  paste0(count_top_no, " (",pct_top_no,"%)"),
+#"More than 50% of our board is made up of minorities",
+  #yes
+  paste0(count_board_yes, " (",pct_board_yes,"%)"),
+  #no
+  paste0(count_board_no, " (",pct_board_no,"%)"),
+#"More than 50% of program recipients are minorities",
+  #yes
+  paste0(count_recip_yes, " (",pct_recip_yes,"%)"),
+  #no
+  paste0(count_recip_no, " (",pct_recip_no,"%)"),
+#"None of the above"
+  #yes
+  paste0(count_none_yes, " (",pct_none_yes,"%)"),
+  #no
+  paste0(count_none_no, " (",pct_none_no,"%)")
+),
+
+         ncol = 2, byrow = TRUE)
+
+output_continuous%>% 
+  addHtmlTableStyle(col.columns = c("none", "#F7F7F7"))%>% 
+  htmlTable(header =  c("# Yes (% Yes) ", "# No (% No)"),
+            rnames = c(
+"Our top executive position is held by a minority",
+"More than 50% of our board is made up of minorities",
+"More than 50% of program recipients are minorities",
+"None of the above"
+            ),
+            rgroup = c("Minority Leadership"),
+            n.rgroup = c(4),
+            caption = " Table 3: Number, percentages of respondants indicating minority leadership"
+            )
+```
+
+
+**Figure 10: General Attitudes Toward ToolBank Impact Among Respondents Reporting a Top Executive with Minority Status **
+
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+#The ToolBank (TB) has positively impacted our CBO by reducing costs related to purchasing or renting tools and equipment
+data <- data%>%
+  mutate(top_exec_minority = str_detect(di_mled,"Our top executive position is held by a minority."),
+         maj_prog_recip_minority = str_detect(di_mled,"More than 50% of program recipients are minorities"),
+         none = str_detect(di_mled,"None of the above"),
+         maj_board_minority = str_detect(di_mled,"More than 50% of our board is made up of minorities"),
+         )
+
+                                                                                                                                    
+# sentiments of top exec minority
+data%>%
+  filter(top_exec_minority==TRUE)%>%
+  pivot_longer(cols=att_purtool:att_posimpact,names_to="question",values_to="response")%>%
+  group_by(question)%>%
+  summarize(agree = sum(response=="Agree",na.rm=T)/n(),
+            strongly_agree = sum(response=="Strongly agree",na.rm=T)/n(),
+            neutral = sum(response=="Neutral",na.rm=T)/n(),
+            disagree = sum(response=="Disagree",na.rm=T)/n(),
+            strongly_disagree = sum(response=="Strongly disagree",na.rm=T)/n(),
+            N_A = sum(response=="N/A",na.rm=T)/n())%>%
+  pivot_longer(agree:N_A, 
+               names_to= "Response", 
+               values_to = "Percentage")%>%
+  mutate(Response = factor(Response, levels = c("strongly_agree",
+                                                "agree",
+                                                "neutral", 
+                                                "disagree",
+                                                "strongly_disagree", 
+                                                 "N_A")))%>%
+  ggplot(aes(fill=Response,
+             y=Percentage, 
+             x=question)) + 
+    geom_bar(position="stack", 
+             stat="identity")+
+  labs(x="General Attitude", 
+       y="Percentage of respondents",
+       title="Sentiment on TB among CBOs w/ top exec. a minority") +
+  scale_x_discrete(labels = c("higher quality event", "positive impact", "purchase tool", "reduce time", "store tool")) 
+```
+
+**Figure 11: General Attitudes Toward ToolBank Impact Among Respondents Indicating More Than 50% of Program Recipients as Minorities**
+
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+# sentiments of CBOS w "More than 50% of program recipients are minorities"
+data%>%
+  filter(maj_prog_recip_minority==TRUE)%>%
+  pivot_longer(cols=att_purtool:att_posimpact,names_to="question",values_to="response")%>%
+  group_by(question)%>%
+  summarize(agree = sum(response=="Agree",na.rm=T)/n(),
+            strongly_agree = sum(response=="Strongly agree",na.rm=T)/n(),
+            neutral = sum(response=="Neutral",na.rm=T)/n(),
+            disagree = sum(response=="Disagree",na.rm=T)/n(),
+            strongly_disagree = sum(response=="Strongly disagree",na.rm=T)/n(),
+            N_A = sum(response=="N/A",na.rm=T)/n())%>%
+  pivot_longer(agree:N_A, 
+               names_to= "Response", 
+               values_to = "Percentage")%>%
+  mutate(Response = factor(Response, levels = c("strongly_agree",
+                                                "agree",
+                                                "neutral", 
+                                                "disagree",
+                                                "strongly_disagree", 
+                                                 "N_A")))%>%
+  ggplot(aes(fill=Response,
+             y=Percentage, 
+             x=question)) + 
+    geom_bar(position="stack", 
+             stat="identity")+
+  labs(x="General Attitude", 
+       y="Percentage of respondants",
+       title="Sentiment on TB among CBOs w/ 50%+ program recipients are minorities") +
+  scale_x_discrete(labels = c("higher quality event", "positive impact", "purchase tool", "reduce time", "store tool"))
+
+```
+
+**Figure 12: General Attitudes Toward ToolBank Impact Among Respondents Indicating More Than 50% of CBO Board Members are Minorities**
+
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+#sentiment of CBOs w "More than 50% of our board is made up of minorities"
+data%>%
+  filter(maj_board_minority==TRUE)%>%
+  pivot_longer(cols=att_purtool:att_posimpact,names_to="question",values_to="response")%>%
+  group_by(question)%>%
+  summarize(agree = sum(response=="Agree",na.rm=T)/n(),
+            strongly_agree = sum(response=="Strongly agree",na.rm=T)/n(),
+            neutral = sum(response=="Neutral",na.rm=T)/n(),
+            disagree = sum(response=="Disagree",na.rm=T)/n(),
+            strongly_disagree = sum(response=="Strongly disagree",na.rm=T)/n(),
+            N_A = sum(response=="N/A",na.rm=T)/n())%>%
+  pivot_longer(agree:N_A, 
+               names_to= "Response", 
+               values_to = "Percentage")%>%
+  mutate(Response = factor(Response, levels = c("strongly_agree",
+                                                "agree",
+                                                "neutral", 
+                                                "disagree",
+                                                "strongly_disagree", 
+                                                 "N_A")))%>%
+  ggplot(aes(fill=Response,
+             y=Percentage, 
+             x=question)) + 
+    geom_bar(position="stack", 
+             stat="identity")+
+  labs(x="General Attitude", 
+       y="Percentage of respondants",
+       title="Sentiment on TB among CBOs w/ 50%+ board members are minorities") +
+  scale_x_discrete(labels = c("higher quality event", "positive impact", "purchase tool", "reduce time", "store tool"))
+
+```
+
+
+
+**Figure 13: General Attitudes Toward ToolBank Impact Among Respondents Indicating Their CBO Did Not Meet Any of the Minority Status Criteria Provided**
+
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+# sentiments of CBOs who responded "None of the above"
+data%>%
+  filter(none==TRUE)%>%
+  pivot_longer(cols=att_purtool:att_posimpact,names_to="question",values_to="response")%>%
+  group_by(question)%>%
+  summarize(agree = sum(response=="Agree",na.rm=T)/n(),
+            strongly_agree = sum(response=="Strongly agree",na.rm=T)/n(),
+            neutral = sum(response=="Neutral",na.rm=T)/n(),
+            disagree = sum(response=="Disagree",na.rm=T)/n(),
+            strongly_disagree = sum(response=="Strongly disagree",na.rm=T)/n(),
+            N_A = sum(response=="N/A",na.rm=T)/n())%>%
+  pivot_longer(agree:N_A, 
+               names_to= "Response", 
+               values_to = "Percentage")%>%
+  mutate(Response = factor(Response, levels = c("strongly_agree",
+                                                "agree",
+                                                "neutral", 
+                                                "disagree",
+                                                "strongly_disagree", 
+                                                 "N_A")))%>%
+  ggplot(aes(fill=Response,
+             y=Percentage, 
+             x=question)) + 
+    geom_bar(position="stack", 
+             stat="identity")+
+  labs(x="General Attitude", 
+       y="Percentage of respondents",
+       title="Sentiment on TB among CBOs reporting none for minority status Q") +
+  scale_x_discrete(labels = c("higher quality event", "positive impact", "purchase tool", "reduce time", "store tool"))
+```
+
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE, include=F}
+#The ToolBank (TB) has positively impacted our CBO by reducing costs related to purchasing or renting tools and equipment
+data <- data%>%
+  mutate(top_exec_minority = str_detect(di_mled,"Our top executive position is held by a minority."),
+         maj_prog_recip_minority = str_detect(di_mled,"More than 50% of program recipients are minorities"),
+         none = str_detect(di_mled,"None of the above"),
+         maj_board_minority = str_detect(di_mled,"More than 50% of our board is made up of minorities"),
+         )
+
+                                                                                                                                    
+# sentiments of top exec minority
+data%>%
+  filter(top_exec_minority==TRUE)%>%
+  pivot_longer(cols=att_purtool:att_posimpact,names_to="question",values_to="response")%>%
+  group_by(question)%>%
+  summarize(agree = sum(response=="Agree",na.rm=T)/n(),
+            strongly_agree = sum(response=="Strongly agree",na.rm=T)/n(),
+            neutral = sum(response=="Neutral",na.rm=T)/n(),
+            disagree = sum(response=="Disagree",na.rm=T)/n(),
+            strongly_disagree = sum(response=="Strongly disagree",na.rm=T)/n(),
+            N_A = sum(response=="N/A",na.rm=T)/n())%>%
+  pivot_longer(agree:N_A, 
+               names_to= "Response", 
+               values_to = "Percentage")%>%
+  mutate(Response = factor(Response, levels = c("strongly_agree",
+                                                "agree",
+                                                "neutral", 
+                                                "disagree",
+                                                "strongly_disagree", 
+                                                 "N_A")))%>%
+  ggplot(aes(fill=Response,
+             y=Percentage, 
+             x=question)) + 
+    geom_bar(position="stack", 
+             stat="identity")+
+  labs(x="General Attitude", 
+       y="Percentage of respondants",
+       title="Sentiment on TB among CBOs w/ top exec. a minority") +
+  scale_x_discrete(labels = c("higher quality event", "positive impact", "purchase tool", "reduce time", "store tool"))
+
+# sentiments of CBOS w "More than 50% of program recipients are minorities"
+data%>%
+  filter(maj_prog_recip_minority==TRUE)%>%
+  pivot_longer(cols=att_purtool:att_posimpact,names_to="question",values_to="response")%>%
+  group_by(question)%>%
+  summarize(agree = sum(response=="Agree",na.rm=T)/n(),
+            strongly_agree = sum(response=="Strongly agree",na.rm=T)/n(),
+            neutral = sum(response=="Neutral",na.rm=T)/n(),
+            disagree = sum(response=="Disagree",na.rm=T)/n(),
+            strongly_disagree = sum(response=="Strongly disagree",na.rm=T)/n(),
+            N_A = sum(response=="N/A",na.rm=T)/n())%>%
+  pivot_longer(agree:N_A, 
+               names_to= "Response", 
+               values_to = "Percentage")%>%
+  mutate(Response = factor(Response, levels = c("strongly_agree",
+                                                "agree",
+                                                "neutral", 
+                                                "disagree",
+                                                "strongly_disagree", 
+                                                 "N_A")))%>%
+  ggplot(aes(fill=Response,
+             y=Percentage, 
+             x=question)) + 
+    geom_bar(position="stack", 
+             stat="identity")+
+  labs(x="General Attitude", 
+       y="Percentage of respondants",
+       title="Sentiment on TB among CBOs w/ 50%+ program recipients are minorities") +
+  scale_x_discrete(labels = c("higher quality event", "positive impact", "purchase tool", "reduce time", "store tool"))
+
+#sentiment of CBOs w "More than 50% of our board is made up of minorities"
+data%>%
+  filter(maj_board_minority==TRUE)%>%
+  pivot_longer(cols=att_purtool:att_posimpact,names_to="question",values_to="response")%>%
+  group_by(question)%>%
+  summarize(agree = sum(response=="Agree",na.rm=T)/n(),
+            strongly_agree = sum(response=="Strongly agree",na.rm=T)/n(),
+            neutral = sum(response=="Neutral",na.rm=T)/n(),
+            disagree = sum(response=="Disagree",na.rm=T)/n(),
+            strongly_disagree = sum(response=="Strongly disagree",na.rm=T)/n(),
+            N_A = sum(response=="N/A",na.rm=T)/n())%>%
+  pivot_longer(agree:N_A, 
+               names_to= "Response", 
+               values_to = "Percentage")%>%
+  mutate(Response = factor(Response, levels = c("strongly_agree",
+                                                "agree",
+                                                "neutral", 
+                                                "disagree",
+                                                "strongly_disagree", 
+                                                 "N_A")))%>%
+  ggplot(aes(fill=Response,
+             y=Percentage, 
+             x=question)) + 
+    geom_bar(position="stack", 
+             stat="identity")+
+  labs(x="General Attitude", 
+       y="Percentage of respondants",
+       title="Sentiment on TB among CBOs w/ 50%+ board members are minorities") +
+  scale_x_discrete(labels = c("higher quality event", "positive impact", "purchase tool", "reduce time", "store tool"))
+
+# sentiments of CBOs who responded "None of the above"
+data%>%
+  filter(none==TRUE)%>%
+  pivot_longer(cols=att_purtool:att_posimpact,names_to="question",values_to="response")%>%
+  group_by(question)%>%
+  summarize(agree = sum(response=="Agree",na.rm=T)/n(),
+            strongly_agree = sum(response=="Strongly agree",na.rm=T)/n(),
+            neutral = sum(response=="Neutral",na.rm=T)/n(),
+            disagree = sum(response=="Disagree",na.rm=T)/n(),
+            strongly_disagree = sum(response=="Strongly disagree",na.rm=T)/n(),
+            N_A = sum(response=="N/A",na.rm=T)/n())%>%
+  pivot_longer(agree:N_A, 
+               names_to= "Response", 
+               values_to = "Percentage")%>%
+  mutate(Response = factor(Response, levels = c("strongly_agree",
+                                                "agree",
+                                                "neutral", 
+                                                "disagree",
+                                                "strongly_disagree", 
+                                                 "N_A")))%>%
+  ggplot(aes(fill=Response,
+             y=Percentage, 
+             x=question)) + 
+    geom_bar(position="stack", 
+             stat="identity")+
+  labs(x="General Attitude", 
+       y="Percentage of respondants",
+       title="Sentiment on TB among CBOs reporting none for minority status Q") +
+  scale_x_discrete(labels = c("higher quality event", "positive impact", "purchase tool", "reduce time", "store tool"))
+```
+
+**Findings:**
+
+- Respondents' attitude towards the TB are similar across organizations with different minority status. Part of the reason may be that respondents in these categories overlap with each other.
+- Attitudes of respondents from organizations with no minority status are more fluctuated, which is likely related to the small sample size for that group.
+
+
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE, include=F}
+### Response analysis
+#overall table:
+#creating a table to give these summary stats
+#n respondants 
+num_resp <- nrow(data)
+
+#att_purtool: the ToolBank (TB) has positively impacted our CBO by reducing costs related to purchasing or renting tools and equipment
+table_att_purtool<- as.data.frame(table(data$att_purtool))
+list_of_names <- unique(as.character(table_att_purtool$Var1))
+list_of_counts <- c(as.character(table_att_purtool$Freq))
+
+
+count_purtool_s_d_initial <- list_of_counts[as.numeric(which(list_of_names=="Strongly disagree"))]
+count_purtool_d_initial <- list_of_counts[as.numeric(which(list_of_names=="Disagree"))]
+count_purtool_n_initial <- list_of_counts[as.numeric(which(list_of_names=="Neutral"))]
+count_purtool_a_initial <- list_of_counts[as.numeric(which(list_of_names=="Agree"))]
+count_purtool_s_a_initial <- list_of_counts[as.numeric(which(list_of_names=="Strongly agree"))]
+count_purtool_na_initial <- list_of_counts[as.numeric(which(list_of_names=="N/A"))]
+
+#strongly disagree
+if(is_empty(count_purtool_s_d_initial)){
+    count_purtool_s_d <- 0
+    pct_purtool_s_d <- 0
+}else{
+    count_purtool_s_d <- as.numeric(count_purtool_s_d_initial)
+    pct_purtool_s_d <- round(count_purtool_s_d/num_resp*100,1)
+}
+#disagree
+if(is_empty(count_purtool_d_initial)){
+    count_purtool_d <- 0
+    pct_purtool_d <- 0
+}else{
+    count_purtool_d <-  as.numeric(count_purtool_d_initial)
+    pct_purtool_d <- round(count_purtool_d/num_resp*100,1)
+}
+#neutral
+if(is_empty(count_purtool_n_initial)){
+    count_purtool_n <- 0
+    pct_purtool_n <- 0
+}else{
+    count_purtool_n <-  as.numeric(count_purtool_n_initial)
+    pct_purtool_n <- round(count_purtool_n/num_resp*100,1)
+}
+#agree
+if(is_empty(count_purtool_a_initial)){
+    count_purtool_a <- 0
+    pct_purtool_a <- 0
+}else{
+    count_purtool_a <-  as.numeric(count_purtool_a_initial)
+    pct_purtool_a <- round(count_purtool_a/num_resp*100,1)
+}
+#stronngly agree
+if(is_empty(count_purtool_s_a_initial)){
+    count_purtool_s_a <- 0
+    pct_purtool_s_a <- 0
+}else{
+    count_purtool_s_a <-  as.numeric(count_purtool_s_a_initial)
+    pct_purtool_s_a <- round(count_purtool_s_a/num_resp*100,1)
+}
+#na
+if(is_empty(count_purtool_na_initial)){
+    count_purtool_na <- 0
+    pct_purtool_na <- 0
+}else{
+    count_purtool_na <- as.numeric(count_purtool_na_initial)
+    pct_purtool_na <- round(count_purtool_na/num_resp*100,1)
+}
+
+
+
+
+#att_strtool: the TB has positively impacted our CBO by reducing costs related to storing tools and equipment
+table_att_strtool<- as.data.frame(table(data$att_strtool))
+list_of_names <- unique(as.character(table_att_strtool$Var1))
+list_of_counts <- c(as.character(table_att_strtool$Freq))
+
+
+count_strtool_s_d_initial <- list_of_counts[as.numeric(which(list_of_names=="Strongly disagree"))]
+count_strtool_d_initial <- list_of_counts[as.numeric(which(list_of_names=="Disagree"))]
+count_strtool_n_initial <- list_of_counts[as.numeric(which(list_of_names=="Neutral"))]
+count_strtool_a_initial <- list_of_counts[as.numeric(which(list_of_names=="Agree"))]
+count_strtool_s_a_initial <- list_of_counts[as.numeric(which(list_of_names=="Strongly agree"))]
+count_strtool_na_initial <- list_of_counts[as.numeric(which(list_of_names=="N/A"))]
+
+#strongly disagree
+if(is_empty(count_strtool_s_d_initial)){
+    count_strtool_s_d <- 0
+    pct_strtool_s_d <- 0
+}else{
+    count_strtool_s_d <- as.numeric(count_strtool_s_d_initial)
+    pct_strtool_s_d <- round(count_strtool_s_d/num_resp*100,1)
+}
+#disagree
+if(is_empty(count_strtool_d_initial)){
+    count_strtool_d <- 0
+    pct_strtool_d <- 0
+}else{
+    count_strtool_d <-  as.numeric(count_strtool_d_initial)
+    pct_strtool_d <- round(count_strtool_d/num_resp*100,1)
+}
+#neutral
+if(is_empty(count_strtool_n_initial)){
+    count_strtool_n <- 0
+    pct_strtool_n <- 0
+}else{
+    count_strtool_n <-  as.numeric(count_strtool_n_initial)
+    pct_strtool_n <- round(count_strtool_n/num_resp*100,1)
+}
+#agree
+if(is_empty(count_strtool_a_initial)){
+    count_strtool_a <- 0
+    pct_strtool_a <- 0
+}else{
+    count_strtool_a <-  as.numeric(count_strtool_a_initial)
+    pct_strtool_a <- round(count_strtool_a/num_resp*100,1)
+}
+#stronngly agree
+if(is_empty(count_strtool_s_a_initial)){
+    count_strtool_s_a <- 0
+    pct_strtool_s_a <- 0
+}else{
+    count_strtool_s_a <-  as.numeric(count_strtool_s_a_initial)
+    pct_strtool_s_a <- round(count_strtool_s_a/num_resp*100,1)
+}
+#na
+if(is_empty(count_strtool_na_initial)){
+    count_strtool_na <- 0
+    pct_strtool_na <- 0
+}else{
+    count_strtool_na <- as.numeric(count_strtool_na_initial)
+    pct_strtool_na <- round(count_strtool_na/num_resp*100,1)
+}
+
+#att_redtime: theTB has positively impacted our CBO by reducing staff time to complete maintenance/projects
+table_att_redtime<- as.data.frame(table(data$att_redtime))
+list_of_names <- unique(as.character(table_att_redtime$Var1))
+list_of_counts <- c(as.character(table_att_redtime$Freq))
+
+
+count_redtime_s_d_initial <- list_of_counts[as.numeric(which(list_of_names=="Strongly disagree"))]
+count_redtime_d_initial <- list_of_counts[as.numeric(which(list_of_names=="Disagree"))]
+count_redtime_n_initial <- list_of_counts[as.numeric(which(list_of_names=="Neutral"))]
+count_redtime_a_initial <- list_of_counts[as.numeric(which(list_of_names=="Agree"))]
+count_redtime_s_a_initial <- list_of_counts[as.numeric(which(list_of_names=="Strongly agree"))]
+count_redtime_na_initial <- list_of_counts[as.numeric(which(list_of_names=="N/A"))]
+
+#strongly disagree
+if(is_empty(count_redtime_s_d_initial)){
+    count_redtime_s_d <- 0
+    pct_redtime_s_d <- 0
+}else{
+    count_redtime_s_d <- as.numeric(count_redtime_s_d_initial)
+    pct_redtime_s_d <- round(count_redtime_s_d/num_resp*100,1)
+}
+#disagree
+if(is_empty(count_redtime_d_initial)){
+    count_redtime_d <- 0
+    pct_redtime_d <- 0
+}else{
+    count_redtime_d <-  as.numeric(count_redtime_d_initial)
+    pct_redtime_d <- round(count_redtime_d/num_resp*100,1)
+}
+#neutral
+if(is_empty(count_redtime_n_initial)){
+    count_redtime_n <- 0
+    pct_redtime_n <- 0
+}else{
+    count_redtime_n <-  as.numeric(count_redtime_n_initial)
+    pct_redtime_n <- round(count_redtime_n/num_resp*100,1)
+}
+#agree
+if(is_empty(count_redtime_a_initial)){
+    count_redtime_a <- 0
+    pct_redtime_a <- 0
+}else{
+    count_redtime_a <-  as.numeric(count_redtime_a_initial)
+    pct_redtime_a <- round(count_redtime_a/num_resp*100,1)
+}
+#stronngly agree
+if(is_empty(count_redtime_s_a_initial)){
+    count_redtime_s_a <- 0
+    pct_redtime_s_a <- 0
+}else{
+    count_redtime_s_a <-  as.numeric(count_redtime_s_a_initial)
+    pct_redtime_s_a <- round(count_redtime_s_a/num_resp*100,1)
+}
+#na
+if(is_empty(count_redtime_na_initial)){
+    count_redtime_na <- 0
+    pct_redtime_na <- 0
+}else{
+    count_redtime_na <- as.numeric(count_redtime_na_initial)
+    pct_redtime_na <- round(count_redtime_na/num_resp*100,1)
+}
+
+
+#att_evquality:  "the Tools made available through the TB allow our CBO to complete higher quality events/projects without additional funding
+table_att_evquality<- as.data.frame(table(data$att_evquality))
+list_of_names <- unique(as.character(table_att_evquality$Var1))
+list_of_counts <- c(as.character(table_att_evquality$Freq))
+
+
+count_evquality_s_d_initial <- list_of_counts[as.numeric(which(list_of_names=="Strongly disagree"))]
+count_evquality_d_initial <- list_of_counts[as.numeric(which(list_of_names=="Disagree"))]
+count_evquality_n_initial <- list_of_counts[as.numeric(which(list_of_names=="Neutral"))]
+count_evquality_a_initial <- list_of_counts[as.numeric(which(list_of_names=="Agree"))]
+count_evquality_s_a_initial <- list_of_counts[as.numeric(which(list_of_names=="Strongly agree"))]
+count_evquality_na_initial <- list_of_counts[as.numeric(which(list_of_names=="N/A"))]
+
+#strongly disagree
+if(is_empty(count_evquality_s_d_initial)){
+    count_evquality_s_d <- 0
+    pct_evquality_s_d <- 0
+}else{
+    count_evquality_s_d <- as.numeric(count_evquality_s_d_initial)
+    pct_evquality_s_d <- round(count_evquality_s_d/num_resp*100,1)
+}
+#disagree
+if(is_empty(count_evquality_d_initial)){
+    count_evquality_d <- 0
+    pct_evquality_d <- 0
+}else{
+    count_evquality_d <-  as.numeric(count_evquality_d_initial)
+    pct_evquality_d <- round(count_evquality_d/num_resp*100,1)
+}
+#neutral
+if(is_empty(count_evquality_n_initial)){
+    count_evquality_n <- 0
+    pct_evquality_n <- 0
+}else{
+    count_evquality_n <-  as.numeric(count_evquality_n_initial)
+    pct_evquality_n <- round(count_evquality_n/num_resp*100,1)
+}
+#agree
+if(is_empty(count_evquality_a_initial)){
+    count_evquality_a <- 0
+    pct_evquality_a <- 0
+}else{
+    count_evquality_a <-  as.numeric(count_evquality_a_initial)
+    pct_evquality_a <- round(count_evquality_a/num_resp*100,1)
+}
+#stronngly agree
+if(is_empty(count_evquality_s_a_initial)){
+    count_evquality_s_a <- 0
+    pct_evquality_s_a <- 0
+}else{
+    count_evquality_s_a <-  as.numeric(count_evquality_s_a_initial)
+    pct_evquality_s_a <- round(count_evquality_s_a/num_resp*100,1)
+}
+#na
+if(is_empty(count_evquality_na_initial)){
+    count_evquality_na <- 0
+    pct_evquality_na <- 0
+}else{
+    count_evquality_na <- as.numeric(count_evquality_na_initial)
+    pct_evquality_na <- round(count_evquality_na/num_resp*100,1)
+}
+
+#att_posimpact:  TB has positively impacted our CBO 
+table_att_posimpact<- as.data.frame(table(data$att_posimpact))
+list_of_names <- unique(as.character(table_att_posimpact$Var1))
+list_of_counts <- c(as.character(table_att_posimpact$Freq))
+
+
+count_posimpact_s_d_initial <- list_of_counts[as.numeric(which(list_of_names=="Strongly disagree"))]
+count_posimpact_d_initial <- list_of_counts[as.numeric(which(list_of_names=="Disagree"))]
+count_posimpact_n_initial <- list_of_counts[as.numeric(which(list_of_names=="Neutral"))]
+count_posimpact_a_initial <- list_of_counts[as.numeric(which(list_of_names=="Agree"))]
+count_posimpact_s_a_initial <- list_of_counts[as.numeric(which(list_of_names=="Strongly agree"))]
+count_posimpact_na_initial <- list_of_counts[as.numeric(which(list_of_names=="N/A"))]
+
+#strongly disagree
+if(is_empty(count_posimpact_s_d_initial)){
+    count_posimpact_s_d <- 0
+    pct_posimpact_s_d <- 0
+}else{
+    count_posimpact_s_d <- as.numeric(count_posimpact_s_d_initial)
+    pct_posimpact_s_d <- round(count_posimpact_s_d/num_resp*100,1)
+}
+#disagree
+if(is_empty(count_posimpact_d_initial)){
+    count_posimpact_d <- 0
+    pct_posimpact_d <- 0
+}else{
+    count_posimpact_d <-  as.numeric(count_posimpact_d_initial)
+    pct_posimpact_d <- round(count_posimpact_d/num_resp*100,1)
+}
+#neutral
+if(is_empty(count_posimpact_n_initial)){
+    count_posimpact_n <- 0
+    pct_posimpact_n <- 0
+}else{
+    count_posimpact_n <-  as.numeric(count_posimpact_n_initial)
+    pct_posimpact_n <- round(count_posimpact_n/num_resp*100,1)
+}
+#agree
+if(is_empty(count_posimpact_a_initial)){
+    count_posimpact_a <- 0
+    pct_posimpact_a <- 0
+}else{
+    count_posimpact_a <-  as.numeric(count_posimpact_a_initial)
+    pct_posimpact_a <- round(count_posimpact_a/num_resp*100,1)
+}
+#stronngly agree
+if(is_empty(count_posimpact_s_a_initial)){
+    count_posimpact_s_a <- 0
+    pct_posimpact_s_a <- 0
+}else{
+    count_posimpact_s_a <-  as.numeric(count_posimpact_s_a_initial)
+    pct_posimpact_s_a <- round(count_posimpact_s_a/num_resp*100,1)
+}
+#na
+if(is_empty(count_posimpact_na_initial)){
+    count_posimpact_na <- 0
+    pct_posimpact_na <- 0
+}else{
+    count_posimpact_na <- as.numeric(count_posimpact_na_initial)
+    pct_posimpact_na <- round(count_posimpact_na/num_resp*100,1)
+}
+
+```
+
+
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE, include=F}
 
 #table summarizing demographic info
 output_continuous <- matrix(c(
@@ -1441,94 +2319,19 @@ output_continuous%>%
 ```
 
 
-Percent of respondents that reported "Agreeing" or "Strongly Agreeing" that, "the ToolBank (TB) has positively impacted our CBO by reducing costs related to purchasing or renting tools and equipment"
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
-table_att_purtool<- table(data$att_purtool)
-percentages <- prop.table(table_att_purtool)
-summary_table_att_purtool <-data.frame(count=table_att_purtool, Percentage=percentages)
-print(summary_table_att_purtool)
-```
+# Section 4: Economic Benefit of the ToolBank
+The following section analyses responses to the survey questions regarding the economic benefit of the ToolBank. For these questions, respondents were asked to provide their best estimates rounded to the nearest dollar. This section aimed to quantify the direct impact of the ToolBank on the member CBOs' budgets and fundraising capabilities. This section asked respondents the following questions: 
 
+- If the TB did not exist, how much would you spend purchasing or renting tools and equipment in an average year?
+- If the TB did not exist, how much would you spend on storage of tools and equipment in an average year?
+- If the TB did not exist, how much would you spend maintaining tools and equipment in an average year?
+- Reflecting on your events in the past year: If the TB did not exist, how much funding would your organization allocate to buying, storing, tracking and maintaining your own inventory of tools and equipment?
+- In the past year, how many community events did your organization host?
+- If there were no TB, how many of your events in the past year would you not have hosted for any reason?
+- If there were no TB, how many of your constituents, including volunteers, members, and event attendees, would have been negatively impacted in the past year?
 
-Percent of respondents that reported "Agreeing" or "strongly Agreeing" that, "the TB has positively impacted our CBO by reducing costs related to storing tools and equipment
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
-table_att_strtool<- table(data$att_strtool)
-percentages <- prop.table(table_att_strtool)
-summary_table_att_strtool <-data.frame(count=table_att_strtool, Percentage=percentages)
-print(summary_table_att_strtool)
-```
+*Note that the responses to all of the following questions in this section are highly skewed. As a result, we recommended reporting sum, medians, or quantiles rather than averages *
 
-
-Percent of respondents that reported "Agreeing" or "strongly Agreeing" that, "the TB has positively impacted our CBO by reducing staff time to complete maintenance/projects
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
-table_att_redtime<- table(data$att_redtime)
-percentages <- prop.table(table_att_redtime)
-summary_table_att_redtime <-data.frame(count=table_att_redtime, Percentage=percentages)
-print(summary_table_att_redtime)
-```
-
-
-Percent of respondents that reported "Agreeing" or "strongly Agreeing" that, "the Tools made available through the TB allow our CBO to complete higher quality events/projects without additional funding
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
-table_att_evquality<- table(data$att_evquality)
-percentages <- prop.table(table_att_evquality)
-summary_table_att_evquality <-data.frame(count=table_att_evquality, Percentage=percentages)
-print(summary_table_att_evquality)
-```
-
-Question: TB has positively impacted our CBO 
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
-table_att_posimpact<- table(data$att_posimpact)
-percentages <- prop.table(table_att_posimpact)
-summary_table_att_posimpact <-data.frame(count=table_att_posimpact, Percentage=percentages)
-print(summary_table_att_posimpact)
-```
-
-### Plots
-
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
-#overall 
-data%>%
-  mutate(num_orgs = n())%>%
-  pivot_longer(cols=att_purtool:att_posimpact,names_to="question",values_to="response")%>%
-  group_by(question)%>%
-  summarize(agree = sum(response=="Agree",na.rm=T)/n(),
-            strongly_agree = sum(response=="Strongly agree",na.rm=T)/n(),
-            neutral = sum(response=="Neutral",na.rm=T)/n(),
-            disagree = sum(response=="Disagree",na.rm=T)/n(),
-            strongly_disagree = sum(response=="Strongly disagree",na.rm=T)/n(),
-            N_A = sum(response=="N/A",na.rm=T)/n())%>%
-  pivot_longer(agree:N_A, 
-               names_to= "Response", 
-               values_to = "Percentage")%>%
-  mutate(Response = factor(Response, levels = c("strongly_agree",
-                                                "agree",
-                                                "neutral", 
-                                                "disagree",
-                                                "strongly_disagree", 
-                                                 "N_A")))%>%
-  ggplot(aes(fill=Response,
-             y=Percentage, 
-             x=question)) + 
-    geom_bar(position="stack", 
-             stat="identity")+
-  labs(x="General Attitude", 
-       y="Percentage of respondants",
-       title="Agreement that TB helps with different aspects") +
-  scale_x_discrete(labels = c("higher quality event", "positive impact", "purchase tool", "reduce time", "store tool"))
-```
-
-**Findings:**
-
-- 100% of respondents strongly agreed (93.3%) or agreed (6.7%) that the ToolBank positively impacts their CBO 
-- 100% of respondents strongly agreed (93.3%) or agreed (6.7%) that the ToolBank reduced costs related to purchasing and renting tools and equipment
-- More than 95% or respondents strongly agreed (80.0%) or agreed (15.6%) that the tools made available through the ToolBank allow their CBO to complete higher quality events/projects without additional funding
-- respondents have comparatively less positive attitudes towards (still more than 60% of the respondent strongly agreed or agreed) the statements that the ToolBank positively impacted their CBO by reducing costs related to storing tools and equipment, and the ToolBank has positively impacted their CBO by reducing staff time to complete maintenance/projects
-
-## Section 3C: Economic Benefit 
-*Respondence of all questions within this section are highly skewed, so we recommended reporting the data through sum, medians, or quantiles*
-
-### Response analysis
 
 Question: How much would you have spent purchasing or renting tools and equipment had the TB not existed?
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
@@ -1861,16 +2664,15 @@ constit_q3 <- q75_value
 constit_sum <- sum_value
 ```
 
-Calculated: 
 
-Reflecting on your events in the past year, how many events did your organization host?
-
-If there were no TB, how many of your events in the past year would you not have been able to host?
-
-What percentage of the events hosted last year did the TB help make possible?
-
-put all this into one table:
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+#Calculated: 
+#Reflecting on your events in the past year, how many events did your organization host?
+#If there were no TB, how many of your events in the past year would you not have been able to host?
+#What percentage of the events hosted last year did the TB help make possible?
+#put all this into one table:
+
+
 output_continuous <- matrix(c(
 # "on Purchasing or renting tools and equipment",
   #"Mean"
@@ -2008,7 +2810,6 @@ output_continuous%>%
 
 ```
 
-### Plots
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 data%>%
   group_by(row_number())%>%
@@ -2065,10 +2866,19 @@ data%>%
 - Half of the respondents reported that at least 150 of their constituents (volunteers, members, and event attendees) would have been negatively impacted without the help of the ToolBank.
 - A total of 58,790 constituents (volunteers, members, and event attendees) of our CBO partners would haven been negatively impacted without the help of the ToolBank.
 
-## Section 3D: Community Impact
+# Section 5: Community Impact of the Tool Bank
+The following section summarizes the community impact of the ToolBank, as reported by survey respondents. This section aims to quantify the indirect ways that the ToolBank may impact CBOs and the community by reducing barriers and costs related to accessing tools and equipment. This section analyzes responded from the following survey questions: 
 
-Question: With the money that you have saved on purchasing, storing, and maintaining tools and equipment, what have you been able to accomplish?
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+- With the money you have saved on purchasing, storing, and maintaining tools and equipment through the TB, what have you been able to accomplish?
+-Without the TB, what would you no longer be able to fund?
+- If you answered 'staff', how many positions would be impacted?
+- If you answered 'projects', how many projects would be impacted?
+- If other, please quantify the impact:
+- Without the TB, which of the following are ways that your community events would be impacted? (check all that apply: Quantity, Quality, Diversity, Consistency)
+
+
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE, include=F}
+#Question: With the money that you have saved on purchasing, storing, and maintaining tools and equipment, what have you been able to accomplish
 sum_table = data.frame(cbind(choices = c("Hired additional staff positions",
                                          "Hosted additional projects or events",
                                          "other"),
@@ -2089,8 +2899,8 @@ other_pct <- round(as.numeric(sum_table[3,3])*100,1)
 ```
 
 
-Question: Without the TB, what would you no longer be able to fund?
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE, include=F}
+#Question: Without the TB, what would you no longer be able to fund?
 sum_table = data.frame(cbind(choices = c("Staff",
                                          "Projects",
                                          "other"),
@@ -2111,8 +2921,8 @@ without_other_freq <- sum_table[3,2]
 without_other_pct <- round(as.numeric(sum_table[3,3])*100,1)
 ```
 
-Among partners indicated certain effect, what is the average quantified effects
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE, include=F}
+#Among partners indicated certain effect, what is the average quantified effects
 mean(data$ci_staff, na.rm = T)
 sd(data$ci_staff, na.rm = T)
 mean(data$ci_project, na.rm = T)
@@ -2159,7 +2969,7 @@ paste0(without_other_pct,"%")
 library(htmlTable)
 output_continuous%>% 
   addHtmlTableStyle(col.columns = c("none", "#F7F7F7"))%>% 
-  htmlTable(header =  c("# Respondants", "% Respondants"),
+  htmlTable(header =  c("# Respondents", "% Respondents"),
             rnames = c("Hired more staff",
                        "Hosted additional projects/events",
                        "Other",
@@ -2170,11 +2980,10 @@ output_continuous%>%
             rgroup = c("Accomplishments through money saved through TB",
                        "Where funding would be cut if TB did not exist"),
             n.rgroup = c(3,3),
-            caption = "Number, percentages of where Respondants report funding"
+            caption = "Number and Percentage of Respondants Reporting Impacts of Funds Saved "
             )
 ```
 
-Quantify effect of "other", if selected
 
 **Findings:**
 
@@ -2183,7 +2992,14 @@ Quantify effect of "other", if selected
 - 24.4% respondents reported the fundings the ToolBank helps them to save make them able to achieve accomplishments other than staff positions and projects.
 - 15.6% respondents reported that they need to cut fundings in items other than staff positions and projects if the ToolBank did not exist.
 
-## Section 3E: Analysis surrounding questions 
+# Section 6: Fundraising Impact of the ToolBank 
+The following section aims to quantify the impact that the ToolBank may have on CBOs' ability to host specific events, including fundraising. This section analyses the following survey questions: 
+
+- Which of the following types of events have TB tools and equipment helped your CBO complete?
+- If you use the TB to support your fundraising events, in an average year, what have been the outcomes of these fundraising events?
+- To your best estimate, what percent of your event expense budget was saved by using TB equipment at your event?
+
+Example: "We raised $20,000 at our annual fundraiser and hosted 150 people."
 
 Question: do organizations with higher savings through toolbank report more of a positive impact? 
 
@@ -2277,20 +3093,7 @@ data%>%
        title= "amount saved through TB services (excl. outliers)")
 ```
 
-
-
-Question: What is the relationship like between minority-led CBOs and the toolbank compared to non-minority led CBOs?
-```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
-
-```
-
-
-
-Question: where within the organization does the Toolbank impact most?
-
-
-Question: In what ways has the community benefited through the toolbank? What are the most prominent types of events (or organization types) the toolbank supports?
-
+Question: Which of the following types of events have TB tools and equipment helped your CBO complete?
 
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 sum_table = data.frame(choices = c("Quantity",
@@ -2346,14 +3149,14 @@ ggplot(sum_table)+
 
 **Findings:**
 
-- Respondents with more positive attitudes with the ToolBank helping reduce their costs in multiple aspects would have spent more on buying, storing and maintaining tools or equipments if the ToolBank did not exist (not statistically significant).
+- Respondents with more positive attitudes with the ToolBank helping reduce their costs in multiple aspects would have spent more on buying, storing and maintaining tools or equipment if the ToolBank did not exist (not statistically significant).
 - the ToolBank helps to save the most in purchasing tools and equipments than storing and maintaining those (not statistically significant).
 - Events got impacted by the TB mainly through their quality (77.8%), consistency (66.7%), and quantity (55.6%).
 - The most prominent types of events the toolbank supports are community building (84.4%) and service projects (75.6%).
 
 
 
-## Section 3F: marginal analysis on fundraising questions
+
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 nrow(data[!is.na(data$eve_fundraise_p),])
 mean(data$eve_fundraise_p, na.rm = T)
