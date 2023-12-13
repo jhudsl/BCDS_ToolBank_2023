@@ -42,8 +42,8 @@ gs4_auth(email = TRUE)
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE, include=F}
 # Once set up, you can automate this process by passing your email
 #gs4_auth(email = "karinchen737@gmail.com")
-#gs4_auth(email = "chclapham@gmail.com")
-gs4_auth(email = "haley.farrie@gmail.com")
+gs4_auth(email = "chclapham@gmail.com")
+#gs4_auth(email = "haley.farrie@gmail.com")
 ```
 
 
@@ -1215,6 +1215,13 @@ The following plots analyze the general attitude questions from section two, str
 
 *confirm size classification standards*
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
+### now combine mid-sized, large CBOs
+data<- data%>%
+  mutate(cbo_size_2_cat = case_when(cbo_size_str =="500,000 or less"~"500,000 or less",
+                                    cbo_size_str =="over 1,000,000"~"over 500,000",
+                                    cbo_size_str =="b/w 500,000 and 1,000,000"~"over 500,000"))
+
+#extract info from three size categories
 table_size<- table(data$cbo_size)
 count_size_1 <- table_size[[1]]
 count_size_2 <- table_size[[2]]
@@ -1229,10 +1236,19 @@ pct_size_2 <- round(count_size_2/num_obsv*100,1)
 pct_size_3 <- round(count_size_3/num_obsv*100,1)
 pct_size_NA <- round(count_size_NA/num_obsv*100,1)
 
+#extract info from 2 size categories
+table_size_2 <- table(data$cbo_size_2_cat)
+count_size_sm <- table_size_2[[1]]
+count_size_big <- table_size_2[[2]]
+
+num_obsv <- sum(count_size_sm,
+                count_size_big)
+pct_size_sm <- round(count_size_sm/num_obsv*100,1)
+pct_size_big <- round(count_size_big/num_obsv*100,1)
 
 
 
-#table summarizing demographic info
+#table summarizing info, 3 size cats
 output_continuous <- matrix(c(
 # "Less than 500k (group 1)",
   # number
@@ -1271,7 +1287,38 @@ output_continuous%>%
             ),
             rgroup = c("CBO Size"),
             n.rgroup = c(4),
-            caption = "Table 2: Number and Percentage of CBOs by Size"
+            caption = "Table 2a: Number and Percentage of CBOs by 3 Size Categories"
+            )
+
+
+
+
+output_continuous <- matrix(c(
+# "Less than 500k (group 1)",
+  # number
+  count_size_sm,
+  # pct
+  paste0(pct_size_sm,"%"),
+# "Between 500k and 1000k (group 2)",
+  # number
+  count_size_big,
+  # pct
+  paste0(pct_size_big,"%")
+),
+
+         ncol = 2, byrow = TRUE)
+
+library(htmlTable)
+output_continuous%>% 
+  addHtmlTableStyle(col.columns = c("none", "#F7F7F7"))%>% 
+  htmlTable(header =  c("Number Respondents   ", "   Percent of Total Respondents"),
+            rnames = c(
+"Less than 500k",
+"Greater than 500k"
+            ),
+            rgroup = c("CBO Size"),
+            n.rgroup = c(2),
+            caption = "Table 2b: Number and Percentage of CBOs by 2 Size Categories"
             )
 ```
 
@@ -1281,7 +1328,7 @@ output_continuous%>%
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 #The ToolBank (TB) has positively impacted our CBO by reducing costs related to purchasing or renting tools and equipment
 data%>%
-  group_by(cbo_size)%>%
+  group_by(cbo_size_2_cat)%>%
   summarize(agree = sum(att_purtool=="Agree",na.rm=T)/n(),
             strongly_agree = sum(att_purtool=="Strongly agree",na.rm=T)/n(),
             neutral = sum(att_purtool=="Neutral",na.rm=T)/n(),
@@ -1299,13 +1346,12 @@ data%>%
                                                  "N_A")))%>%
   ggplot(aes(fill=Response,
              y=Percentage, 
-             x=as.factor(cbo_size))) + 
+             x=as.factor(cbo_size_2_cat))) + 
     geom_bar(position="stack", 
              stat="identity")+
   labs(x="Size of CBO*", 
        y="Percentage of respondents",
-       title="Respondent Agreement that TB Reduced Purchasing and Renting Costs",
-       caption = "*Groups 1,2 3 are CBOs with size 500kor less, b/w 500k and 1000k, and over 1000k, respectively") 
+       title="Respondent Agreement that TB Reduced Purchasing and Renting Costs") 
 ```
 
 **Figure 7: Respondent Agreement that the ToolBank Reduced Their CBOs Costs Related Storing Tools and Equipment, Stratified by, Stratified by CBO Size**
@@ -1313,7 +1359,7 @@ data%>%
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 #The TB has positively impacted our CBO by reducing costs related to storing tools and equipment
 data%>%
-  group_by(cbo_size)%>%
+  group_by(cbo_size_2_cat)%>%
   summarize(agree = sum(att_strtool=="Agree",na.rm=T)/n(),
             strongly_agree = sum(att_strtool=="Strongly agree",na.rm=T)/n(),
             neutral = sum(att_strtool=="Neutral",na.rm=T)/n(),
@@ -1331,7 +1377,7 @@ data%>%
                                                  "N_A")))%>%
   ggplot(aes(fill=Response,
              y=Percentage, 
-             x=as.factor(cbo_size))) + 
+             x=as.factor(cbo_size_2_cat))) + 
     geom_bar(position="stack", 
              stat="identity")+
   labs(x="Size of CBO*", 
@@ -1346,7 +1392,7 @@ data%>%
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 #The TB has positively impacted our CBO by reducing staff time to complete community projects
 data%>%
-  group_by(cbo_size)%>%
+  group_by(cbo_size_2_cat)%>%
   summarize(agree = sum(att_redtime=="Agree",na.rm=T)/n(),
             strongly_agree = sum(att_redtime=="Strongly agree",na.rm=T)/n(),
             neutral = sum(att_redtime=="Neutral",na.rm=T)/n(),
@@ -1364,7 +1410,7 @@ data%>%
                                                  "N_A")))%>%
   ggplot(aes(fill=Response,
              y=Percentage, 
-             x=as.factor(cbo_size))) + 
+             x=as.factor(cbo_size_2_cat))) + 
     geom_bar(position="stack", 
              stat="identity")+
   labs(x="Size of CBO*", 
@@ -1380,7 +1426,7 @@ data%>%
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 #The TB has positively impacted our CBO
 data%>%
-  group_by(cbo_size)%>%
+  group_by(cbo_size_2_cat)%>%
   summarize(agree = sum(att_posimpact=="Agree",na.rm=T)/n(),
             strongly_agree = sum(att_posimpact=="Strongly agree",na.rm=T)/n(),
             neutral = sum(att_posimpact=="Neutral",na.rm=T)/n(),
@@ -1398,7 +1444,7 @@ data%>%
                                                  "N_A")))%>%
   ggplot(aes(fill=Response,
              y=Percentage, 
-             x=as.factor(cbo_size))) + 
+             x=as.factor(cbo_size_2_cat))) + 
     geom_bar(position="stack", 
              stat="identity")+
   labs(x="Size of CBO*", 
@@ -1412,7 +1458,7 @@ data%>%
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE, include=F}
 #The ToolBank (TB) has positively impacted our CBO by reducing costs related to purchasing or renting tools and equipment
 data%>%
-  group_by(cbo_size)%>%
+  group_by(cbo_size_2_cat)%>%
   summarize(agree = sum(att_purtool=="Agree",na.rm=T)/n(),
             strongly_agree = sum(att_purtool=="Strongly agree",na.rm=T)/n(),
             neutral = sum(att_purtool=="Neutral",na.rm=T)/n(),
@@ -1430,7 +1476,7 @@ data%>%
                                                  "N_A")))%>%
   ggplot(aes(fill=Response,
              y=Percentage, 
-             x=as.factor(cbo_size))) + 
+             x=as.factor(cbo_size_2_cat))) + 
     geom_bar(position="stack", 
              stat="identity")+
   labs(x="Size of CBO*", 
@@ -1440,7 +1486,7 @@ data%>%
 
 #The TB has positively impacted our CBO by reducing costs related to storing tools and equipment
 data%>%
-  group_by(cbo_size)%>%
+  group_by(cbo_size_2_cat)%>%
   summarize(agree = sum(att_strtool=="Agree",na.rm=T)/n(),
             strongly_agree = sum(att_strtool=="Strongly agree",na.rm=T)/n(),
             neutral = sum(att_strtool=="Neutral",na.rm=T)/n(),
@@ -1458,7 +1504,7 @@ data%>%
                                                  "N_A")))%>%
   ggplot(aes(fill=Response,
              y=Percentage, 
-             x=as.factor(cbo_size))) + 
+             x=as.factor(cbo_size_2_cat))) + 
     geom_bar(position="stack", 
              stat="identity")+
   labs(x="Size of CBO*", 
@@ -1469,7 +1515,7 @@ data%>%
 
 #The TB has positively impacted our CBO by reducing staff time to complete community projects
 data%>%
-  group_by(cbo_size)%>%
+  group_by(cbo_size_2_cat)%>%
   summarize(agree = sum(att_redtime=="Agree",na.rm=T)/n(),
             strongly_agree = sum(att_redtime=="Strongly agree",na.rm=T)/n(),
             neutral = sum(att_redtime=="Neutral",na.rm=T)/n(),
@@ -1487,7 +1533,7 @@ data%>%
                                                  "N_A")))%>%
   ggplot(aes(fill=Response,
              y=Percentage, 
-             x=as.factor(cbo_size))) + 
+             x=as.factor(cbo_size_2_cat))) + 
     geom_bar(position="stack", 
              stat="identity")+
   labs(x="Size of CBO*", 
@@ -1497,7 +1543,7 @@ data%>%
 
 #Tools made available through the TB allow our CBO to complete higher quality events/projects without additional funding
 data%>%
-  group_by(cbo_size)%>%
+  group_by(cbo_size_2_cat)%>%
   summarize(agree = sum(att_evquality=="Agree",na.rm=T)/n(),
             strongly_agree = sum(att_evquality=="Strongly agree",na.rm=T)/n(),
             neutral = sum(att_evquality=="Neutral",na.rm=T)/n(),
@@ -1515,7 +1561,7 @@ data%>%
                                                  "N_A")))%>%
   ggplot(aes(fill=Response,
              y=Percentage, 
-             x=as.factor(cbo_size))) + 
+             x=as.factor(cbo_size_2_cat))) + 
     geom_bar(position="stack", 
              stat="identity")+
   labs(x="Size of CBO*", 
@@ -1525,7 +1571,7 @@ data%>%
 
 #The TB has positively impacted our CBO
 data%>%
-  group_by(cbo_size)%>%
+  group_by(cbo_size_2_cat)%>%
   summarize(agree = sum(att_posimpact=="Agree",na.rm=T)/n(),
             strongly_agree = sum(att_posimpact=="Strongly agree",na.rm=T)/n(),
             neutral = sum(att_posimpact=="Neutral",na.rm=T)/n(),
@@ -1543,7 +1589,7 @@ data%>%
                                                  "N_A")))%>%
   ggplot(aes(fill=Response,
              y=Percentage, 
-             x=as.factor(cbo_size))) + 
+             x=as.factor(cbo_size_2_cat))) + 
     geom_bar(position="stack", 
              stat="identity")+
   labs(x="Size of CBO*", 
@@ -1555,7 +1601,7 @@ data%>%
 
 **Findings:**
 
-- As the median size CBO group has a **much smaller sample size**, we cannot safely conclude that small or large CBOs have more positive attitude towards the TB in all aspects.
+- In general, larger and smaller CBOs show similar trends in agreement with benefits from the Toolbank. However, smaller CBOs tend to report slightly stronger levels of agreement.
 
 ### General Attitudes Stratified Minority Status
 The following plots analyze the general attitude questions from section one, stratified by the minority status of the CBO, as determined by respondent self-report. For this survey, minority was defined as women, people of color, non-gender conforming individuals, LGBTQ+ individuals, and immigrants, and respondents were asked if they met one of more the following criteria: 1) the top executive position is held by a minority, 2) more than 50% of the board is made up of minorities, 3) more than 50% of program recipients are minorities, 4) none of the above. Respondents were able to select more than one of each criteria. The plots below explore if there is a relationship between the  minority criteria of the CBO provided by the respondent and the respondents' attitudes towards the ToolBank's economic and community impact.
@@ -2320,6 +2366,7 @@ output_continuous%>%
 
 
 # Section 4: Economic Benefit of the ToolBank
+
 The following section analyses responses to the survey questions regarding the economic benefit of the ToolBank. For these questions, respondents were asked to provide their best estimates rounded to the nearest dollar. This section aimed to quantify the direct impact of the ToolBank on the member CBOs' budgets and fundraising capabilities. This section asked respondents the following questions: 
 
 - If the TB did not exist, how much would you spend purchasing or renting tools and equipment in an average year?
@@ -2333,7 +2380,9 @@ The following section analyses responses to the survey questions regarding the e
 *Note that the responses to all of the following questions in this section are highly skewed. As a result, we recommended reporting sum, medians, or quantiles rather than averages *
 
 
-Question: How much would you have spent purchasing or renting tools and equipment had the TB not existed?
+
+**Figure 14: Distribution of money spent purchasing/renting tools/equipment if TB did not exist**
+
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 # Create a vector 
 eco_purchase<- data$eco_purchase
@@ -2359,10 +2408,10 @@ summary_table_eco_purchase<- data.frame(
 )
 
 # Display the summary table
-print(summary_table_eco_purchase)
+#print(summary_table_eco_purchase)
 
 # Display histogram
-hist(eco_purchase, main = "Histogram of Spending on Purchasing/Renting Tools/Equip if without TB", xlab = "spending (dollars)")
+hist(eco_purchase, main = NULL, xlab = "spending (dollars)")
 
 #extract info for an overall table
 purchase_mean <- mean_value
@@ -2375,7 +2424,9 @@ purchase_sum <- sum_value
 ```
 
 
-Question: How much would you have spent on storage of tools and equipment had the TB not existed ?
+
+**Figure 15: Distribution of money spent storing tools/equipment if TB did not exist**
+
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 # Create a vector 
 eco_storage<- data$eco_storage
@@ -2401,10 +2452,10 @@ summary_table_eco_storage<- data.frame(
 )
 
 # Display the summary table
-print(summary_table_eco_storage)
+#print(summary_table_eco_storage)
 
 # Display histogram
-hist(eco_storage, main = "Histogram of Spending on Storaging Tools/Equip if without TB", xlab = "spending (dollars)")
+hist(eco_storage, main = NULL, xlab = "spending (dollars)")
 
 #extract values for an overall table
 storage_mean <- mean_value
@@ -2416,8 +2467,8 @@ storage_q3 <- q75_value
 storage_sum <- sum_value
 ```
 
+**Figure 16: Distribution of money spent on tool maintenance if TB did not exist**
 
-Question: How much would you have spent on maintenance of tools and equipment had the TB not existed?
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 # Create a vector 
 eco_maintain<- data$eco_maintain
@@ -2443,10 +2494,10 @@ summary_table_eco_maintain<- data.frame(
 )
 
 # Display the summary table
-print(summary_table_eco_maintain)
+#print(summary_table_eco_maintain)
 
 # Display histogram
-hist(eco_maintain, main = "Histogram of Maintaining on Purchasing/Renting Tools/Equip if without TB", xlab = "spending (dollars)")
+hist(eco_maintain, main = NULL, xlab = "spending (dollars)")
 
 #extract values for an overall table
 maintain_mean <- mean_value
@@ -2458,7 +2509,9 @@ maintain_q3 <- q75_value
 maintain_sum <- sum_value
 ```
 
-Question: Reflecting on your events in the past year: If the TB did not exist, how much funding would your organization allocate to buying, storing, tracking and maintaining your own inventory of tools and equipment?
+
+**Figure 17: Dist of money spent on all tool/equipment related costs if TB did not exist (past year)**
+
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 # Create a vector 
 eco_totalcost<- data$eco_totalcost
@@ -2484,10 +2537,10 @@ summary_table_eco_totalcost<- data.frame(
 )
 
 # Display the summary table
-print(summary_table_eco_totalcost)
+#print(summary_table_eco_totalcost)
 
 # Display histogram
-hist(eco_totalcost, main = "Histogram of Total Spending in Past Year if without TB", xlab = "spending (dollars)")
+hist(eco_totalcost, main = NULL, xlab = "spending (dollars)")
 
 #extract values for an overall table
 totalcost_mean <- mean_value
@@ -2499,7 +2552,9 @@ totalcost_q3 <- q75_value
 totalcost_sum <- sum_value
 ```
 
-Question: number of total events hosted during last year
+
+**Figure 18: Distribution of total events hosted in past year**
+
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 # Create a vector 
 eco_events<- data$eco_events
@@ -2525,10 +2580,10 @@ summary_table_eco_events<- data.frame(
 )
 
 # Display the summary table
-print(summary_table_eco_events)
+#print(summary_table_eco_events)
 
 # Display histogram
-hist(eco_events, main = "Histogram of Total Event Hosted in Past Year", xlab = "count of events")
+hist(eco_events, main = NULL, xlab = "count of events")
 
 #extract values for an overall table
 events_mean <- mean_value
@@ -2540,7 +2595,9 @@ events_q3 <- q75_value
 events_sum <- sum_value
 ```
 
-Question: If there were no TB, how many of your events in the past year would you not have been hosted for any reason?
+
+**Figure 19: Distribution of past-year events impossible w/o TB**
+
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 # Create a vector 
 eco_nothost<- data$eco_nothost
@@ -2565,10 +2622,10 @@ summary_table_eco_nothost<- data.frame(
   Value = c(mean_value, median_value, mode_value, sd_value, q25_value, q75_value, sum_value)
 )
 # Display the summary table
-print(summary_table_eco_nothost)
+#print(summary_table_eco_nothost)
 
 # Display histogram
-hist(eco_nothost, main = "Histogram of Events not able to Host in Past Year if without TB", xlab = "count of events")
+hist(eco_nothost, main = NULL, xlab = "count of events")
 
 nothost_mean <- mean_value
 nothost_med <- median_value
@@ -2579,7 +2636,9 @@ nothost_q3 <- q75_value
 nothost_sum <- sum_value
 ```
 
-Extra analysis: percent of event not host during last year
+
+**Figure 20: Distribution of % of past-year events impossible w/o TB**
+
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 data$eco_nothost_pct_calc = data$eco_nothost/data$eco_events
 eco_nothost_pct_calc = data$eco_nothost_pct_calc
@@ -2605,10 +2664,10 @@ summary_table_eco_nothost_pct_calc<- data.frame(
 )
 
 # Display the summary table
-print(summary_table_eco_nothost_pct_calc)
+#print(summary_table_eco_nothost_pct_calc)
 
 # Display histogram
-hist(eco_nothost_pct_calc*100, main = "Histogram: Percentage of Events not able to Host in Past Year if without TB", xlab = "Percentage(%)")
+hist(eco_nothost_pct_calc*100, main = NULL, xlab = "Percentage(%)")
 
 nothost_pct_calc_mean <- mean_value
 nothost_pct_calc_med <- median_value
@@ -2619,9 +2678,8 @@ nothost_pct_calc_q3 <- q75_value
 nothost_pct_calc_sum <- sum_value
 ```
 
+**Figure 21: Dist of negatively impacted constituents if TB did not exist (past year)**
 
-
-Questions: If there were no TB, how many of your constituents, including volunteers, members, and event attendees, would have been negatively impacted in the past year?
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 # Create a vector 
 eco_constit<- data$eco_constit
@@ -2650,10 +2708,10 @@ summary_table_eco_constit<- data.frame(
 )
 
 # Display the summary table
-print(summary_table_eco_constit)
+#print(summary_table_eco_constit)
 
 # Display histogram
-hist(eco_constit, main = "Histogram of Number of Constituents Affected if without TB", xlab = "count")
+hist(eco_constit, main = NULL, xlab = "count")
 
 constit_mean <- mean_value
 constit_med <- median_value
@@ -2810,6 +2868,8 @@ output_continuous%>%
 
 ```
 
+**Figures 22a-d: Dist of events possible through TB by minority status**
+
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 data%>%
   group_by(row_number())%>%
@@ -2841,20 +2901,14 @@ data%>%
   ggplot(aes(x=`Percent of events posible by TB (%)`))+
   geom_boxplot()+
   labs(title="% events through TB: among CBOs w/ 50%+ board members minorities")
-data%>%
-  filter(none==TRUE)%>%
-  group_by(row_number())%>%
-  mutate(`Percent of events posible by TB (%)` = round(eco_nothost/eco_events*100,1))%>%
-  ggplot(aes(x=`Percent of events posible by TB (%)`))+
-  geom_boxplot()+
-  labs(title="% events through TB: among CBOs w/ no minority status listed")
 
 
-data%>%
-  group_by(row_number())%>%
-  mutate(`Percent of events posible by TB` = round(eco_nothost/eco_events*100,1))%>%
-  ungroup()%>%
-  summarize(`Average % of a CBO's events possible through TB in past year` = mean(`Percent of events posible by TB`))
+
+# data%>%
+#   group_by(row_number())%>%
+#   mutate(`Percent of events posible by TB` = round(eco_nothost/eco_events*100,1))%>%
+#   ungroup()%>%
+#   summarize(`Average % of a CBO's events possible through TB in past year` = mean(`Percent of events posible by TB`))
 ```
 
 **Findings:**
@@ -2993,15 +3047,20 @@ output_continuous%>%
 - 15.6% respondents reported that they need to cut fundings in items other than staff positions and projects if the ToolBank did not exist.
 
 # Section 6: Fundraising Impact of the ToolBank 
+
 The following section aims to quantify the impact that the ToolBank may have on CBOs' ability to host specific events, including fundraising. This section analyses the following survey questions: 
 
 - Which of the following types of events have TB tools and equipment helped your CBO complete?
+
 - If you use the TB to support your fundraising events, in an average year, what have been the outcomes of these fundraising events?
-- To your best estimate, what percent of your event expense budget was saved by using TB equipment at your event?
 
-Example: "We raised $20,000 at our annual fundraiser and hosted 150 people."
+- To your best estimate, what percent of your event expense budget was saved by using TB equipment at your event? Example: "We raised $20,000 at our annual fundraiser and hosted 150 people."
 
-Question: do organizations with higher savings through toolbank report more of a positive impact? 
+
+
+The following plots address the question whether there is a relationship between money saved through the Toolbank and attitude towards the Toolbank
+
+**Figures 23a-e: Money saved through TB (past year) by attitude towards TB**
 
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 data%>%
@@ -3014,7 +3073,8 @@ data%>%
   ggplot(aes(x=att_posimpact, y=eco_totalcost))+
   geom_boxplot()+
   labs(x="Agreement with TB has positively impacted CBO",
-       y= "Money org would spend on buying/storing/etc. equipment w/o TB?")
+       y= "Money",
+       title = "Fig a: w/o TB, money needed for buying/storing/etc. equipment")
 
 data%>%
   mutate(att_purtool = factor(att_purtool, levels = c("Strongly agree",
@@ -3026,7 +3086,8 @@ data%>%
   ggplot(aes(x=att_purtool, y=eco_totalcost))+
   geom_boxplot()+
   labs(x="Agreement with TB reducing costs related to purchasing/renting tools/equipment",
-       y= "Money org would spend on buying/storing/etc. equipment w/o TB?")
+       y= "Money",
+       title = "Fig b: w/o TB, money needed for buying/storing/etc. equipment")
 
 data%>%
   mutate(att_strtool = factor(att_strtool, levels = c("Strongly agree",
@@ -3038,7 +3099,8 @@ data%>%
   ggplot(aes(x=att_strtool, y=eco_totalcost))+
   geom_boxplot()+
   labs(x="Agreement with TB reducing costs related to storing tools/equipment",
-       y= "Money org would spend on buying/storing/etc. equipment w/o TB?")
+       y= "Money",
+       title = "Fig c: w/o TB, money needed for buying/storing/etc. equipment")
 
 data%>%
   mutate(att_redtime = factor(att_redtime, levels = c("Strongly agree",
@@ -3050,7 +3112,8 @@ data%>%
   ggplot(aes(x=att_redtime, y=eco_totalcost))+
   geom_boxplot()+
   labs(x="Agreement with TB reducing taff time for projects",
-       y= "Money org would spend on buying/storing/etc. equipment w/o TB?")
+       y= "Money",
+       title = "Fig d: w/o TB, money needed for buying/storing/etc. equipment")
 
 data%>%
   mutate(att_evquality = factor(att_evquality, levels = c("Strongly agree",
@@ -3062,12 +3125,15 @@ data%>%
   ggplot(aes(x=att_evquality, y=eco_totalcost))+
   geom_boxplot()+
   labs(x="Agreement with TB increaing event quality",
-       y= "Money org would spend on buying/storing/etc. equipment w/o TB?")
+       y= "Money",
+       title = "Fig e: w/o TB, money needed for buying/storing/etc. equipment")
 ```
 
 
+The following plots address the question of how savings vary by different Toolbank offerings
 
-Question: How do savings vary by different toolbank offerings?
+**Figures 24a-b: Money saved through TB (avg year) by Toolbank service**
+
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 data%>%
   pivot_longer(eco_purchase:eco_maintain,names_to="service", values_to = "amount_saved")%>%
@@ -3078,7 +3144,7 @@ data%>%
   ggplot(aes(x=`TB service`,y=amount_saved))+
   geom_boxplot()+
   labs(y="amount saved in an average year",
-       title= "amount saved through TB services")
+       title= "Fig a: amount saved through TB services")
 
 data%>%
   pivot_longer(eco_purchase:eco_maintain,names_to="service", values_to = "amount_saved")%>%
@@ -3086,14 +3152,14 @@ data%>%
                                   service=="eco_storage"~"storing tools/equipment",
                                   service=="eco_maintain"~"maintaining tools/equipment"
                                   ))%>%
-  filter(amount_saved<25000)%>%
+  filter(amount_saved<10000)%>%
   ggplot(aes(x=`TB service`,y=amount_saved))+
   geom_boxplot()+
   labs(y="amount saved in an average year",
-       title= "amount saved through TB services (excl. outliers)")
+       title= "Fig b: amount saved through TB services (zoomed in)")
 ```
 
-Question: Which of the following types of events have TB tools and equipment helped your CBO complete?
+The following information addresses the question of which types of events have TB tools and equipment helped the CBO to complete
 
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 sum_table = data.frame(choices = c("Quantity",
@@ -3112,11 +3178,14 @@ sum_table = data.frame(choices = c("Quantity",
                                             nrow(data[data$ci_evimpact_cst == 1,])/nrow(data),
                                             nrow(data[!is.na(data$ci_evimpact_otr),])/nrow(data)),3))
 sum_table
+```
 
+**Figure 25: Percentage for Ways Events Got Impacted without TB**
+
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 ggplot(sum_table)+
   geom_bar(aes(x = choices, y = percentage), stat='identity') +
-  labs(x = "ways events impacted without TB", y = "percentage responded", title = "Percentage for Ways Events Got Impacted 
-       without TB among Respondents") +
+  labs(x = "ways events impacted without TB", y = "percentage responded", title = NULL) +
   ylim(c(0,1))
 ```
 
@@ -3138,11 +3207,15 @@ sum_table = data.frame(choices = c("Fundraising",
                                             nrow(data[data$eve_type_cb == 1,])/nrow(data),
                                             nrow(data[!is.na(data$eve_type_otr),])/nrow(data)),3))
 sum_table
+```
 
+
+**Figure 27: Percentage for Event Types TB helps to Complete**
+
+```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 ggplot(sum_table)+
   geom_bar(aes(x = choices, y = percentage), stat='identity') +
-  labs(x = "event types TB helps to complete", y = "percentage responded", title = "Percentage for Each Event Types 
-       TB helps to Complete among Respondents") +
+  labs(x = "event types TB helps to complete", y = "percentage responded", title = NULL) +
   ylim(c(0,1))
 
 ```
