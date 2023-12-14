@@ -41,8 +41,8 @@ gs4_auth(email = TRUE)
 ```
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE, include=F}
 # Once set up, you can automate this process by passing your email
-#gs4_auth(email = "karinchen737@gmail.com")
-gs4_auth(email = "chclapham@gmail.com")
+gs4_auth(email = "karinchen737@gmail.com")
+#gs4_auth(email = "chclapham@gmail.com")
 #gs4_auth(email = "haley.farrie@gmail.com")
 ```
 
@@ -915,7 +915,7 @@ output_continuous%>%
 - 100% of respondents strongly agreed (93.3%) or agreed (6.7%) that the ToolBank positively impacts their CBO 
 - 100% of respondents strongly agreed (93.3%) or agreed (6.7%) that the ToolBank reduced costs related to purchasing and renting tools and equipment
 - More than 95% or respondents strongly agreed (80.0%) or agreed (15.6%) that the tools made available through the ToolBank allow their CBO to complete higher quality events/projects without additional funding
-- respondents have comparatively less positive attitudes towards (still more than 60% of the respondent strongly agreed or agreed) the statements that the ToolBank positively impacted their CBO by reducing costs related to storing tools and equipment, and the ToolBank has positively impacted their CBO by reducing staff time to complete maintenance/project
+- Respondents have comparatively less positive attitudes towards (still more than 60% of the respondent strongly agreed or agreed) the statements that the ToolBank positively impacted their CBO by reducing costs related to storing tools and equipment, and the ToolBank has positively impacted their CBO by reducing staff time to complete maintenance/project
 
 
 
@@ -2862,7 +2862,7 @@ output_continuous%>%
             rgroup = c("Money That Would Have Been Spent if TB Did Not Exist*",
                        "# Events/People Impacted If TB Did Not Exist"),
             n.rgroup = c(4,3),
-            caption = "Impact on CBO if TB did not exists",
+            caption = "Table 4: Impact on CBO if TB did not exists",
             tfoot = "*in US dollars"
             )
 
@@ -3034,7 +3034,7 @@ output_continuous%>%
             rgroup = c("Accomplishments through money saved through TB",
                        "Where funding would be cut if TB did not exist"),
             n.rgroup = c(3,3),
-            caption = "Number and Percentage of Respondants Reporting Impacts of Funds Saved "
+            caption = "Table 5: Number and Percentage of Respondants Reporting Impacts of Funds Saved "
             )
 ```
 
@@ -3177,7 +3177,19 @@ sum_table = data.frame(choices = c("Quantity",
                                             nrow(data[data$ci_evimpact_dvt == 1,])/nrow(data),
                                             nrow(data[data$ci_evimpact_cst == 1,])/nrow(data),
                                             nrow(data[!is.na(data$ci_evimpact_otr),])/nrow(data)),3))
-sum_table
+
+sum_table[,-c(1)] %>% addHtmlTableStyle(col.columns = c("none", "#F7F7F7",
+                                    "none", "#F7F7F7",
+                                    "none", "#F7F7F7")) %>% 
+  htmlTable(header =  c("Frequency", "Percentage"),
+            rnames = c("Quantity",
+                       "Quality",
+                       "Diversity",
+                       "Consistency",
+                       "Other"),
+            rgroup = c("Choice*"),
+            n.rgroup = c(5),
+            caption = "Table 6: Ways community events would be impact without TB")
 ```
 
 **Figure 25: Percentage for Ways Events Got Impacted without TB**
@@ -3206,7 +3218,18 @@ sum_table = data.frame(choices = c("Fundraising",
                                             nrow(data[data$eve_type_ew == 1,])/nrow(data),
                                             nrow(data[data$eve_type_cb == 1,])/nrow(data),
                                             nrow(data[!is.na(data$eve_type_otr),])/nrow(data)),3))
-sum_table
+sum_table[, -c(1)] %>% addHtmlTableStyle(col.columns = c("none", "#F7F7F7",
+                                    "none", "#F7F7F7",
+                                    "none", "#F7F7F7")) %>% 
+  htmlTable(header =  c("Frequency", "Percentage"),
+            rnames = c("Fundraising",
+                       "Service Projects",
+                       "Educational Workshops",
+                       "Community Building",
+                       "Other"),
+            rgroup = c("Choice*"),
+            n.rgroup = c(5),
+            caption = "Table 7: Events types TB helped to complete")
 ```
 
 
@@ -3229,13 +3252,24 @@ ggplot(sum_table)+
 
 
 
+The following information addresses the question of what percent of the event expense budget was saved by using TB equipment.
 
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
-nrow(data[!is.na(data$eve_fundraise_p),])
-mean(data$eve_fundraise_p, na.rm = T)
-median(data$eve_fundraise_p, na.rm = T)
-sd(data$eve_fundraise_p, na.rm = T)
-quantile(data$eve_fundraise_p, na.rm = T)
+sum_table = cbind(mean = round(mean(data$eve_fundraise_p, na.rm = T),1),
+                  q25 = quantile(data$eve_fundraise_p, na.rm = T, 0.25),
+                  median = median(data$eve_fundraise_p, na.rm = T),
+                  mode = Mode(data$eve_fundraise_p),
+                  q75 = quantile(data$eve_fundraise_p, na.rm = T, 0.75),
+                  sd = round(sd(data$eve_fundraise_p, na.rm = T),1))
+
+
+sum_table%>% 
+  addHtmlTableStyle(col.columns = c("none", "#F7F7F7",
+                                    "none", "#F7F7F7",
+                                    "none", "#F7F7F7"))%>% 
+  htmlTable(header =  c("Mean","25th quantile", "Median", "Mode","75th quantile","Standard deviation"),
+            rnames = c("% of event expense budget"),
+            caption = "Table 8: Event expense budget saved by using TB equipment")
 ```
 
 **Findings:**
