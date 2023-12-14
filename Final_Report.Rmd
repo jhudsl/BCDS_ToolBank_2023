@@ -3269,7 +3269,7 @@ sum_table%>%
                                     "none", "#F7F7F7"))%>% 
   htmlTable(header =  c("Mean","25th quantile", "Median", "Mode","75th quantile","Standard deviation"),
             rnames = c("% of event expense budget"),
-            caption = "Table 8: Event expense budget was saved by using TB equipment")
+            caption = "Table 8: Event expense budget saved by using TB equipment")
 ```
 
 **Findings:**
