@@ -2,7 +2,7 @@
 
 ## Overview of project
 
-This repository contains analyses regarding a ToolBank usage and assessment survey distributed by the [Baltimore ToolBank](https://baltimoretoolbank.org/) to its users. This survey and subsequent analyses were conducted in collaboration with the Johns Hopkins School of Public Health (in particular, the Baltimore Community Data Science course taught in the first and second quarter of the 2023-2024 academic year). This project was completed December 2023. The course instructors were Carrie Wright, Ava Hoffman, and Michael Rosenblum. The course instructor working on this specific project was Ava Hoffman, and the students working on this project were Tianxu Chen, Charlotte Clapham, and Haley Farrie. On the Baltimore ToolBank side, Noah Smock led this project.
+This repository contains analyses regarding a ToolBank usage and assessment survey distributed by the [Baltimore ToolBank](https://baltimoretoolbank.org/) to its users. This survey and subsequent analyses were conducted in collaboration with the Johns Hopkins School of Public Health (in particular, the [Baltimore Community Data Science course](https://jhudatascience.org/Baltimore_Community_Course/) taught in the first and second quarter of the 2023-2024 academic year). This project was completed December 2023. The course instructors were Carrie Wright, Ava Hoffman, and Michael Rosenblum. The course instructor working on this specific project was Ava Hoffman, and the students working on this project were Tianxu Chen, Charlotte Clapham, and Haley Farrie. On the Baltimore ToolBank side, Noah Smock led this project.
 
 All analyses were conducted using R. The survey itself was conducted using Google Forms.
 
