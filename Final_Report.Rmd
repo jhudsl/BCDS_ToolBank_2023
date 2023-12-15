@@ -1398,8 +1398,7 @@ data%>%
              stat="identity")+
   labs(x="Size of CBO*", 
        y="Percentage of respondents",
-       title="Agreement that TB reduced costs related to storing tools/equipment",
-       caption = "*Groups 1,2 3 are CBOs with size 500kor less, b/w 500k and 1000k, and over 1000k, respectively")  +
+       title="Agreement that TB reduced costs related to storing tools/equipment")  +
   scale_fill_manual("Response", values = c("strongly_agree" = "#C2B089", "agree" = "#ECD778", 
                                          "neutral" = "#CCDCD6", "disagree" = "#728E9D", 
                                          "strongly_disagree" =  "#314D59", "N_A" = "#265999"))
@@ -1434,8 +1433,7 @@ data%>%
              stat="identity")+
   labs(x="Size of CBO*", 
        y="Percentage of respondants",
-       title="Agreement That TB Reduced Costs Related to Staff Time for Projects",
-       caption = "*Groups 1,2 3 are CBOs with size 500kor less, b/w 500k and 1000k, and over 1000k, respectively")+
+       title="Agreement That TB Reduced Costs Related to Staff Time for Projects")+
   scale_fill_manual("Response", values = c("strongly_agree" = "#C2B089", "agree" = "#ECD778", 
                                          "neutral" = "#CCDCD6", "disagree" = "#728E9D", 
                                          "strongly_disagree" =  "#314D59", "N_A" = "#265999"))   
@@ -1471,8 +1469,7 @@ data%>%
              stat="identity")+
   labs(x="Size of CBO*", 
        y="Percentage of respondants",
-       title="Agreement that TB Postively Impacted the CBO",
-       caption = "*Groups 1,2 3 are CBOs with size 500kor less, b/w 500k and 1000k, and over 1000k, respectively") +
+       title="Agreement that TB Postively Impacted the CBO") +
   scale_fill_manual("Response", values = c("strongly_agree" = "#C2B089", "agree" = "#ECD778", 
                                          "neutral" = "#CCDCD6", "disagree" = "#728E9D", 
                                          "strongly_disagree" =  "#314D59", "N_A" = "#265999"))
@@ -2905,7 +2902,7 @@ output_continuous%>%
 
 ```
 
-**Figures 22a-d: Distribution of events possible through TB by minority status**
+**Figures 22a-d: Distribution of Events Possible Through TB by Minority Status**
 
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 data%>%
@@ -2958,6 +2955,7 @@ data%>%
 - A total of 58,790 constituents (volunteers, members, and event attendees) of our CBO partners would haven been negatively impacted without the help of the ToolBank
 
 # Section 5: Community Impact of the Tool Bank
+
 The following section summarizes the community impact of the ToolBank, as reported by survey respondents. This section aims to quantify the indirect ways that the ToolBank may impact CBOs and the community by reducing barriers and costs related to accessing tools and equipment. This section analyzes responded from the following survey questions: 
 
 - With the money you have saved on purchasing, storing, and maintaining tools and equipment through the TB, what have you been able to accomplish?
@@ -3097,7 +3095,7 @@ The following section aims to quantify the impact that the ToolBank may have on 
 
 The following plots address the question whether there is a relationship between money saved through the Toolbank and attitude towards the Toolbank
 
-**Figures 23a-e: Money saved through TB (past year) by attitude towards TB**
+**Figures 23a-e: Money Saved Through TB (past year) by Attitude Towards TB**
 
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 data%>%
@@ -3169,7 +3167,7 @@ data%>%
 
 The following plots address the question of how savings vary by different Toolbank offerings
 
-**Figures 24a-b: Money saved through TB (avg year) by Toolbank service**
+**Figures 24a-b: Money Saved Through TB (avg year) by Toolbank Service**
 
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 data%>%
@@ -3209,16 +3207,26 @@ sum_table = data.frame(choices = c("Quantity",
                                             nrow(data[data$ci_evimpact_dvt == 1,]),
                                             nrow(data[data$ci_evimpact_cst == 1,]),
                                             nrow(data[!is.na(data$ci_evimpact_otr),])),3),
-                       percentage = round(c(nrow(data[data$ci_evimpact_qtt == 1,])/nrow(data),
-                                            nrow(data[data$ci_evimpact_qlt == 1,])/nrow(data),
-                                            nrow(data[data$ci_evimpact_dvt == 1,])/nrow(data),
-                                            nrow(data[data$ci_evimpact_cst == 1,])/nrow(data),
-                                            nrow(data[!is.na(data$ci_evimpact_otr),])/nrow(data)),3))
+                       percentage = c(paste0(round(
+                         as.numeric(nrow(data[data$ci_evimpact_qtt == 1,])/nrow(data),1)*100
+                         ),"%"),
+                                            paste0(round(
+                         as.numeric(nrow(data[data$ci_evimpact_qlt == 1,])/nrow(data),1)*100
+                         ),"%"),
+                                           paste0(round(
+                         as.numeric(nrow(data[data$ci_evimpact_dvt == 1,])/nrow(data),1)*100
+                         ),"%"),
+                                            paste0(round(
+                         as.numeric(nrow(data[data$ci_evimpact_cst == 1,])/nrow(data),1)*100
+                         ),"%"),
+                                            paste0(round(
+                         as.numeric(nrow(data[!is.na(data$ci_evimpact_otr),])/nrow(data),1)*100
+                         ),"%")))
 
 sum_table[,-c(1)] %>% addHtmlTableStyle(col.columns = c("none", "#F7F7F7",
                                     "none", "#F7F7F7",
                                     "none", "#F7F7F7")) %>% 
-  htmlTable(header =  c("Frequency", "Percentage"),
+  htmlTable(header =  c("Frequency", "Percentage (%)"),
             rnames = c("Quantity",
                        "Quality",
                        "Diversity",
@@ -3250,15 +3258,23 @@ sum_table = data.frame(choices = c("Fundraising",
                                             nrow(data[data$eve_type_ew == 1,]),
                                             nrow(data[data$eve_type_cb == 1,]),
                                             nrow(data[!is.na(data$eve_type_otr),])),3),
-                       percentage = round(c(nrow(data[data$eve_type_fr == 1,])/nrow(data),
-                                            nrow(data[data$eve_type_sp == 1,])/nrow(data),
-                                            nrow(data[data$eve_type_ew == 1,])/nrow(data),
-                                            nrow(data[data$eve_type_cb == 1,])/nrow(data),
-                                            nrow(data[!is.na(data$eve_type_otr),])/nrow(data)),3))
+                       percentage = c(
+                         paste0(round(
+                           nrow(data[data$eve_type_fr == 1,])/nrow(data)*100,1),"%"),
+                                            paste0(round(
+                                              nrow(data[data$eve_type_sp == 1,])/nrow(data)*100,1),"%"),
+                                            paste0(round(
+                                              nrow(data[data$eve_type_ew == 1,])/nrow(data)*100,1),"%"),
+                                            paste0(round(
+                                              nrow(data[data$eve_type_cb == 1,])/nrow(data)*100,1),"%"),
+                                            paste0(round(
+                                              nrow(data[!is.na(data$eve_type_otr),])/nrow(data)*100,1),"%")))
+
+
 sum_table[, -c(1)] %>% addHtmlTableStyle(col.columns = c("none", "#F7F7F7",
                                     "none", "#F7F7F7",
                                     "none", "#F7F7F7")) %>% 
-  htmlTable(header =  c("Frequency", "Percentage"),
+  htmlTable(header =  c("Frequency", "Percentage (%)"),
             rnames = c("Fundraising",
                        "Service Projects",
                        "Educational Workshops",
