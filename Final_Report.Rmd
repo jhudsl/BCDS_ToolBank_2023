@@ -16,7 +16,7 @@ The following report outlines the findings from a survey of ToolBank member orga
 - Events got impacted by the TB mainly through their quality (77.8%), consistency (66.7%), and quantity (55.6%)
 - The most prominent types of events the toolbank supports are community building (84.4%) and service projects (75.6%)
 - For the past year, half of the respondents reported that at least 1/3 (35%) of their events would have been impossible without the help of the TB
-- For the past year, half of the respondents reported that at least 150 of their constituents (volunteers, members, and event attendees) would have been negatively impacted without the help of the TB.
+- For the past year, half of the respondents reported that at least 150 of their constituents (volunteers, members, and event attendees) would have been negatively impacted without the help of the TB
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -38,12 +38,13 @@ library(htmlTable)
 ```{r eval=FALSE, include = F}
 # Prompts a browser pop-up
 gs4_auth(email = TRUE)
+gs4_auth(email = "haley.farrie@gmail.com")
 ```
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE, include=F}
 # Once set up, you can automate this process by passing your email
-gs4_auth(email = "karinchen737@gmail.com")
+#gs4_auth(email = "karinchen737@gmail.com")
 #gs4_auth(email = "chclapham@gmail.com")
-#gs4_auth(email = "haley.farrie@gmail.com")
+
 ```
 
 
@@ -443,7 +444,7 @@ Respondents were asked five questions to assess their attitudes towards the Tool
 
 - "The ToolBank (TB) has positively impacted our Community-Based Organization (CBO) by reducing costs related to purchasing or renting tools and equipment"; 
 - "The TB has positively impacted our CBO by reducing costs related to storing tools and equipment";
-- "The TB has positively impacted our CBO by reducing staff time to complete community projects"'
+- "The TB has positively impacted our CBO by reducing staff time to complete community projects";
 - "Tools made available through the TB allow our CBO to complete higher quality events/projects without additional funding";
 -"The TB has positively impacted our CBO"
 
@@ -808,7 +809,6 @@ if(is_empty(count_posimpact_na_initial)){
 ```
 
 
-**Table 1: Respondent Attitudes Toward ToolBank Impact**
 
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 
@@ -1228,7 +1228,6 @@ data%>%
 ### General Attitudes Stratified by Size of CBO
 The following plots analyze the general attitude questions from section two, stratified by the size of the organization, as determined by their publicly available gross receipts. These plots explore if there is a relationship between the size of the funding available to the CBO and the respondents' attitudes towards the ToolBank's economic and community impact.
 
-*confirm size classification standards*
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 ### now combine mid-sized, large CBOs
 data<- data%>%
@@ -1628,7 +1627,7 @@ data%>%
 
 **Findings:**
 
-- In general, larger and smaller CBOs show similar trends in agreement with benefits from the Toolbank. However, smaller CBOs tend to report slightly stronger levels of agreement.
+- In general, larger and smaller CBOs show similar trends in agreement with benefits from the Toolbank. However, smaller CBOs tend to report slightly stronger levels of agreement
 
 ### General Attitudes Stratified Minority Status
 The following plots analyze the general attitude questions from section one, stratified by the minority status of the CBO, as determined by respondent self-report. For this survey, minority was defined as women, people of color, non-gender conforming individuals, LGBTQ+ individuals, and immigrants, and respondents were asked if they met one of more the following criteria: 1) the top executive position is held by a minority, 2) more than 50% of the board is made up of minorities, 3) more than 50% of program recipients are minorities, 4) none of the above. Respondents were able to select more than one of each criteria. The plots below explore if there is a relationship between the  minority criteria of the CBO provided by the respondent and the respondents' attitudes towards the ToolBank's economic and community impact.
@@ -1971,8 +1970,8 @@ data%>%
 
 **Findings:**
 
-- Respondents' attitude towards the TB are similar across organizations with different minority status. Part of the reason may be that respondents in these categories overlap with each other.
-- Attitudes of respondents from organizations with no minority status are more fluctuated, which is likely related to the small sample size for that group.
+- Respondents' attitude towards the TB are similar across organizations with different minority status. Part of the reason may be that respondents in these categories overlap with each other
+- Attitudes of respondents from organizations with no minority status are more fluctuated, which is likely related to the small sample size for that group
 
 
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE, include=F}
@@ -2717,7 +2716,7 @@ nothost_pct_calc_q3 <- q75_value
 nothost_pct_calc_sum <- sum_value
 ```
 
-**Figure 21: Dist of negatively impacted constituents if TB did not exist (past year)**
+**Figure 21: Distribution of negatively impacted constituents if TB did not exist (past year)**
 
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 # Create a vector 
@@ -2907,7 +2906,7 @@ output_continuous%>%
 
 ```
 
-**Figures 22a-d: Dist of events possible through TB by minority status**
+**Figures 22a-d: Distribution of events possible through TB by minority status**
 
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 data%>%
@@ -2952,12 +2951,12 @@ data%>%
 
 **Findings:**
 
-- In an average year, the ToolBank helps to save money in buying, storing, tracking, and maintaining tools or equipments for the 45 respondents a sum value of \$304, 700, among which purchasing tools and equipments cost our partner CBO the most with \$226,300 (74.3%).
-- In the past year, the ToolBank helps to save money in buying, storing, tracking, and maintaining tools or equipments for the 45 respondents a sum value of \$113,720.
-- Half of the respondents reported that at least 35% of their events would have been impossible without the help of the ToolBank.
-- A total of 280 events would have been impossible if the ToolBank did not exist.
-- Half of the respondents reported that at least 150 of their constituents (volunteers, members, and event attendees) would have been negatively impacted without the help of the ToolBank.
-- A total of 58,790 constituents (volunteers, members, and event attendees) of our CBO partners would haven been negatively impacted without the help of the ToolBank.
+- In an average year, the ToolBank helps to save money in buying, storing, tracking, and maintaining tools or equipments for the 45 respondents a sum value of \$304, 700, among which purchasing tools and equipments cost our partner CBO the most with \$226,300 (74.3%)
+- In the past year, the ToolBank helps to save money in buying, storing, tracking, and maintaining tools or equipments for the 45 respondents a sum value of \$113,720
+- Half of the respondents reported that at least 35% of their events would have been impossible without the help of the ToolBank
+- A total of 280 events would have been impossible if the ToolBank did not exist
+- Half of the respondents reported that at least 150 of their constituents (volunteers, members, and event attendees) would have been negatively impacted without the help of the ToolBank
+- A total of 58,790 constituents (volunteers, members, and event attendees) of our CBO partners would haven been negatively impacted without the help of the ToolBank
 
 # Section 5: Community Impact of the Tool Bank
 The following section summarizes the community impact of the ToolBank, as reported by survey respondents. This section aims to quantify the indirect ways that the ToolBank may impact CBOs and the community by reducing barriers and costs related to accessing tools and equipment. This section analyzes responded from the following survey questions: 
@@ -3277,17 +3276,17 @@ sum_table[, -c(1)] %>% addHtmlTableStyle(col.columns = c("none", "#F7F7F7",
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 ggplot(sum_table)+
   geom_bar(aes(x = choices, y = percentage), stat='identity', fill = "#265999") +
-  labs(x = "event types TB helps to complete", y = "percentage responded", title = NULL) +
+  labs(x = "Event Types TB Tools Support", y = "percentage responded", title = NULL) +
   ylim(c(0,1))
 
 ```
 
 **Findings:**
 
-- Respondents with more positive attitudes with the ToolBank helping reduce their costs in multiple aspects would have spent more on buying, storing and maintaining tools or equipment if the ToolBank did not exist (not statistically significant).
-- the ToolBank helps to save the most in purchasing tools and equipments than storing and maintaining those (not statistically significant).
-- Events got impacted by the TB mainly through their quality (77.8%), consistency (66.7%), and quantity (55.6%).
-- The most prominent types of events the toolbank supports are community building (84.4%) and service projects (75.6%).
+- Respondents with more positive attitudes with the ToolBank helping reduce their costs in multiple aspects would have spent more on buying, storing and maintaining tools or equipment if the ToolBank did not exist (not statistically significant)
+- The ToolBank helps to save the most in purchasing tools and equipment than storing and maintaining those (not statistically significant)
+- Events got impacted by the TB mainly through their quality (77.8%), consistency (66.7%), and quantity (55.6%)
+- The most prominent types of events the Toolbank supports are community building (84.4%) and service projects (75.6%)
 
 
 
@@ -3313,6 +3312,6 @@ sum_table%>%
 
 **Findings:**
 
-- Half of the respondents reported that using the the ToolBank equipements helped to save at least 30% of their event expense budget.
+- Half of the respondents reported that using the ToolBank tools and equipement helped to their CBO save at least 30% of their event expense budget.
 
 
