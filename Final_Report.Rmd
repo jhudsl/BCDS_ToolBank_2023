@@ -479,7 +479,10 @@ data%>%
   labs(x="General Attitude", 
        y="Percentage of respondants",
        title="Respondent Attitudes Toward ToolBank Impact") +
-  scale_x_discrete(labels = c("higher quality event", "positive impact", "purchase tool", "reduce time", "store tool"))
+  scale_x_discrete(labels = c("higher quality event", "positive impact", "purchase tool", "reduce time", "store tool")) +
+  scale_fill_manual("Response", values = c("strongly_agree" = "#C2B089", "agree" = "#ECD778", 
+                                         "neutral" = "#CCDCD6", "disagree" = "#728E9D", 
+                                         "strongly_disagree" =  "#314D59", "N_A" = "#265999"))
 ```
 
 
@@ -954,7 +957,10 @@ data%>%
   labs(x="Years Worked at CBO", 
        y="Percentage of respondents",
        title="Respondent Agreement that TB Reduced Purchasing and Renting Costs") +
-  scale_x_discrete(labels = c("0-2 years", "3-5 years", "More than 5 years"))
+  scale_x_discrete(labels = c("0-2 years", "3-5 years", "More than 5 years")) +
+  scale_fill_manual("Response", values = c("strongly_agree" = "#C2B089", "agree" = "#ECD778", 
+                                         "neutral" = "#CCDCD6", "disagree" = "#728E9D", 
+                                         "strongly_disagree" =  "#314D59", "N_A" = "#265999"))
 
 ```
 
@@ -987,7 +993,10 @@ data%>%
   labs(x="Years Worked at CBO", 
        y="Percentage of respondants",
        title="Agreement that TB reduced costs related to storing tools/equipment") +
-  scale_x_discrete(labels = c("0-2 years", "3-5 years", "More than 5 years"))
+  scale_x_discrete(labels = c("0-2 years", "3-5 years", "More than 5 years")) +
+  scale_fill_manual("Response", values = c("strongly_agree" = "#C2B089", "agree" = "#ECD778", 
+                                         "neutral" = "#CCDCD6", "disagree" = "#728E9D", 
+                                         "strongly_disagree" =  "#314D59", "N_A" = "#265999"))
 ```
 
 
@@ -1020,7 +1029,10 @@ data%>%
   labs(x="Years Worked at CBO", 
        y="Percentage of respondents",
        title="Agreement that TB reduced staff time for projects") +
-  scale_x_discrete(labels = c("0-2 years", "3-5 years", "More than 5 years"))
+  scale_x_discrete(labels = c("0-2 years", "3-5 years", "More than 5 years")) +
+  scale_fill_manual("Response", values = c("strongly_agree" = "#C2B089", "agree" = "#ECD778", 
+                                         "neutral" = "#CCDCD6", "disagree" = "#728E9D", 
+                                         "strongly_disagree" =  "#314D59", "N_A" = "#265999"))
 
 
 ```
@@ -1056,7 +1068,10 @@ data%>%
   labs(x="Years Worked at CBO", 
        y="Percentage of respondants",
        title="Respondent Agreement that the ToolBank Has Positively Impacted Their CBO") +
-  scale_x_discrete(labels = c("0-2 years", "3-5 years", "More than 5 years"))
+  scale_x_discrete(labels = c("0-2 years", "3-5 years", "More than 5 years")) +
+  scale_fill_manual("Response", values = c("strongly_agree" = "#C2B089", "agree" = "#ECD778", 
+                                         "neutral" = "#CCDCD6", "disagree" = "#728E9D", 
+                                         "strongly_disagree" =  "#314D59", "N_A" = "#265999"))
 ```
 
 
@@ -1202,7 +1217,7 @@ data%>%
   labs(x="Years Worked at CBO", 
        y="Percentage of respondants",
        title="Agreement that TB pos. impacted CBO") +
-  scale_x_discrete(labels = c("0-2 years", "3-5 years", "More than 5 years"))
+  scale_x_discrete(labels = c("0-2 years", "3-5 years", "More than 5 years")) 
 ```
 
 **Findings**
@@ -1351,7 +1366,10 @@ data%>%
              stat="identity")+
   labs(x="Size of CBO*", 
        y="Percentage of respondents",
-       title="Respondent Agreement that TB Reduced Purchasing and Renting Costs") 
+       title="Respondent Agreement that TB Reduced Purchasing and Renting Costs") +
+  scale_fill_manual("Response", values = c("strongly_agree" = "#C2B089", "agree" = "#ECD778", 
+                                         "neutral" = "#CCDCD6", "disagree" = "#728E9D", 
+                                         "strongly_disagree" =  "#314D59", "N_A" = "#265999"))
 ```
 
 **Figure 7: Respondent Agreement that the ToolBank Reduced Their CBOs Costs Related Storing Tools and Equipment, Stratified by, Stratified by CBO Size**
@@ -1383,7 +1401,10 @@ data%>%
   labs(x="Size of CBO*", 
        y="Percentage of respondents",
        title="Agreement that TB reduced costs related to storing tools/equipment",
-       caption = "*Groups 1,2 3 are CBOs with size 500kor less, b/w 500k and 1000k, and over 1000k, respectively")  
+       caption = "*Groups 1,2 3 are CBOs with size 500kor less, b/w 500k and 1000k, and over 1000k, respectively")  +
+  scale_fill_manual("Response", values = c("strongly_agree" = "#C2B089", "agree" = "#ECD778", 
+                                         "neutral" = "#CCDCD6", "disagree" = "#728E9D", 
+                                         "strongly_disagree" =  "#314D59", "N_A" = "#265999"))
 ```
 
 
@@ -1416,7 +1437,10 @@ data%>%
   labs(x="Size of CBO*", 
        y="Percentage of respondants",
        title="Agreement That TB Reduced Costs Related to Staff Time for Projects",
-       caption = "*Groups 1,2 3 are CBOs with size 500kor less, b/w 500k and 1000k, and over 1000k, respectively")   
+       caption = "*Groups 1,2 3 are CBOs with size 500kor less, b/w 500k and 1000k, and over 1000k, respectively")+
+  scale_fill_manual("Response", values = c("strongly_agree" = "#C2B089", "agree" = "#ECD778", 
+                                         "neutral" = "#CCDCD6", "disagree" = "#728E9D", 
+                                         "strongly_disagree" =  "#314D59", "N_A" = "#265999"))   
 ```
 
 
@@ -1450,7 +1474,10 @@ data%>%
   labs(x="Size of CBO*", 
        y="Percentage of respondants",
        title="Agreement that TB Postively Impacted the CBO",
-       caption = "*Groups 1,2 3 are CBOs with size 500kor less, b/w 500k and 1000k, and over 1000k, respectively")   
+       caption = "*Groups 1,2 3 are CBOs with size 500kor less, b/w 500k and 1000k, and over 1000k, respectively") +
+  scale_fill_manual("Response", values = c("strongly_agree" = "#C2B089", "agree" = "#ECD778", 
+                                         "neutral" = "#CCDCD6", "disagree" = "#728E9D", 
+                                         "strongly_disagree" =  "#314D59", "N_A" = "#265999"))
 ```
 
 
@@ -1690,7 +1717,10 @@ data%>%
   labs(x="General Attitude", 
        y="Percentage of respondents",
        title="Sentiment on TB among CBOs w/ top exec. a minority") +
-  scale_x_discrete(labels = c("higher quality event", "positive impact", "purchase tool", "reduce time", "store tool")) 
+  scale_x_discrete(labels = c("higher quality event", "positive impact", "purchase tool", "reduce time", "store tool")) +
+  scale_fill_manual("Response", values = c("strongly_agree" = "#C2B089", "agree" = "#ECD778", 
+                                         "neutral" = "#CCDCD6", "disagree" = "#728E9D", 
+                                         "strongly_disagree" =  "#314D59", "N_A" = "#265999"))
 ```
 
 **Figure 11: General Attitudes Toward ToolBank Impact Among Respondents Indicating More Than 50% of Program Recipients as Minorities**
@@ -1724,7 +1754,10 @@ data%>%
   labs(x="General Attitude", 
        y="Percentage of respondants",
        title="Sentiment on TB among CBOs w/ 50%+ program recipients are minorities") +
-  scale_x_discrete(labels = c("higher quality event", "positive impact", "purchase tool", "reduce time", "store tool"))
+  scale_x_discrete(labels = c("higher quality event", "positive impact", "purchase tool", "reduce time", "store tool")) +
+  scale_fill_manual("Response", values = c("strongly_agree" = "#C2B089", "agree" = "#ECD778", 
+                                         "neutral" = "#CCDCD6", "disagree" = "#728E9D", 
+                                         "strongly_disagree" =  "#314D59", "N_A" = "#265999"))
 
 ```
 
@@ -1759,7 +1792,10 @@ data%>%
   labs(x="General Attitude", 
        y="Percentage of respondants",
        title="Sentiment on TB among CBOs w/ 50%+ board members are minorities") +
-  scale_x_discrete(labels = c("higher quality event", "positive impact", "purchase tool", "reduce time", "store tool"))
+  scale_x_discrete(labels = c("higher quality event", "positive impact", "purchase tool", "reduce time", "store tool")) +
+  scale_fill_manual("Response", values = c("strongly_agree" = "#C2B089", "agree" = "#ECD778", 
+                                         "neutral" = "#CCDCD6", "disagree" = "#728E9D", 
+                                         "strongly_disagree" =  "#314D59", "N_A" = "#265999"))
 
 ```
 
@@ -1796,7 +1832,10 @@ data%>%
   labs(x="General Attitude", 
        y="Percentage of respondents",
        title="Sentiment on TB among CBOs reporting none for minority status Q") +
-  scale_x_discrete(labels = c("higher quality event", "positive impact", "purchase tool", "reduce time", "store tool"))
+  scale_x_discrete(labels = c("higher quality event", "positive impact", "purchase tool", "reduce time", "store tool")) +
+  scale_fill_manual("Response", values = c("strongly_agree" = "#C2B089", "agree" = "#ECD778", 
+                                         "neutral" = "#CCDCD6", "disagree" = "#728E9D", 
+                                         "strongly_disagree" =  "#314D59", "N_A" = "#265999"))
 ```
 
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE, include=F}
@@ -2411,7 +2450,7 @@ summary_table_eco_purchase<- data.frame(
 #print(summary_table_eco_purchase)
 
 # Display histogram
-hist(eco_purchase, main = NULL, xlab = "spending (dollars)")
+hist(eco_purchase, main = NULL, xlab = "spending (dollars)", col = "#265999", border = "white")
 
 #extract info for an overall table
 purchase_mean <- mean_value
@@ -2455,7 +2494,7 @@ summary_table_eco_storage<- data.frame(
 #print(summary_table_eco_storage)
 
 # Display histogram
-hist(eco_storage, main = NULL, xlab = "spending (dollars)")
+hist(eco_storage, main = NULL, xlab = "spending (dollars)", col = "#265999", border = "white")
 
 #extract values for an overall table
 storage_mean <- mean_value
@@ -2497,7 +2536,7 @@ summary_table_eco_maintain<- data.frame(
 #print(summary_table_eco_maintain)
 
 # Display histogram
-hist(eco_maintain, main = NULL, xlab = "spending (dollars)")
+hist(eco_maintain, main = NULL, xlab = "spending (dollars)", col = "#265999", border = "white")
 
 #extract values for an overall table
 maintain_mean <- mean_value
@@ -2540,7 +2579,7 @@ summary_table_eco_totalcost<- data.frame(
 #print(summary_table_eco_totalcost)
 
 # Display histogram
-hist(eco_totalcost, main = NULL, xlab = "spending (dollars)")
+hist(eco_totalcost, main = NULL, xlab = "spending (dollars)", col = "#265999", border = "white")
 
 #extract values for an overall table
 totalcost_mean <- mean_value
@@ -2583,7 +2622,7 @@ summary_table_eco_events<- data.frame(
 #print(summary_table_eco_events)
 
 # Display histogram
-hist(eco_events, main = NULL, xlab = "count of events")
+hist(eco_events, main = NULL, xlab = "count of events", col = "#265999", border = "white")
 
 #extract values for an overall table
 events_mean <- mean_value
@@ -2625,7 +2664,7 @@ summary_table_eco_nothost<- data.frame(
 #print(summary_table_eco_nothost)
 
 # Display histogram
-hist(eco_nothost, main = NULL, xlab = "count of events")
+hist(eco_nothost, main = NULL, xlab = "count of events", col = "#265999", border = "white")
 
 nothost_mean <- mean_value
 nothost_med <- median_value
@@ -2667,7 +2706,7 @@ summary_table_eco_nothost_pct_calc<- data.frame(
 #print(summary_table_eco_nothost_pct_calc)
 
 # Display histogram
-hist(eco_nothost_pct_calc*100, main = NULL, xlab = "Percentage(%)")
+hist(eco_nothost_pct_calc*100, main = NULL, xlab = "Percentage(%)", col = "#265999", border = "white")
 
 nothost_pct_calc_mean <- mean_value
 nothost_pct_calc_med <- median_value
@@ -2711,7 +2750,7 @@ summary_table_eco_constit<- data.frame(
 #print(summary_table_eco_constit)
 
 # Display histogram
-hist(eco_constit, main = NULL, xlab = "count")
+hist(eco_constit, main = NULL, xlab = "count", col = "#265999", border = "white")
 
 constit_mean <- mean_value
 constit_med <- median_value
@@ -2875,7 +2914,7 @@ data%>%
   group_by(row_number())%>%
   mutate(`Percent of events posible by TB (%)` = round(eco_nothost/eco_events*100,1))%>%
   ggplot(aes(x=`Percent of events posible by TB (%)`))+
-  geom_boxplot()+
+  geom_boxplot(color = "#265999", fill = "#93b9e1", linewidth = 1)+
   labs(title="Percentage of events in the least year made posible by TB")
 #events in past year: eco_events
 
@@ -2885,21 +2924,21 @@ data%>%
   group_by(row_number())%>%
   mutate(`Percent of events posible by TB (%)` = round(eco_nothost/eco_events*100,1))%>%
   ggplot(aes(x=`Percent of events posible by TB (%)`))+
-  geom_boxplot()+
+  geom_boxplot(color = "#265999", fill = "#93b9e1", linewidth = 1)+
   labs(title="% events through TB: among CBOs w/ top exec a minority")
 data%>%
   filter(maj_prog_recip_minority==TRUE)%>%
   group_by(row_number())%>%
   mutate(`Percent of events posible by TB (%)` = round(eco_nothost/eco_events*100,1))%>%
   ggplot(aes(x=`Percent of events posible by TB (%)`))+
-  geom_boxplot()+
+  geom_boxplot(color = "#265999", fill = "#93b9e1", linewidth = 1)+
   labs(title="% events through TB: among CBOs w/ 50%+ prog. recipients minorities")
 data%>%
   filter(maj_board_minority==TRUE)%>%
   group_by(row_number())%>%
   mutate(`Percent of events posible by TB (%)` = round(eco_nothost/eco_events*100,1))%>%
   ggplot(aes(x=`Percent of events posible by TB (%)`))+
-  geom_boxplot()+
+  geom_boxplot(color = "#265999", fill = "#93b9e1", linewidth = 1)+
   labs(title="% events through TB: among CBOs w/ 50%+ board members minorities")
 
 
@@ -3071,7 +3110,7 @@ data%>%
                                                 "Strongly disagree", 
                                                  "N/A")))%>%    
   ggplot(aes(x=att_posimpact, y=eco_totalcost))+
-  geom_boxplot()+
+  geom_boxplot(color = "#265999", fill = "#93b9e1", linewidth = 1)+
   labs(x="Agreement with TB has positively impacted CBO",
        y= "Money",
        title = "Fig a: w/o TB, money needed for buying/storing/etc. equipment")
@@ -3084,7 +3123,7 @@ data%>%
                                                 "Strongly disagree", 
                                                  "N/A")))%>%  
   ggplot(aes(x=att_purtool, y=eco_totalcost))+
-  geom_boxplot()+
+  geom_boxplot(color = "#265999", fill = "#93b9e1", linewidth = 1)+
   labs(x="Agreement with TB reducing costs related to purchasing/renting tools/equipment",
        y= "Money",
        title = "Fig b: w/o TB, money needed for buying/storing/etc. equipment")
@@ -3097,7 +3136,7 @@ data%>%
                                                 "Strongly disagree", 
                                                  "N/A")))%>%  
   ggplot(aes(x=att_strtool, y=eco_totalcost))+
-  geom_boxplot()+
+  geom_boxplot(color = "#265999", fill = "#93b9e1", linewidth = 1)+
   labs(x="Agreement with TB reducing costs related to storing tools/equipment",
        y= "Money",
        title = "Fig c: w/o TB, money needed for buying/storing/etc. equipment")
@@ -3110,7 +3149,7 @@ data%>%
                                                 "Strongly disagree", 
                                                  "N/A")))%>%
   ggplot(aes(x=att_redtime, y=eco_totalcost))+
-  geom_boxplot()+
+  geom_boxplot(color = "#265999", fill = "#93b9e1", linewidth = 1)+
   labs(x="Agreement with TB reducing taff time for projects",
        y= "Money",
        title = "Fig d: w/o TB, money needed for buying/storing/etc. equipment")
@@ -3123,7 +3162,7 @@ data%>%
                                                 "Strongly disagree", 
                                                  "N/A")))%>%
   ggplot(aes(x=att_evquality, y=eco_totalcost))+
-  geom_boxplot()+
+  geom_boxplot(color = "#265999", fill = "#93b9e1", linewidth = 1)+
   labs(x="Agreement with TB increaing event quality",
        y= "Money",
        title = "Fig e: w/o TB, money needed for buying/storing/etc. equipment")
@@ -3142,7 +3181,7 @@ data%>%
                                   service=="eco_maintain"~"maintaining tools/equipment"
                                   ))%>%
   ggplot(aes(x=`TB service`,y=amount_saved))+
-  geom_boxplot()+
+  geom_boxplot(color = "#265999", fill = "#93b9e1", linewidth = 1)+
   labs(y="amount saved in an average year",
        title= "Fig a: amount saved through TB services")
 
@@ -3154,7 +3193,7 @@ data%>%
                                   ))%>%
   filter(amount_saved<10000)%>%
   ggplot(aes(x=`TB service`,y=amount_saved))+
-  geom_boxplot()+
+  geom_boxplot(color = "#265999", fill = "#93b9e1", linewidth = 1)+
   labs(y="amount saved in an average year",
        title= "Fig b: amount saved through TB services (zoomed in)")
 ```
@@ -3196,7 +3235,7 @@ sum_table[,-c(1)] %>% addHtmlTableStyle(col.columns = c("none", "#F7F7F7",
 
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 ggplot(sum_table)+
-  geom_bar(aes(x = choices, y = percentage), stat='identity') +
+  geom_bar(aes(x = choices, y = percentage), stat='identity', fill = "#265999") +
   labs(x = "ways events impacted without TB", y = "percentage responded", title = NULL) +
   ylim(c(0,1))
 ```
@@ -3237,7 +3276,7 @@ sum_table[, -c(1)] %>% addHtmlTableStyle(col.columns = c("none", "#F7F7F7",
 
 ```{r,out.width="50%",fig.show="hold",warning=FALSE,message=FALSE,echo=FALSE}
 ggplot(sum_table)+
-  geom_bar(aes(x = choices, y = percentage), stat='identity') +
+  geom_bar(aes(x = choices, y = percentage), stat='identity', fill = "#265999") +
   labs(x = "event types TB helps to complete", y = "percentage responded", title = NULL) +
   ylim(c(0,1))
 
@@ -3274,6 +3313,6 @@ sum_table%>%
 
 **Findings:**
 
-- Half of the respond reported that using the the ToolBank equipements helped to save at least 30% of their event expense budget.
+- Half of the respondents reported that using the the ToolBank equipements helped to save at least 30% of their event expense budget.
 
 
